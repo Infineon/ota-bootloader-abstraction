@@ -1,0 +1,13 @@
+build
+configs
+deps
+docs
+doxygen
+devops_scripts
+images
+template_linkers
+scripts
+snippets
+ota_bootloader_abstraction_doxy.h
+README.md
+RELEASE.md
