@@ -4,18 +4,16 @@
 
 See the [README.md](./README.md) for a complete description of the OTA bootloader support library.
 
-## Known issues
-
-| Problem | Workaround |
-| ------- | ---------- |
-| OTA Bootloader Support Middleware is currently not supported on IAR toolchain with CYW20829B0 kit. | No workaround. Support will be added in a future release. |
-
-
 ## Changelog
+
+### v1.1.0
+
+- Added support for CYW89829(CYW989829M2EVB-01) kits.
+- IAR support added for 20829 platform.
 
 ### v1.0.0
 
-- New ota-bootloader-abstraction library
+- New ota-bootloader-abstraction library.
 - This ota-bootloader-abstraction has mcubootloader support.
 - ota-bootloader-abstraction v1.0.0 works with MTB 3.1
 - Legacy support for these devices:
@@ -34,10 +32,10 @@ This version of the library was validated for compatibility with the following s
 
 | Software and Tools                                        | Version |
 | :---                                                      | :----:  |
-| ModusToolbox&trade; Software Environment                  | 3.1     |
-| - ModusToolbox&trade; Device Configurator                 | 4.10    |
-| - ModusToolbox&trade; CapSense Configurator / Tuner tools | 6.10.0  |
-| Peripheral Driver Library (PDL CAT1)                      | 3.9.0   |
+| ModusToolbox&trade; Software Environment                  | 3.2     |
+| - ModusToolbox&trade; Device Configurator                 | 4.20    |
+| - ModusToolbox&trade; CapSense Configurator / Tuner tools | 6.20.0  |
+| Peripheral Driver Library (PDL CAT1)                      | 3.10.0  |
 | GCC Compiler                                              | 11.3.1  |
-| IAR Compiler                                              | 9.30.1  |
+| IAR Compiler                                              | 9.40.2  |
 | Arm Compiler 6                                            | 6.16    |

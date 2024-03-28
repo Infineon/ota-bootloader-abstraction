@@ -66,7 +66,7 @@ define symbol RAMVECTORS_ALIGNMENT          = 512;
 define symbol FLASH_ALIGNMENT_SIZE          = 0x00000200;
 
 /* vma for bootstrap code region */
-define symbol CODE_VMA                      = RAM_END_ADDR_SAHB - BOOTSTRAP_SIZE; /* 0x2003c600 */
+define symbol CODE_VMA                      = RAM_START_ADDR_CBUS + (RAM_END_ADDR_SAHB - RAM_START_ADDR_SAHB - BOOTSTRAP_SIZE);
 /* lma for bootstrap code region */
 define symbol CODE_LMA                      = FLASH_START_ADDR_SAHB + BOOTSTRAP_OFFSET_FLASH; /* 0x60000050 */
 /* Size of Bootstrap data */
@@ -80,7 +80,7 @@ define symbol DATA_VMA                      = RAM_START_ADDR_SAHB; /* 0x20000000
 /* app data size */
 define symbol DATA_SIZE                     = RAM_END_ADDR_SAHB - DATA_VMA - BOOTSTRAP_SIZE; /* 0x3DC00 */
 /* vma for application XIP region */
-define symbol XIP_VMA                       = FLASH_START_ADDR_SAHB + BOOTSTRAP_SIZE + FLASH_ALIGNMENT_SIZE; /* 0x08002600 */
+define symbol XIP_VMA                       = FLASH_START_ADDR_CBUS + BOOTSTRAP_SIZE + FLASH_ALIGNMENT_SIZE; /* 0x08002600 */
 /* lma for application XIP region */
 define symbol XIP_LMA                       = FLASH_START_ADDR_SAHB + BOOTSTRAP_SIZE + FLASH_ALIGNMENT_SIZE; /* 0x60002600 */
 /* size of XIP region */

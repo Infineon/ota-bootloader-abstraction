@@ -1,7 +1,7 @@
 # Over-the-Air (OTA) Bootloader Abstraction Middleware Library
 
 The OTA Bootloader Abstraction library has implementation for bootloader specific storage interface APIs for handling OTA upgrade images.
-This library is expected to work only with the Infineon [ota-update](https://github.com/Infineon/ota-update/) library which downloads OTA upgrade images on PSoC6, 20829, and XMC7200 platforms.
+This library is expected to work only with the Infineon [ota-update](https://github.com/Infineon/ota-update/) library which downloads OTA upgrade images on PSoC6, 20829, 89829 and XMC7200 platforms.
 Application should not directly call the bootloader-specific storage interface APIs. Rather, during Infineon OTA Agent initialization, the application needs to register these bootloader-specific storage interface APIs as callback APIs.
 See the [ota-update](https://github.com/Infineon/ota-update/) library documentation for more details.
 
@@ -9,6 +9,7 @@ See the [ota-update](https://github.com/Infineon/ota-update/) library documentat
 
 | Library Version                 | Supported MTB version    | Remarks                                   |
 |---------------------------------| -------------------------|-------------------------------------------|
+| ota-bootloader-abstraction v1.1.0  | ModusToolbox 3.2         | CYW89829 platform support added |
 | ota-bootloader-abstraction v1.0.0  | ModusToolbox 3.1         | cysecuretools v5.0 or greater is required |
 
 ## 1. Bootloader Support
@@ -50,9 +51,9 @@ typedef struct cy_ota_storage_interface_s
 
 ## 2. MCUBootloader Support
 
-*ota-bootloader-abstraction* library has below support for MCUBootloader based OTA on PSoC6, 20829,and XMC7200 platforms.
+*ota-bootloader-abstraction* library has below support for MCUBootloader based OTA on PSoC6, 20829, 89829 and XMC7200 platforms.
 
-- Template flashmaps for PSoC6, 20829, and XMC7200 platforms.
+- Template flashmaps for PSoC6, 20829, 89829 and XMC7200 platforms.
 
 - Template linker files for GCC_ARM, ARM, and IAR toolchains.
 
@@ -69,6 +70,7 @@ typedef struct cy_ota_storage_interface_s
 - CY8CPROTO-063-BLE
 - CYBLE-416045-EVAL
 - KIT_XMC72_EVK
+- CYW989829M2EVB-01
 
 The *ota-update* along with *ota-bootloader-abstraction* library works in concert with MCUBootloader to provide a no-fail solution to updating device software in the field.
 
@@ -118,6 +120,7 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 | CY8CPROTO-062S3-4343W  | 512K | PSOC_062_512K | Default - psoc62_512k_xip_swap_single.json<br> psoc62_512k_ext_overwrite_single.json<br>psoc62_512k_ext_swap_single.json |
 | CY8CKIT-064B0S2-4343W | 2M | PSOC_064_2M | Default - policy_single_CM0_CM4_smif_swap.json |
 | CYW920829M2EVK-02 | 0K | CYW20829 | Default - cyw20829_xip_swap_single.json<br> cyw20829_xip_overwrite_single.json |
+| CYW989829M2EVB-01 | 0K | CYW89829 | Default - cyw89829_xip_swap_single.json<br> cyw89829_xip_overwrite_single.json |
 | KIT_XMC72_EVK | 8MB | XMC7200 | Default - xmc7200_int_swap_single.json<br> xmc7200_int_overwrite_single.json |
 
 <br>
@@ -146,7 +149,8 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 |--------------------------------|--------------|
 | cyw20829_xip_overwrite_single.json       | External only (primary and secondary) |
 | cyw20829_xip_swap_single.json            | External only (primary and secondary) |
-| cyw20829_xip_swap_single_psvp.json       | External only (primary and secondary) |
+| cyw89829_xip_overwrite_single.json       | External only (primary and secondary) |
+| cyw89829_xip_swap_single.json            | External only (primary and secondary) |
 
 
 | 8M Internal Flash Maps | Memory Usage |
@@ -159,7 +163,7 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 MCUBootloader Application i.e MCUBootApp is a standalone application. It is an open source software taken and customized in terms of Flash map and is built outside of ModusToolbox. MCUBootApp is programmed/flashed on the device one time, at manufacture (or for development).
 
 - MCUBootApp runs on the CM0+ CPU and starts any OTA enabled application on CM4 core in case of multicore Psoc6 devices and on CM7 core in case of XMC7200 devices.
-- In case of 20829 devices, MCUBootApp runs on CM33 CPU along with the OTA enabled applications.
+- In case of 20829 and 89829 devices, MCUBootApp runs on CM33 CPU along with the OTA enabled applications.
 
 MCUBoot itself is not OTA upgradable.
 
@@ -289,6 +293,7 @@ For the toolchain version information, please refer to [ota-bootloader-abstracti
 - [EZ-BLE Arduino Evaluation Board](https://www.infineon.com/cms/en/product/evaluation-boards/cyble-416045-eval/) (CYBLE-416045-EVAL)
 - [AIROC™ CYW20829 Bluetooth® LE SoC](https://www.infineon.com/cms/en/product/promopages/airoc20829/) (CYW920829M2EVK-02)
 - [XMC7200 Evaluation Kit](https://www.infineon.com/cms/en/product/evaluation-boards/kit_xmc72_evk/) (KIT_XMC72_EVK)
+- [AIROC™ CYW989820M2EVB-01 Evaluation kit](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/)(CYW989820M2EVB-01)
 
 ## 9. Hardware Setup
 

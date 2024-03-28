@@ -99,7 +99,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 <div class="title">Over The Air(OTA) Bootloader Abstraction Library Overview </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This library offers assistance for handling downloaded over-the-air (OTA) updates of the application code that is executed on a PSoC™ 6 Connectivity Device, a 20829(CYW920829M2EVK-02) Device, or an XMC7200(KIT_XMC72_EVK) Device based on selected bootloader.<br />
+<div class="textblock"><p>This library offers assistance for handling downloaded over-the-air (OTA) updates of the application code that is executed on a PSoC™ 6 Connectivity Device, a 20829(CYW920829M2EVK-02) Device, a 89829(CYW989829M2EVB-01) Device, or an XMC7200(KIT_XMC72_EVK) Device based on selected bootloader.<br />
 <br />
  The library implements storage interface APIs required by ota-update library to complete OTA on supported platforms. Current version(v1.X) of <b>ota-bootloader-abstraction</b> has storage interface APIs for MCUBootloader based OTA.<br />
 <br />
@@ -186,11 +186,11 @@ General Concept</h1>
  c. The updated application must call cy_ota_storage_validated() to validate the update.<br />
 <br />
  <b>MCUBootloader Support:</b> <br />
- This library has below support for MCUBootloader based OTA on PSoC6, 20829,and XMC7200 platforms.<br />
+ This library has below support for MCUBootloader based OTA on PSoC6, 20829, 89829 and XMC7200 platforms.<br />
 </li>
 </ol>
 <ol type="1">
-<li>Template flashmaps for PSoC6, 20829, and XMC7200 platforms.<br />
+<li>Template flashmaps for PSoC6, 20829, 89829 and XMC7200 platforms.<br />
 </li>
 <li>Template linker files for GCC_ARM, ARM, and IAR toolchains.<br />
 </li>

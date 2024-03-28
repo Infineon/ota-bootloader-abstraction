@@ -159,9 +159,9 @@
 #endif
 
 
-#if ( (defined (CYW20829B0LKML)) && (MCUBOOT_IMAGE_NUMBER > 1) )
+#if ( (defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG)) && (MCUBOOT_IMAGE_NUMBER > 1) )
 #error Multi-image configuration is NOT supported on this platform!
-#endif /* (defined(CYW20829) && MCUBOOT_IMAGE_NUMBER > 1) */
+#endif /* ((defined(CYW20829) || defined(CYW89829)) && MCUBOOT_IMAGE_NUMBER > 1) */
 
 /**
  *

@@ -118,8 +118,8 @@ $CY_HEX_TO_BIN -I binary -O ihex $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin $C
 #################################################### SIGNING BOOT IMAGE ######################################################
 echo ""
 echo "[SIGNING BOOT using cysecuretools]"
-echo "cysecuretools -t XMC7200 sign-image --header-size $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE -R 0xff --overwrite-only --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin --hex-addr=$FLASH_AREA_IMG_1_PRIMARY_START_ABS"
-cysecuretools -t XMC7200 sign-image --header-size $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE -R 0xff --overwrite-only --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin --hex-addr=$FLASH_AREA_IMG_1_PRIMARY_START_ABS
+echo "$CY_PYTHON_PATH -m cysecuretools -t XMC7200 sign-image --header-size $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE -R 0xff --overwrite-only --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin --hex-addr=$FLASH_AREA_IMG_1_PRIMARY_START_ABS"
+$CY_PYTHON_PATH -m cysecuretools -t XMC7200 sign-image --header-size $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE -R 0xff --overwrite-only --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin --hex-addr=$FLASH_AREA_IMG_1_PRIMARY_START_ABS
 
 echo ""
 echo "[Bin to Hex for PRIMARY (BOOT) Slot]"
@@ -131,8 +131,8 @@ cp $CY_OUTPUT_FINAL_HEX $CY_OUTPUT_FINAL_FINAL_HEX
 # #################################################### SIGNING UPGRADE IMAGE ######################################################
 echo ""
 echo "[SIGNING UPGRADE using cysecuretools]"
-echo "cysecuretools -t XMC7200 sign-image --header-size $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE -R 0xff --overwrite-only --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin --hex-addr=$FLASH_AREA_IMG_1_SECONDARY_START"
-cysecuretools -t XMC7200 sign-image --header-size $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE -R 0xff --overwrite-only --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin --hex-addr=$FLASH_AREA_IMG_1_SECONDARY_START
+echo "$CY_PYTHON_PATH -m cysecuretools -t XMC7200 sign-image --header-size $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE -R 0xff --overwrite-only --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin --hex-addr=$FLASH_AREA_IMG_1_SECONDARY_START"
+$CY_PYTHON_PATH -m cysecuretools -t XMC7200 sign-image --header-size $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE -R 0xff --overwrite-only --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin --hex-addr=$FLASH_AREA_IMG_1_SECONDARY_START
 
 echo ""
 echo "[Bin to Hex for SECONDARY (UPDATE) Slot]"

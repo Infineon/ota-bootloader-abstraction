@@ -1,19 +1,7 @@
+"""MCUBoot Flash Map Converter (JSON to .h)
+Copyright (c) 2022 Infineon Technologies AG
 """
-Copyright 2023 Cypress Semiconductor Corporation (an Infineon company)
-or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
 
 import sys
 import json
@@ -104,11 +92,11 @@ class Memory:
 
 class MemoryRegion(Memory):
     ''' Memory region handler '''
-    def __init__(self, addr, sz, erase_sz, erase_val, type):
+    def __init__(self, addr, sz, erase_sz, erase_val, mem_type):
         super().__init__(addr, sz)
         self.erase_sz   : int   = erase_sz
         self.erase_val  : int   = erase_val
-        self.type               = type
+        self.mem_type           = mem_type
 
 class BootloaderLayout:
     '''
@@ -264,12 +252,12 @@ class FlashMap:
                 size        = int(region['size'], 0)
                 erase_size  = int(region['erase_size'], 0)
                 erase_value = int(region['erase_value'], 0)
-                type        = str(region['type'])
+                mem_type    = str(region['mem_type'])
 
-                if type not in self.region_types:
-                    self.region_types.append(type)
+                if mem_type not in self.region_types:
+                    self.region_types.append(mem_type)
 
-                self.regions.append(MemoryRegion(addr, size, erase_size, erase_value, type))
+                self.regions.append(MemoryRegion(addr, size, erase_size, erase_value, mem_type))
             except KeyError as key:
                 print('Malformed JSON:', key, 'is missing')
 
@@ -295,7 +283,7 @@ class FlashMap:
 
         region_id = self.__memory_area_find_region_id(area)
         region = self.regions[region_id]
-        region_name = region.type
+        region_name = region.mem_type
 
         offset = area.addr - region.addr
         size = area.sz
@@ -378,7 +366,7 @@ class FlashMap:
                 f_out.write(f'\t\t.size         = {hex(region.sz)}U,\n')
                 f_out.write(f'\t\t.erase_size   = {hex(region.erase_sz)}U,\n')
                 f_out.write(f'\t\t.erase_val    = {hex(region.erase_val)}U,\n')
-                f_out.write(f'\t\t.device_id    = {str(region.type)},\n')
+                f_out.write(f'\t\t.device_id    = {str(region.mem_type)},\n')
                 f_out.write('\t},\n')
             f_out.write('};\n\n')
 
@@ -426,8 +414,8 @@ class FlashMap:
             f_out.write('extern uint8_t memory_areas_secondary[];\n\n')
 
             f_out.write('enum \n{\n')
-            for id, type in enumerate(self.region_types):
-                f_out.write(f'\t{type} = {id}U,\n')
+            for id, mem_type in enumerate(self.region_types):
+                f_out.write(f'\t{mem_type} = {id}U,\n')
             f_out.write('};\n\n')
 
             f_out.write('enum \n{\n')

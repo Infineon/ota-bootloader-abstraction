@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -93,7 +93,7 @@
 #define CY_BOOT_EXTERNAL_FLASH_ERASE_VALUE      (0xff)
 
 /* For CYW20829 this needs to be 256. Tested OK */
-#if defined(CYW20829)
+#if ( defined(CYW20829) || defined(CYW89829))
     #define BOOT_MAX_ALIGN          256u
 #endif
 
@@ -255,8 +255,8 @@ int8_t flash_area_read(const struct flash_area *fa, uint32_t off, void *dst, uin
 
     if(fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-#if defined(CYW20829)
-        /* CYW20829 does not have internal flash - check your flash layout JSON file!*/
+#if defined(CYW20829) || defined(CYW89829)
+        /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
         return BOOT_EBADARGS;
 #endif
 #if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined(XMC7200)
@@ -301,8 +301,8 @@ int8_t flash_area_write(const struct flash_area *fa, uint32_t off, const void *s
 
     if(fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-#if defined(CYW20829)
-        /* CYW20829 does not have internal flash - check your flash layout JSON file!*/
+#if defined(CYW20829) || defined(CYW89829)
+        /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
         return BOOT_EBADARGS;
 #endif
 #if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined(XMC7200)
@@ -350,8 +350,8 @@ int8_t flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
 
     if(fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-#if defined(CYW20829)
-        /* CYW20829 does not have internal flash - check your flash layout JSON file!*/
+#if defined(CYW20829) || defined(CYW89829)
+        /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
         return BOOT_EBADARGS;
 #endif
 #if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined(XMC7200)

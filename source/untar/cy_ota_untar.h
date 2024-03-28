@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -31,8 +31,8 @@
  * so agrees to indemnify Cypress against all liability.
  */
 
-#ifndef UNTAR_H__
-#define UNTAR_H__   1
+#ifndef CY_OTA_UNTAR_H__
+#define CY_OTA_UNTAR_H__   1
 
 #include <stdint.h>
 #include "cy_result.h"
@@ -159,11 +159,12 @@ typedef struct ustar_header_s {
 /**
  * @brief Structure used for keeping track of files in the tar archive while extracting.
  */
-typedef struct cy_ota_file_info_s {
-    char                name[TNAMELEN];         /**< Copied from the components.json file         */
-    char                type[CY_FILE_TYPE_LEN]; /**< From components.json.                         */
-    uint16_t            found_in_tar;           /**< Encountered the header in the tar file.       */
-    uint32_t            header_offset;          /**< Offset of the header in the tar file.                 */
+typedef struct cy_ota_file_info_s
+{
+    char                name[TNAMELEN];         /**< Copied from the components.json file              */
+    char                type[CY_FILE_TYPE_LEN]; /**< From components.json.                             */
+    uint16_t            found_in_tar;           /**< Encountered the header in the tar file.           */
+    uint32_t            header_offset;          /**< Offset of the header in the tar file.             */
     uint32_t            size;                   /**< From components.json, verified from the header.   */
     uint32_t            processed;              /**< Bytes processed from the tar file.                */
 } cy_ota_file_info_t;
@@ -268,4 +269,4 @@ cy_untar_result_t cy_untar_parse( cy_untar_context_t *ctxt, uint32_t in_stream_o
 #endif
 
 
-#endif  /* UNTAR_H__ */
+#endif  /* CY_OTA_UNTAR_H__ */

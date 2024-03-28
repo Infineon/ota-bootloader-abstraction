@@ -1,6 +1,6 @@
 # MCUBoot Build Commands
 
-The JSON flash maps were verified to work with MCUBoot v1.9.1-cypress. The JSON flash map files are available in [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap/) folder.
+The JSON flash maps were verified to work with MCUBoot v1.9.2-cypress. The JSON flash map files are available in [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap/) folder.
 
 Choose the configuration to use from the information below and copy the flash map file to your **\<mcuboot\>/boot/cypress/** directory before building MCUBootApp.
 
@@ -127,6 +127,24 @@ To build MCUBoot for internal only flash OVERWRITE configuration:
 
 ```
 make clean app APP_NAME=MCUBootApp PLATFORM=XMC7200 BUILDCFG=Debug FLASH_MAP=./xmc7200_int_swap_single.json PLATFORM_CONFIG=platforms/memory/XMC7000/flashmap/xmc7200_platform.json CORE=CM0P APP_CORE=CM7 APP_CORE_ID=0
+```
+
+## 8. CYW89829 Platforms
+
+The CYW989829M2EVB-01 platform only supports an external flash execution(XIP) configuration.
+
+<b>Building MCUBoot</b>
+
+To build MCUBoot for external flash execute (XIP) SWAP configuration:
+
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw89829_xip_swap_single.json
+```
+
+To build MCUBoot for external flash execute (XIP) OVERWRITE configuration:
+
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw89829_xip_overwrite_single.json
 ```
 
 # UART differences

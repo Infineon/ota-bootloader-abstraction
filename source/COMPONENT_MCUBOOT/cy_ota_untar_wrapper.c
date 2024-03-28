@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -47,7 +47,7 @@
 
 #include "cyabs_rtos.h"
 
-#include "untar.h"
+#include "cy_ota_untar.h"
 #include "flash_map_backend.h"
 
 /* define CY_TEST_APP_VERSION_IN_TAR to test the application version in the
@@ -61,7 +61,7 @@
 
 /***********************************************************************
  *
- * OTA wrappers and callbacks for untar.c
+ * OTA wrappers and callbacks for cy_ota_untar.c
  *
  **********************************************************************/
 

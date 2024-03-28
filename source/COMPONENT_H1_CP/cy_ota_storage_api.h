@@ -46,35 +46,6 @@
 
 #include "cy_ota_api.h"
 
-/**
- * \addtogroup group_ota_bootsupport Infineon OTA Bootloader Support API
- * \{
- * OTA Bootloader support for handling and installing firmware updates.
- *
- * \defgroup group_ota_bootsupport_macros OTA Bootloader Support Macros
- * Macros used to define the OTA Bootloader Support behavior.
- *
- * \defgroup group_ota_bootsupport_typedefs Bootloader Support Typedefs
- * Typedefs used by the OTA Bootloader Support.
- *
- * \defgroup group_ota_bootsupport_functions Bootloader Support Functions
- * Functions for handling and installing firmware updates.
- *
- */
-
-/***********************************************************************
- *
- * Functions
- *
- **********************************************************************/
-/**
- * \addtogroup group_ota_bootsupport_functions
- * \{
- * Bootloader based storage interface APIs for handling downloaded UPGRADE image of OTA application.
- * These callbacks are defind in ota-update library and expected to register these callbacks during OTA agent start.
- * ota-bootloader-abstraction library has implementation of these bootloader specific storage interface APIs.
- *
- */
 
 /**
  * @brief Initialize Storage area
@@ -145,7 +116,6 @@ cy_rslt_t cy_ota_storage_verify(cy_ota_storage_context_t *storage_ptr);
  * @brief Application has validated the new OTA Image
  *
  * This call needs to be after reboot and Bootloader has started the upgrade version of Application.
- *      to the Primary Slot.
  *
  * @param[in]   app_id          Application ID.
  *
@@ -155,10 +125,22 @@ cy_rslt_t cy_ota_storage_verify(cy_ota_storage_context_t *storage_ptr);
 cy_rslt_t cy_ota_storage_image_validate(uint16_t app_id);
 
 /**
+ * @brief API to activate the downloaded OTA Image.
+ *
+ * This call needs to be after new OTA image successfully downloaded to inactive DS.
+ * If OTA image header, image certificates are valid then bootloader boots new OTA image.
+ *
+ * @param[in]   app_id          Application ID(For future use).
+ *
+ * @return      CY_RSLT_SUCCESS
+ *              CY_RSLT_OTA_ERROR_GENERAL
+ */
+cy_rslt_t cy_ota_storage_switch_to_new_image(uint16_t app_id);
+
+/**
  * @brief Get Application image information
  *
  * This call needs to be after reboot and Bootloader has started the upgrade version of Application.
- *      to the Primary Slot.
  *
  * @param[in]        file_des        Pointer to the storage context.
  * @param[in]        app_info        Pointer to the OTA Application information structure.
@@ -167,9 +149,5 @@ cy_rslt_t cy_ota_storage_image_validate(uint16_t app_id);
  *          CY_RSLT_OTA_ERROR_GENERAL
  */
 cy_rslt_t cy_ota_storage_get_app_info(void* file_des, cy_ota_app_info_t *app_info);
-
-/** \} group_ota_bootsupport_functions */
-
-/** \} group_ota_bootsupport */
 
 #endif /* CY_OTA_STORAGE_API_H_ */

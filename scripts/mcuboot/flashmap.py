@@ -75,6 +75,18 @@ platDict = {
         },
         'appCore': 'Cortex-M33'
     },
+    'CYW89829': {
+        'flashSize': 0,  # n/a
+        'smifAddr': 0x60000000,
+        'smifSize': 0x8000000,  # i.e., window size
+        'VTAlign': 0x200,  # Vector Table alignment
+        'allCores': {
+            'cortex-m33': 'CM33',
+            'cm33': 'CM33',
+            'm33': 'CM33'
+        },
+        'appCore': 'Cortex-M33'
+    },
     'EXPLORER': {
         'flashSize': 0,  # n/a
         'smifAddr': 0x60000000,

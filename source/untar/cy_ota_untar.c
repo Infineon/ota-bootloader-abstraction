@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -48,7 +48,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include "untar.h"
+#include "cy_ota_untar.h"
 #include "cy_utils.h"
 #include "cy_result.h"
 #include "cy_json_parser.h"
@@ -120,24 +120,24 @@ static uint32_t cy_octal_string_to_u32(const char *octal_string)
 static cy_rslt_t ota_untar_json_callback( cy_JSON_object_t *obj, void*cb_arg )
 {
     cy_untar_context_t *ctxt = (cy_untar_context_t *)cb_arg;
-    if (ctxt == NULL)
+    if(ctxt == NULL)
     {
         return CY_RSLT_TYPE_ERROR;
     }
 
-    if (strncmp(CY_KEY_NUM_COMPONENTS, obj->object_string, obj->object_string_length) == 0)
+    if(strncmp(CY_KEY_NUM_COMPONENTS, obj->object_string, obj->object_string_length) == 0)
     {
         ctxt->num_files_in_json = (uint16_t)atoi(obj->value);
     }
-    if (strncmp(CY_KEY_VERSION, obj->object_string, obj->object_string_length) == 0)
+    else if(strncmp(CY_KEY_VERSION, obj->object_string, obj->object_string_length) == 0)
     {
         memcpy(ctxt->app_version, obj->value, obj->value_length);
     }
-    if (strncmp(CY_KEY_FILES, obj->object_string, obj->object_string_length) == 0)
+    else if(strncmp(CY_KEY_FILES, obj->object_string, obj->object_string_length) == 0)
     {
         ctxt->curr_file_in_json = 0;
     }
-    else if (strncmp(CY_KEY_FILE_NAME, obj->object_string, obj->object_string_length) == 0)
+    else if(strncmp(CY_KEY_FILE_NAME, obj->object_string, obj->object_string_length) == 0)
     {
         /* if we already have an entry for curr file, increment curr file */
         if (strncmp(CY_FILENAME_COMPONENT_JSON, obj->value, obj->value_length) == 0 )

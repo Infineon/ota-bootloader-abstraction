@@ -33,6 +33,8 @@ MCUBOOT_HEADER_SIZE=$1
 shift
 APP_BUILD_VERSION=$1
 shift
+APP_PLATFORM=$1
+shift
 FLASH_BASE_ADDRESS=$1
 shift
 FLASH_AREA_IMG_1_PRIMARY_START=$1
@@ -153,8 +155,8 @@ PRJ_DIR=.
 
 echo ""
 echo "[Bin to Hex for debug (unsigned)]"
-#echo "$CY_HEX_TO_BIN -I binary -O ihex $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.hex"
-#$CY_HEX_TO_BIN -I binary -O ihex $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.hex
+echo "$CY_HEX_TO_BIN -I binary -O ihex $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.hex"
+$CY_HEX_TO_BIN -I binary -O ihex $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.unsigned.hex
 
 echo ""
 echo "[TOC2_Generate] Execute toc2 generator script for $CY_OUTPUT_NAME"
@@ -168,21 +170,21 @@ ls -l $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin
 #################################################### SIGNING BOOT IMAGE ######################################################
 echo ""
 echo "[SIGNING BOOT using cysecuretools]"
-echo "cysecuretools -q -t cyw20829 -p $OTA_APP_POLICY_PATH sign-image -H $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE --overwrite-only -R 0xff --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin --output $CY_OUTPUT_BIN --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image-id 1"
-cysecuretools -q -t cyw20829 -p $OTA_APP_POLICY_PATH sign-image -H $MCUBOOT_HEADER_SIZE --align 1 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE --overwrite-only -R 0xff --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin --output $CY_OUTPUT_BIN --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image-id 1
+echo "$CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image -H $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE --overwrite-only -R 0xff --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image-id 1"
+$CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image -H $MCUBOOT_HEADER_SIZE --align 1 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE --overwrite-only -R 0xff --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image-id 1
 
 echo ""
 echo "[Bin to Hex for PRIMARY (BOOT) Slot]"
-echo "$CY_HEX_TO_BIN --change-address=$FLASH_AREA_IMG_1_PRIMARY_START_ABS -I binary -O ihex $CY_OUTPUT_BIN $CY_OUTPUT_FINAL_HEX"
-$CY_HEX_TO_BIN --change-address=$FLASH_AREA_IMG_1_PRIMARY_START_ABS -I binary -O ihex $CY_OUTPUT_BIN $CY_OUTPUT_FINAL_HEX
+echo "$CY_HEX_TO_BIN --change-address=$FLASH_AREA_IMG_1_PRIMARY_START_ABS -I binary -O ihex $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin $CY_OUTPUT_FINAL_HEX"
+$CY_HEX_TO_BIN --change-address=$FLASH_AREA_IMG_1_PRIMARY_START_ABS -I binary -O ihex $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin $CY_OUTPUT_FINAL_HEX
 echo "Copy $CY_OUTPUT_FINAL_HEX to $CY_OUTPUT_FINAL_FINAL_HEX for MTB"
 cp $CY_OUTPUT_FINAL_HEX $CY_OUTPUT_FINAL_FINAL_HEX
 
 #################################################### SIGNING UPGRADE IMAGE ######################################################
 echo ""
 echo "[SIGNING UPGRADE using cysecuretools]"
-echo "cysecuretools -q -t cyw20829 -p $OTA_APP_POLICY_PATH sign-image -H $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE --overwrite-only -R 0xff --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.update.signed.bin --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image-id 1"
-cysecuretools -q -t cyw20829 -p $OTA_APP_POLICY_PATH sign-image -H $MCUBOOT_HEADER_SIZE --align 1 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE --overwrite-only -R 0xff --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.update.signed.bin --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image-id 1
+echo "$CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image -H $MCUBOOT_HEADER_SIZE --align 8 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE --overwrite-only -R 0xff --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.update.signed.bin --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image-id 1"
+$CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image -H $MCUBOOT_HEADER_SIZE --align 1 -v $APP_BUILD_VERSION -S $FLASH_AREA_IMG_1_PRIMARY_SIZE --overwrite-only -R 0xff --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.update.signed.bin --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE --image-id 1
 
 echo ""
 echo "[Bin to Hex for SECONDARY (UPDATE) Slot]"
@@ -190,7 +192,7 @@ echo "$CY_HEX_TO_BIN --change-address=$FLASH_AREA_IMG_1_SECONDARY_START -I binar
 $CY_HEX_TO_BIN --change-address=$FLASH_AREA_IMG_1_SECONDARY_START -I binary -O ihex $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.update.signed.bin $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.update.hex
 
 # clean up temp files
-rm $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin
+#rm $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin
 
 # get size of binary file for components.json
 BIN_SIZE=$(ls -g -o $CY_OUTPUT_BIN | awk '{printf $3}')

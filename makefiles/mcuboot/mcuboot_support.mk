@@ -7,7 +7,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2022 Cypress Semiconductor Corporation
+# Copyright 2018-2024, Cypress Semiconductor Corporation (an Infineon company)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#################################################################################
+################################################################################
+
 # Find the Relative path between the bootloader support Makefiles and the Application's Build Directory
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -60,6 +61,13 @@ DEFINES+=APP_BUILD_VERSION=$(APP_BUILD_VERSION)
 ###################################################################################################
 # Default OTA_PLATFORM based on TARGET
 ###################################################################################################
+#----------------------------------
+# CYW989829M2EVB-01
+#----------------------------------
+ifeq ($(ACTUAL_TARGET), CYW989829M2EVB-01)
+    OTA_PLATFORM?=CYW89829
+endif
+
 #----------------------------------
 # CYW920829M2EVK-02
 #----------------------------------
@@ -179,6 +187,11 @@ ifeq ($(OTA_PLATFORM),CYW20829)
     OTA_FLASH_MAP?=$(RELATIVE_FILE1_FILE2)/../../configs/COMPONENT_MCUBOOT/flashmap/cyw20829_xip_swap_single.json
 endif
 
+ifeq ($(OTA_PLATFORM),CYW89829)
+    # Default to XIP Swap
+    OTA_FLASH_MAP?=$(RELATIVE_FILE1_FILE2)/../../configs/COMPONENT_MCUBOOT/flashmap/cyw89829_xip_overwrite_single.json
+endif
+
 ifeq ($(OTA_PLATFORM),XMC7200)
     OTA_FLASH_MAP?=$(RELATIVE_FILE1_FILE2)/../../configs/COMPONENT_MCUBOOT/flashmap/xmc7200_int_swap_single.json
     OTA_PLATFORM_CONFIG_JSON=$(RELATIVE_FILE1_FILE2)/../../configs/COMPONENT_MCUBOOT/flashmap/xmc7200_platform.json
@@ -194,7 +207,7 @@ OTA_PSOC_062_SUPPORTED_PLATFORMS="PSOC_062_512K PSOC_062_1M PSOC_062_2M "
 OTA_PSOC_063_SUPPORTED_PLATFORMS="PSOC_063_1M "
 OTA_PSOC_064_SUPPORTED_PLATFORMS="PSOC_064_2M "
 OTA_PSOC_06X_SUPPORTED_PLATFORMS=$(OTA_PSOC_062_SUPPORTED_PLATFORMS)$(OTA_PSOC_063_SUPPORTED_PLATFORMS)$(OTA_PSOC_064_SUPPORTED_PLATFORMS)
-OTA_OTHER_SUPPORTED_PLATFORMS="CYW20829 XMC7200"
+OTA_OTHER_SUPPORTED_PLATFORMS="CYW20829 CYW89829 XMC7200"
 OTA_SUPPORTED_PLATFORMS=$(OTA_PSOC_06X_SUPPORTED_PLATFORMS) $(OTA_OTHER_SUPPORTED_PLATFORMS)
 
 # Add OTA_PLATFORM in DEFINES for platform-specific code
@@ -220,7 +233,7 @@ endif
 #
 # Look in configs/COMPONENT_MCUBOOT/flashmap for an appropriate JSON file
 #
-# CYW920829
+# CYW920829 and CYW89829
 #    Single image JSON files, always external flash
 #        flashmap/cyw20829_ext_overwrite_single.json
 #        flashmap/cyw20829_ext_swap_single.json
@@ -312,7 +325,7 @@ ifeq ($(OTA_PLATFORM),PSOC_064_2M)
 
 else
     # non-PSOC_064_2M here
-    ifneq ($(findstring $(MAKECMDGOALS), build program all),)
+    ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_proj eclipse vscode ewarm ewarm8 uvision uvision5 all),)
         ifeq ($(CY_PYTHON_PATH),)
             $(error CY_PYTHON_PATH is not configured)
         else
@@ -377,15 +390,15 @@ ifeq ($(USE_XIP),1)
 
     # When running from external flash
     # That we need to turn off XIP and enter critical section when accessing SMIF
-    #  NOTE: CYW920829 does not need this. Generalize for now,
+    #  NOTE: CYW920829 and CYW89829 do not need this. Generalize for now,
     #        we may need to change this criteria for future devices
-    ifneq ($(OTA_PLATFORM),CYW20829)
+    ifneq ($(findstring $(OTA_PLATFORM), PSOC_062_2M PSOC_062_1M PSOC_062_512K PSOC_063_1M PSOC_064_2M XMC7200),)
         CY_XIP_SMIF_MODE_CHANGE=1
 
         # Since we are running hybrid (some in RAM, some in External FLash),    #IMP_CHECK
         # we need to override the WEAK functions in CYHAL
         DEFINES+=CYHAL_DISABLE_WEAK_FUNC_IMPL=1
-    endif # Not CYW20829
+    endif # Not CYW20829 or CYW89829
 endif # USE_XIP
 
 # TODO: Can we base this on the flash area at RUNTIME rather than defining it at build time?
@@ -471,7 +484,7 @@ ifeq ($(TOOLCHAIN),GCC_ARM)
     LDFLAGS+="-Wl,--defsym,MCUBOOT_HEADER_SIZE=$(MCUBOOT_HEADER_SIZE),--defsym,FLASH_AREA_IMG_1_PRIMARY_START=$(FLASH_AREA_IMG_1_PRIMARY_START),--defsym,FLASH_AREA_IMG_1_PRIMARY_SIZE=$(FLASH_AREA_IMG_1_PRIMARY_SIZE)"
 else
     ifeq ($(TOOLCHAIN),IAR)
-        CY_ELF_TO_HEX="$(CY_COMPILER_IAR_DIR)/bin/ielftool"
+        CY_ELF_TO_HEX=$(MTB_TOOLCHAIN_IAR__BASE_DIR)/bin/ielftool
         CY_ELF_TO_HEX_OPTIONS="--ihex"
         CY_ELF_TO_HEX_FILE_ORDER="elf_first"
         LDFLAGS+=--config_def MCUBOOT_HEADER_SIZE=$(MCUBOOT_HEADER_SIZE) --config_def FLASH_AREA_IMG_1_PRIMARY_START=$(FLASH_AREA_IMG_1_PRIMARY_START) --config_def FLASH_AREA_IMG_1_PRIMARY_SIZE=$(FLASH_AREA_IMG_1_PRIMARY_SIZE)
@@ -590,7 +603,6 @@ ifneq ($(CY_SECONDSTAGE),)
     $(info TARGET            $(TARGET))
     $(info CONFIG            $(CONFIG))
     $(info OUTPUT_FILE_PATH  $(OUTPUT_FILE_PATH))
-    $(info CY_COMPILER_GCC_ARM_DIR $(CY_COMPILER_GCC_ARM_DIR))
     ifeq ($(CY_COMPILER_GCC_ARM_DIR),)
         CY_COMPILER_GCC_ARM_DIR=$(CY_TOOLS_DIR)/gcc
     endif
@@ -603,10 +615,10 @@ ifneq ($(CY_SECONDSTAGE),)
         $(info "")
 
         # Check for Policy file path for 20829 devices
-        ifeq ($(OTA_PLATFORM), CYW20829)
+        ifneq ($(findstring $(OTA_PLATFORM),CYW20829 CYW89829),)
             ifeq ($(OTA_APP_POLICY_PATH),)
                 $(info "")
-                $(info Application makefile has not defined OTA_APP_POLICY_PATH. Using OTA library's default Policy file for 20829 device.)
+                $(info Application makefile has not defined OTA_APP_POLICY_PATH. Using OTA library's default Policy file for 20829 & 89829 device.)
                 $(info "")
                 OTA_APP_POLICY_PATH?=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/policy/policy_CM33_no_secure.json
                 $(info OTA_APP_POLICY_PATH = $(OTA_APP_POLICY_PATH) )
@@ -626,10 +638,10 @@ ifneq ($(CY_SECONDSTAGE),)
         MCUBOOT_KEY_DIR := $(shell echo "$(CY_SIGN_KEY_PATH)" | sed "s@/$(MCUBOOT_KEY_FILE)@@")
 
         #--------------------------------------
-        # CYW20829 POSTBUILD
+        # CYW20829 and CYW89829 POSTBUILD
         #--------------------------------------
-        ifeq ($(OTA_PLATFORM), CYW20829)
-            $(info Makefile: CYW20829 POSTBUILD )
+        ifneq ($(filter $(OTA_PLATFORM),CYW20829 CYW89829),)
+            $(info Makefile: CYW20829 and CYW89829 POSTBUILD )
 
             MCUBOOT_SCRIPT_FILE_PATH?=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/sign_script_20829.bash
             CY_ELF_TO_HEX=$(CY_HEX_TO_BIN)
@@ -696,16 +708,15 @@ ifneq ($(CY_SECONDSTAGE),)
                 endif # OTA_BUILD_VERBOSE = POST
             endif # SECOND STAGE
 
-            # CYW920829 POSTBUILD call
+            # CYW920829/CYW89829 POSTBUILD call
             POSTBUILD+=$(MCUBOOT_SCRIPT_FILE_PATH) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) $(CY_PYTHON_PATH) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) \
                 $(CY_ELF_TO_HEX) $(CY_ELF_TO_HEX_OPTIONS) $(CY_ELF_TO_HEX_FILE_ORDER) $(CY_HEX_TO_BIN) \
-                $(FLASH_ERASE_SECONDARY_SLOT_VALUE) $(MCUBOOT_HEADER_SIZE) $(APP_BUILD_VERSION) $(FLASH_BASE_ADDRESS) \
+                $(FLASH_ERASE_SECONDARY_SLOT_VALUE) $(MCUBOOT_HEADER_SIZE) $(APP_BUILD_VERSION) $(OTA_PLATFORM) $(FLASH_BASE_ADDRESS) \
                 $(FLASH_AREA_IMG_1_PRIMARY_START) $(FLASH_AREA_IMG_1_PRIMARY_SIZE) $(FLASH_AREA_IMG_1_SECONDARY_START) \
                 $(MCUBOOT_KEY_DIR) $(MCUBOOT_KEY_FILE)\
                 $(CY_TOC2_GENERATOR) $(CY_LCS) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) $(APPTYPE) $(current_dir) $(SMIF_CRYPTO_CONFIG) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) $(OTA_APP_POLICY_PATH) $(FLASH_AREA_IMG_1_PRIMARY_SIZE) $(CY_ENC_IMG) $(CY_SERVICE_APP_DESCR_ADDR) $(BOOTSTRAP_SIZE) $(DEVICE_$(MPN_LIST)_SRAM_KB);
-            POSTBUILD+=rm -rf $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/$(APPNAME).final.hex
 
-        endif# end (CYW920829) section
+        endif# end (CYW920829/CYW89829) section
 
         #--------------------------------------
         # XMC7200 POSTBUILD
@@ -794,46 +805,47 @@ ifneq ($(CY_SECONDSTAGE),)
         #--------------------------------------
         ifneq ($(OTA_PLATFORM), XMC7200)
             ifneq ($(OTA_PLATFORM), CYW20829)
-                # PSoC 062, PSoC 062s3, PSoC 064B0S2 Here
+	            ifneq ($(OTA_PLATFORM), CYW89829)
+                    # PSoC 062, PSoC 062s3, PSoC 064B0S2 Here
 
-                SIGN_SCRIPT_FILE_PATH=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/sign_script.bash
-                IMGTOOL_COMMAND_ARG=sign
-                CY_SIGNING_KEY_ARG="-k $(MCUBOOT_KEY_DIR)/$(MCUBOOT_KEY_FILE)"
+                    SIGN_SCRIPT_FILE_PATH=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/sign_script.bash
+                    IMGTOOL_COMMAND_ARG=sign
+                    CY_SIGNING_KEY_ARG="-k $(MCUBOOT_KEY_DIR)/$(MCUBOOT_KEY_FILE)"
 
-                ifeq ($(ACTUAL_TARGET),CY8CKIT-064B0S2-4343W)        #IMP_CHECK
-                    # values changed for 064B0S2 board
-                    IMGTOOL_COMMAND_ARG=do_not_sign
-                endif
+                    ifeq ($(ACTUAL_TARGET),CY8CKIT-064B0S2-4343W)        #IMP_CHECK
+                        # values changed for 064B0S2 board
+                        IMGTOOL_COMMAND_ARG=do_not_sign
+                    endif
 
-            # If POSTBUILD fails, Turn this on to check all args are present
-                ifneq ($(CY_SECONDSTAGE),)
-                    ifeq ($(OTA_BUILD_POST_VERBOSE),1)
-                        $(info SIGN_SCRIPT_FILE_PATH            =$(SIGN_SCRIPT_FILE_PATH))
-                        $(info OUTPUT_FILE_PATH                 =$(OUTPUT_FILE_PATH))
-                        $(info APPNAME                          =$(APPNAME))
-                        $(info CY_ELF_TO_HEX                    =$(CY_ELF_TO_HEX))
-                        $(info CY_ELF_TO_HEX_OPTIONS            =$(CY_ELF_TO_HEX_OPTIONS))
-                        $(info CY_ELF_TO_HEX_FILE_ORDER         =$(CY_ELF_TO_HEX_FILE_ORDER))
-                        $(info MCUBOOT_SCRIPT_FILE_DIR          =$(MCUBOOT_SCRIPT_FILE_DIR))
-                        $(info IMGTOOL_SCRIPT_NAME              =$(IMGTOOL_SCRIPT_NAME))
-                        $(info IMGTOOL_COMMAND_ARG              =$(IMGTOOL_COMMAND_ARG))
-                        $(info FLASH_ERASE_SECONDARY_SLOT_VALUE =$(FLASH_ERASE_SECONDARY_SLOT_VALUE))
-                        $(info MCUBOOT_HEADER_SIZE              =$(MCUBOOT_HEADER_SIZE))
-                        $(info MCUBOOT_MAX_IMG_SECTORS          =$(MCUBOOT_MAX_IMG_SECTORS))
-                        $(info APP_BUILD_VERSION                =$(APP_BUILD_VERSION))
-                        $(info FLASH_AREA_IMG_1_PRIMARY_START   =$(FLASH_AREA_IMG_1_PRIMARY_START))
-                        $(info FLASH_AREA_IMG_1_PRIMARY_SIZE    =$(FLASH_AREA_IMG_1_PRIMARY_SIZE))
-                        $(info CY_HEX_TO_BIN                    =$(CY_HEX_TO_BIN))
-                        $(info CY_SIGNING_KEY_ARG               =$(CY_SIGNING_KEY_ARG))
-                    endif # OTA_BUILD_VERBOSE = POST
-                endif # SECOND STAGE
+                    # If POSTBUILD fails, Turn this on to check all args are present
+                    ifneq ($(CY_SECONDSTAGE),)
+                        ifeq ($(OTA_BUILD_POST_VERBOSE),1)
+                            $(info SIGN_SCRIPT_FILE_PATH            =$(SIGN_SCRIPT_FILE_PATH))
+                            $(info OUTPUT_FILE_PATH                 =$(OUTPUT_FILE_PATH))
+                            $(info APPNAME                          =$(APPNAME))
+                            $(info CY_ELF_TO_HEX                    =$(CY_ELF_TO_HEX))
+                            $(info CY_ELF_TO_HEX_OPTIONS            =$(CY_ELF_TO_HEX_OPTIONS))
+                            $(info CY_ELF_TO_HEX_FILE_ORDER         =$(CY_ELF_TO_HEX_FILE_ORDER))
+                            $(info MCUBOOT_SCRIPT_FILE_DIR          =$(MCUBOOT_SCRIPT_FILE_DIR))
+                            $(info IMGTOOL_SCRIPT_NAME              =$(IMGTOOL_SCRIPT_NAME))
+                            $(info IMGTOOL_COMMAND_ARG              =$(IMGTOOL_COMMAND_ARG))
+                            $(info FLASH_ERASE_SECONDARY_SLOT_VALUE =$(FLASH_ERASE_SECONDARY_SLOT_VALUE))
+                            $(info MCUBOOT_HEADER_SIZE              =$(MCUBOOT_HEADER_SIZE))
+                            $(info MCUBOOT_MAX_IMG_SECTORS          =$(MCUBOOT_MAX_IMG_SECTORS))
+                            $(info APP_BUILD_VERSION                =$(APP_BUILD_VERSION))
+                            $(info FLASH_AREA_IMG_1_PRIMARY_START   =$(FLASH_AREA_IMG_1_PRIMARY_START))
+                            $(info FLASH_AREA_IMG_1_PRIMARY_SIZE    =$(FLASH_AREA_IMG_1_PRIMARY_SIZE))
+                            $(info CY_HEX_TO_BIN                    =$(CY_HEX_TO_BIN))
+                            $(info CY_SIGNING_KEY_ARG               =$(CY_SIGNING_KEY_ARG))
+                        endif # OTA_BUILD_VERBOSE = POST
+                    endif # SECOND STAGE
 
-                POSTBUILD=$(SIGN_SCRIPT_FILE_PATH) $(OUTPUT_FILE_PATH) $(APPNAME) $(CY_PYTHON_PATH)\
-                        $(CY_ELF_TO_HEX) $(CY_ELF_TO_HEX_OPTIONS) $(CY_ELF_TO_HEX_FILE_ORDER)\
-                        $(MCUBOOT_SCRIPT_FILE_DIR) $(IMGTOOL_SCRIPT_NAME) $(IMGTOOL_COMMAND_ARG) $(FLASH_ERASE_SECONDARY_SLOT_VALUE) $(MCUBOOT_HEADER_SIZE)\
-                        $(MCUBOOT_MAX_IMG_SECTORS) $(APP_BUILD_VERSION) $(FLASH_AREA_IMG_1_PRIMARY_START) $(FLASH_AREA_IMG_1_PRIMARY_SIZE)\
-                        $(CY_HEX_TO_BIN) $(CY_SIGNING_KEY_ARG)
-
+                    POSTBUILD=$(SIGN_SCRIPT_FILE_PATH) $(OUTPUT_FILE_PATH) $(APPNAME) $(CY_PYTHON_PATH)\
+                              $(CY_ELF_TO_HEX) $(CY_ELF_TO_HEX_OPTIONS) $(CY_ELF_TO_HEX_FILE_ORDER)\
+                              $(MCUBOOT_SCRIPT_FILE_DIR) $(IMGTOOL_SCRIPT_NAME) $(IMGTOOL_COMMAND_ARG) $(FLASH_ERASE_SECONDARY_SLOT_VALUE) $(MCUBOOT_HEADER_SIZE)\
+                              $(MCUBOOT_MAX_IMG_SECTORS) $(APP_BUILD_VERSION) $(FLASH_AREA_IMG_1_PRIMARY_START) $(FLASH_AREA_IMG_1_PRIMARY_SIZE)\
+                              $(CY_HEX_TO_BIN) $(CY_SIGNING_KEY_ARG)
+                 endif # Not 89829
             endif # Not 20829
         endif # Not XMC7200
     else

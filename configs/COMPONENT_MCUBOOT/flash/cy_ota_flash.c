@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -45,7 +45,7 @@
 #include "cybsp.h"
 #include "cy_ota_flash.h"
 
-#if !(defined (CYW20829A0LKML) || defined (CYW20829B0LKML))
+#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
 #include <cycfg_pins.h>
 #endif
 
@@ -53,10 +53,10 @@
  * local defines
  **********************************************************************************************************************************/
 /* This defines if External Flash (SMIF) will be used for Upgrade Slots */
-#if defined(CYW20829)
-#define CY_FLASH_BASE                       CY_XIP_BASE /* Override value in /mtb-pdl-cat1/devices/COMPONENT_CAT1A/include/cy_device_common.h for CYW20829 */
-#define CY_FLASH_SIZEOF_ROW                 512u        /* Override value in /mtb-pdl-cat1/devices/COMPONENT_CAT1A/include/cy_device_common.h for CYW20829 */
-#endif /* CYW20829 */
+#if (defined (CYW20829) || defined (CYW89829))
+#define CY_FLASH_BASE                       CY_XIP_BASE /* Override value in /mtb-pdl-cat1/devices/COMPONENT_CAT1A/include/cy_device_common.h for CYW20829 and CYW89829 */
+#define CY_FLASH_SIZEOF_ROW                 512u        /* Override value in /mtb-pdl-cat1/devices/COMPONENT_CAT1A/include/cy_device_common.h for CYW20829 and CYW89829 */
+#endif /* CYW20829 or CYW89829 */
 
 #if defined(XMC7200)
 #define CY_XIP_BASE                         0x60000000UL
@@ -253,7 +253,7 @@ static cy_en_smif_status_t EnableQuadMode(cy_stc_smif_mem_config_t const *memCon
 #endif /* OTA_USE_EXTERNAL_FLASH */
 #endif /* CY_IP_MXSMIF & !PSOC_062_1M & !XMC7200 */
 
-#if !(defined (CYW20829A0LKML) || defined (CYW20829B0LKML) || defined (XMC7200))
+#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG) || defined (XMC7200))
 static int psoc6_internal_flash_write(uint8_t data[], uint32_t address, size_t len)
 {
     int retCode;
@@ -598,8 +598,8 @@ cy_rslt_t cy_ota_mem_init( void )
     /* pre-access to SMIF */
     PRE_SMIF_ACCESS_TURN_OFF_XIP;
 
-#if (defined (CYW20829A0LKML) || defined (CYW20829B0LKML))
-    /* SMIF is already initialized for 20829 so we are only initializing the
+#if (defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
+    /* SMIF is already initialized for 20829 and 89829 so we are only initializing the
      * SMIF base address and the context variables.
      */
     smif_status = Cy_SMIF_Init(SMIF0, &ota_SMIF_config, TIMEOUT_1_MS, &ota_QSPI_context);
@@ -622,7 +622,7 @@ cy_rslt_t cy_ota_mem_init( void )
         goto _bail;
     }
 
-#if (defined (CYW20829A0LKML) || defined (CYW20829B0LKML))
+#if (defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
     /* Even after SFDP enumeration QE command is not initialized */
     /* So, it should be 1.0 device */
     if ((smifMemConfigs[0]->deviceCfg->readStsRegQeCmd->command == 0) ||                        /* 0 - if configurator generated code */
@@ -639,7 +639,7 @@ cy_rslt_t cy_ota_mem_init( void )
             goto _bail;
         }
     }
-#else /* NON - CYW20829A0LKML/CYW20829B0LKML */
+#else /* NON - CYW20829B0LKML/CYW89829B01MKSBG */
     #if !defined(CY_RUN_CODE_FROM_XIP) && (OTA_USE_EXTERNAL_FLASH)
         {
             /* Choose SMIF slot number (slave select).
@@ -661,7 +661,7 @@ cy_rslt_t cy_ota_mem_init( void )
             }
         }
     #endif /* ! CY_RUN_CODE_FROM_XIP */
-#endif /* CYW20829A0LKML/CYW20829B0LKML */
+#endif /* CYW20829B0LKML/CYW89829B01MKSBG */
 
     smif_status = IsQuadEnabled(smifMemConfigs[0], &QE_status);
     if(smif_status != CY_RSLT_SUCCESS)
@@ -707,7 +707,7 @@ cy_rslt_t cy_ota_mem_read( cy_ota_mem_type_t mem_type, uint32_t addr, void *data
 
     if( mem_type == CY_OTA_MEM_TYPE_INTERNAL_FLASH )
     {
-#if !(defined (CYW20829A0LKML) || defined (CYW20829B0LKML))
+#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
         /* flash_area_read() uses offsets, we need absolute address here */
         addr += CY_FLASH_BASE;
 
@@ -758,7 +758,7 @@ static cy_rslt_t cy_ota_mem_write_row_size( cy_ota_mem_type_t mem_type, uint32_t
 
     if( mem_type == CY_OTA_MEM_TYPE_INTERNAL_FLASH )
     {
-#if !(defined (CYW20829A0LKML) || defined (CYW20829B0LKML))
+#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
         int rc = 0;
 
         /* flash_area_write() uses offsets, we need absolute address here */
@@ -937,7 +937,7 @@ cy_rslt_t cy_ota_mem_erase( cy_ota_mem_type_t mem_type, uint32_t addr, size_t le
 
     if( mem_type == CY_OTA_MEM_TYPE_INTERNAL_FLASH )
     {
-#if !(defined (CYW20829A0LKML) || defined (CYW20829B0LKML))
+#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
         int rc = 0;
 
 #if defined (XMC7200)
@@ -1036,7 +1036,7 @@ size_t cy_ota_mem_get_prog_size ( cy_ota_mem_type_t mem_type, uint32_t addr )
 {
     if( mem_type == CY_OTA_MEM_TYPE_INTERNAL_FLASH )
     {
-#if !(defined (CYW20829A0LKML) || defined (CYW20829B0LKML))
+#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
         return CY_FLASH_SIZEOF_ROW;
 #else
         return 0;
@@ -1080,7 +1080,7 @@ size_t cy_ota_mem_get_erase_size ( cy_ota_mem_type_t mem_type, uint32_t addr )
 {
     if( mem_type == CY_OTA_MEM_TYPE_INTERNAL_FLASH )
     {
-#if !(defined (CYW20829A0LKML) || defined (CYW20829B0LKML))
+#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
         return CY_FLASH_SIZEOF_ROW;
 #else
         return 0;
