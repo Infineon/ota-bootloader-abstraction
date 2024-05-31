@@ -128,6 +128,11 @@ static update_file_header_t file_header;
  */
 uint8_t *write_buffer = NULL;
 
+/**
+ * @brief Variable to check header init.
+ */
+bool header_init = false;
+
 /***********************************************************************
  *
  * functions
@@ -526,14 +531,31 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
             memcpy(write_buffer, file_header.buffer, CY_DS_MDH_SIZE);
 
             cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE start for address : size : 0x%08x...!!!\n", CY_DS_MDH_SIZE);
+
+            if(header_init)
+            {
+                cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "De-initializing header to accept new header.");
+                res = thread_ap_OTA_Deinitialize();
+                if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
+                {
+                    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "thread_ap_OTA_Deinitialize() failed with result %d\n", (int)res);
+                }
+                else
+                {
+                    header_init = false;
+                }
+            }
+
             res = thread_ap_OTA_Initialize((BTSS_SYSTEM_NVRAM_OTA_HEADER_t *)write_buffer, CY_DS_MDH_SIZE);
             ota_free_write_buffer();
             if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
             {
+                header_init = false;
                 cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "thread_ap_OTA_Initialize() failed with result %d\n", (int)res);
             }
             else
             {
+                header_init = true;
                 cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE completed \n");
             }
             cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "DS WRITE start for address : 0x%08x size : 0x%08x...!!!\n",
@@ -567,15 +589,32 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
         {
             memcpy(write_buffer, chunk_info->buffer, CY_DS_MDH_SIZE);
             cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE start for address : size : 0x%08x...!!!\n", CY_DS_MDH_SIZE);
+
+            if(header_init)
+            {
+                cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "De-initializing header to accept new header.");
+                res = thread_ap_OTA_Deinitialize();
+                if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
+                {
+                    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "thread_ap_OTA_Deinitialize() failed with result %d\n", (int)res);
+                }
+                else
+                {
+                    header_init = false;
+                }
+            }
+
             res = thread_ap_OTA_Initialize((BTSS_SYSTEM_NVRAM_OTA_HEADER_t *)write_buffer, CY_DS_MDH_SIZE);
             if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
             {
                 ota_free_write_buffer();
+                header_init = false;
                 cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "thread_ap_OTA_Initialize() failed with result %d\n", (int)res);
                 return CY_RSLT_OTA_ERROR_WRITE_STORAGE;
             }
             else
             {
+                header_init = true;
                 cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE completed \n");
             }
 
@@ -702,16 +741,15 @@ cy_rslt_t cy_ota_storage_switch_to_new_image(uint16_t app_id)
     (void)app_id;
 
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "Enabling downloaded OTA image...\n");
-    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "Reset the Device to boot upgrade image...\n");
     res = thread_ap_OTA_SwitchToAltImage();
     if(res == BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
     {
-        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "thread_ap_OTA_SwitchToAltImage completed successfully.\n", (unsigned int)res);
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "thread_ap_OTA_SwitchToAltImage completed successfully.\n");
         return CY_RSLT_SUCCESS;
     }
     else
     {
-        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "thread_ap_OTA_SwitchToAltImage failed with res : %d...\n", (int)res);
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "thread_ap_OTA_SwitchToAltImage failed with res : %d \n", (int)res);
         return CY_RSLT_OTA_ERROR_GENERAL;
     }
 }

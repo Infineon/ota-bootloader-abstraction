@@ -9,6 +9,7 @@ See the [ota-update](https://github.com/Infineon/ota-update/) library documentat
 
 | Library Version                 | Supported MTB version    | Remarks                                   |
 |---------------------------------| -------------------------|-------------------------------------------|
+| ota-bootloader-abstraction v1.2.0  | ModusToolbox 3.2         | CYW955913EVK-01 platform support added |
 | ota-bootloader-abstraction v1.1.0  | ModusToolbox 3.2         | CYW89829 platform support added |
 | ota-bootloader-abstraction v1.0.0  | ModusToolbox 3.1         | cysecuretools v5.0 or greater is required |
 
@@ -24,13 +25,13 @@ Refer [ota-update library API header file](https://github.com/Infineon/ota-updat
 ```
 typedef struct cy_ota_storage_interface_s
 {
-	cy_ota_file_open           ota_file_open;         /**< Creates and open new receive file for the data chunks as they come in. */
-	cy_ota_file_read           ota_file_read;         /**< Reads the flash data starting from the given offset.                   */
-	cy_ota_file_write          ota_file_write;        /**< Write a data to the flash at the given offset.                         */
-	cy_ota_file_close          ota_file_close;        /**< Close the underlying receive file in the specified OTA context.        */
-	cy_ota_file_verify         ota_file_verify;       /**< Authenticate received OTA update file specified in the OTA context.    */
-	cy_ota_file_validate       ota_file_validate;     /**< The application has validated the new OTA image.                       */
-	cy_ota_file_get_app_info   ota_file_get_app_info; /**< Get Application info like Application version and Application ID.      */
+    cy_ota_file_open           ota_file_open;         /**< Creates and open new receive file for the data chunks as they come in. */
+    cy_ota_file_read           ota_file_read;         /**< Reads the flash data starting from the given offset.                   */
+    cy_ota_file_write          ota_file_write;        /**< Write a data to the flash at the given offset.                         */
+    cy_ota_file_close          ota_file_close;        /**< Close the underlying receive file in the specified OTA context.        */
+    cy_ota_file_verify         ota_file_verify;       /**< Authenticate received OTA update file specified in the OTA context.    */
+    cy_ota_file_validate       ota_file_validate;     /**< The application has validated the new OTA image.                       */
+    cy_ota_file_get_app_info   ota_file_get_app_info; /**< Get Application info like Application version and Application ID.      */
 } cy_ota_storage_interface_t;
 ```
 <br>
@@ -47,7 +48,17 @@ typedef struct cy_ota_storage_interface_s
 | ota_file_validate          | MCUBootloader  |  cy_ota_storage_image_validate() | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
 | ota_file_get_app_info      | MCUBootloader  |  cy_ota_storage_get_app_info()   | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
 
-<b>NOTE:</b>  The current version of ota-bootloader-abstraction library implements only storage interface APIs for MCUBootloader based OTA.
+| Storage operation callback |   Bootloader   |             API                  |   Remarks        |
+|----------------------------| ---------------|----------------------------------|------------------|
+| ota_file_open              | H1-CP          |  cy_ota_storage_open()           | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
+| ota_file_read              | H1-CP          |  cy_ota_storage_read()           | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
+| ota_file_write             | H1-CP          |  cy_ota_storage_write()          | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
+| ota_file_close             | H1-CP          |  cy_ota_storage_close()          | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
+| ota_file_verify            | H1-CP          |  cy_ota_storage_verify()         | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
+| ota_file_validate          | H1-CP          |  cy_ota_storage_image_validate() | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
+| ota_file_get_app_info      | H1-CP          |  cy_ota_storage_get_app_info()   | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
+
+<b>NOTE:</b>  The current version of ota-bootloader-abstraction library implements only storage interface APIs for MCUBootloader based OTA and H1-CP bootloader based OTA.
 
 ## 2. MCUBootloader Support
 
@@ -169,7 +180,30 @@ MCUBoot itself is not OTA upgradable.
 
 For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md).
 
-## 3. Enabling MCUBootloader based OTA in an Application
+## 3. H1-CP Bootloader Support
+
+*ota-bootloader-abstraction* library has below support for H1-CP Bootloader based OTA on CYW955913EVK-01 platform.
+
+- Storage operation callback APIs to handle H1-CP Bootloader based upgrade image.
+
+<b> Supported devices: </b><br>
+- CYW955913EVK-01.
+
+The *ota-update* along with *ota-bootloader-abstraction* library works in concert with H1-CP Bootloader to provide a no-fail solution to updating device software in the field.
+
+H1-CP Bootloader is preprogrammed on CYW955913EVK-01 and is not updated for the life of the device.
+
+User OTA application will include the *ota-update* library along with *ota-bootloader-abstraction* library, which will set the appropriate flags so that H1-CP bootloader knows when to perform an update of your application. The OTA library will download a new (updated) application, store it in flash, and set flags so that on the next reset, Bootloader will see there is an update available.
+
+<b> The basic device boot sequence is as follows: </b>
+1. ROM boot will start H1-CP Bootloader.
+2. H1-CP Bootloader starts the current application in Active DS.
+3. If an update is available, the OTA application uses the *ota-update* and *ota-bootloader-abstraction* library to download and store it in the Non-Active DS. Subsequently,<br>
+   a. When the switch image API (cy_ota_storage_switch_to_new_image) is called, the H1-CP Bootloader verifies the update image headers and certificates.<br>
+   b. Upon finding a valid upgrade image, the H1-CP Bootloader activates the Non-Active DS and designates the active DS as Non-Active DS.<br>
+   c. Following a reset, the H1-CP Bootloader initiates the application (Upgraded Image) in the Active DS.<br>
+
+## 4. Enabling MCUBootloader based OTA in an Application
 
 - Before enabling MCUBootloader based OTA in an application, the user must build and program MCUBootApp on the chosen platform(s). Refer to refer to [MCUBootApp README](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md).
 
@@ -194,13 +228,13 @@ For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPON
 
 - Include *mcuboot_support.mk* which is located in [makefiles folder](./makefiles/mcuboot/) from OTA Application makefile.
     ```
-	include ../mtb_shared/ota-bootloader-abstraction/<version>/makefiles/mcuboot/mcuboot_support.mk
+    include ../mtb_shared/ota-bootloader-abstraction/<version>/makefiles/mcuboot/mcuboot_support.mk
     ```
 
 - Configure OTA storage interface callback APIs in OTA application, And pass the same storage interface while starting OTA agent.
     ```
-	/* OTA storage interface callbacks */
-	cy_ota_storage_interface_t ota_interfaces =
+    /* OTA storage interface callbacks */
+    cy_ota_storage_interface_t ota_interfaces =
     {
        .ota_file_open            = cy_ota_storage_open,
        .ota_file_read            = cy_ota_storage_read,
@@ -211,8 +245,8 @@ For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPON
        .ota_file_get_app_info    = cy_ota_storage_get_app_info
     };
 
-	/* Register OTA storage interface callbacks with OTA agent */
-	cy_ota_agent_start(&ota_test_network_params, &ota_test_agent_params, &ota_interfaces, &ota_context);
+    /* Register OTA storage interface callbacks with OTA agent */
+    cy_ota_agent_start(&ota_test_network_params, &ota_test_agent_params, &ota_interfaces, &ota_context);
 
     ```
 
@@ -226,12 +260,12 @@ For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPON
 
 - Program the BOOT image and use UPGRADE image (<App name>.bin) for OTA.
 
-<b> 3.1 Provisioning PSoC64</b><br>
+<b> 4.1 Provisioning PSoC64</b><br>
 - For Secure platforms like PSoC64, MCUBootloader will get programmed during kit provisioning process.
 
 - Prior to provisioning the PSoC64 kit (CY8CKIT-064B0S2-4343W), User need to create *policies* and *keys* for provisioning. To do this, execute the following 'init' command from application root folder.
     ```
-	cysecuretools -t CY8CKIT-064B0S2-4343W init
+    cysecuretools -t CY8CKIT-064B0S2-4343W init
     ```
 
 - The *init* command creates the *keys*, *packets*, *policy*, and *prebuilt* directories in application root folder. These keys and policies are utilized during the provisioning and OTA image signing process.
@@ -249,8 +283,48 @@ For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPON
 
 - During provisioning, the MCU bootloader is also loaded and executed from the CM0 core upon reboot.
 
+## 5. Enabling H1-CP bootloader based OTA in an Application
 
-## 4. Enabling Debug Output
+- Create an *ota-bootloader-abstraction.mtb* file to pull *ota-bootloader-abstraction* library which has storage APIs to handle the MCUBootloader based OTA upgrade files. Place *ota-bootloader-abstraction.mtb* in the application *deps* folder. The contents of *ota-bootloader-abstraction.mtb* should be as follows:
+    ```
+    https://github.com/Infineon/ota-bootloader-abstraction#release-1.1.090#$$ASSET_REPO$$/ota-bootloader-abstraction/release-1.1.090
+    ```
+
+- After adding *ota-bootloader-abstraction.mtb* file to the *deps* folder of your application, Run the command 'make getlibs' to fetch *ota-bootloader-abstraction* library and its dependencies.
+    ```
+    make getlibs
+    ```
+
+- Update OTA Application makefile by referring [OTA Bootloader Abstraction Makefile Readme](./source/COMPONENT_H1_CP/H1-CP_OTA_MAKEFILE_INFO_README.md).
+
+- Configure OTA storage interface callback APIs in OTA application, And pass the same storage interface while starting OTA agent.
+    ```
+    /* OTA storage interface callbacks */
+    cy_ota_storage_interface_t ota_interfaces =
+    {
+       .ota_file_open            = cy_ota_storage_open,
+       .ota_file_read            = cy_ota_storage_read,
+       .ota_file_write           = cy_ota_storage_write,
+       .ota_file_close           = cy_ota_storage_close,
+       .ota_file_verify          = cy_ota_storage_verify,
+       .ota_file_validate        = cy_ota_storage_image_validate,
+       .ota_file_get_app_info    = cy_ota_storage_get_app_info
+    };
+
+    /* Register OTA storage interface callbacks with OTA agent */
+    cy_ota_agent_start(&ota_test_network_params, &ota_test_agent_params, &ota_interfaces, &ota_context);
+
+    ```
+
+- OTA storage interface calls Flash operations(Read, Write, erase) to store upgrade images in Non active DS.
+
+- Once after succesfully downloading OTA upgrade image, switch to new image by calling cy_ota_storage_switch_to_new_image() which is available in *source/COMPONENT_H1_CP/cy_ota_storage_api.c*.
+
+- During application build, Required BOOT and UPGRADE images(.bin) of OTA application will get generated in configured build directory.
+
+- Program the BOOT image and use UPGRADE image (<App name>.bin) for OTA.
+
+## 6. Enabling Debug Output
 
 The *ota-bootloader-abstraction* library disables all debug log messages by default. Do the following to enable log messages:
 
@@ -261,7 +335,7 @@ The *ota-bootloader-abstraction* library disables all debug log messages by defa
 
 2. Call the `cy_log_init()` function provided by the *cy-log* module. cy-log is part of the *connectivity-utilities* library. See [connectivity-utilities library API documentation](https://infineon.github.io/connectivity-utilities/api_reference_manual/html/group__logging__utils.html) for cy-log details.
 
-## 5. Note on Using Windows 10
+## 7. Note on Using Windows 10
 
 When using ModusToolbox, you will need to install the pip requirements to Python in the ModusToolbox installation.
 
@@ -269,7 +343,7 @@ When using ModusToolbox, you will need to install the pip requirements to Python
 \<ModusToolbox\>/tools_3.*/python/python -m pip install -r \<ota-bootloader-abstraction\>scripts/mcuboot/imgtool/requirements.txt
 ```
 
-## 6. Supported Toolchains
+## 8. Supported Toolchains
 
 - GCC
 - IAR
@@ -277,11 +351,12 @@ When using ModusToolbox, you will need to install the pip requirements to Python
 
 For the toolchain version information, please refer to [ota-bootloader-abstraction Release.md](./RELEASE.md).
 
-## 7. Supported OS
+## 9. Supported OS
 
 - FreeRTOS
+- ThreadX
 
-## 8. Supported Kits
+## 10. Supported Kits
 
 - [PSoC™ 6 Wi-Fi BT Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062-4343w/) (CY8CPROTO-062-4343W)
 - [PSoC™ 62S2 Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/) (CY8CKIT-062S2-43012)
@@ -294,6 +369,7 @@ For the toolchain version information, please refer to [ota-bootloader-abstracti
 - [AIROC™ CYW20829 Bluetooth® LE SoC](https://www.infineon.com/cms/en/product/promopages/airoc20829/) (CYW920829M2EVK-02)
 - [XMC7200 Evaluation Kit](https://www.infineon.com/cms/en/product/evaluation-boards/kit_xmc72_evk/) (KIT_XMC72_EVK)
 - [AIROC™ CYW989820M2EVB-01 Evaluation kit](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/)(CYW989820M2EVB-01)
+- [CYW955913EVK-01 Wi-Fi Bluetooth&reg; Prototyping Kit (CYW955913EVK-01)](https://www.infineon.com/CYW955913EVK-01)
 
 ## 9. Hardware Setup
 
@@ -313,7 +389,7 @@ This example uses the board's default configuration. See the kit user guide to e
 
 - [ModusToolbox Software Environment, Quick Start Guide, Documentation, and Videos](https://www.infineon.com/modustoolbox)
 
-- [ModusToolbox&trade; code examples](https://github.com/infineon?q=mtb-example-anycloud%20NOT%20Deprecated)
+- [ModusToolbox&trade; code examples](https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software)
 
 Infineon also provides a wealth of data at www.infineon.com to help you select the right device, and quickly and effectively integrate it into your design.
 

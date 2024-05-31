@@ -99,16 +99,12 @@ $(document).ready(function(){initNavTree('index.html','');});
 <div class="title">Over The Air(OTA) Bootloader Abstraction Library Overview </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This library offers assistance for handling downloaded over-the-air (OTA) updates of the application code that is executed on a PSoC™ 6 Connectivity Device, a 20829(CYW920829M2EVK-02) Device, a 89829(CYW989829M2EVB-01) Device, or an XMC7200(KIT_XMC72_EVK) Device based on selected bootloader.<br />
-<br />
- The library implements storage interface APIs required by ota-update library to complete OTA on supported platforms. Current version(v1.X) of <b>ota-bootloader-abstraction</b> has storage interface APIs for MCUBootloader based OTA.<br />
-<br />
- The ModusToolbox MCUBootloader based OTA code examples import this library automatically along with ota-update library.</p>
+<div class="textblock"><p>This library assists in managing over-the-air (OTA) updates for application code that runs on various devices, including PSoC™ 6 Connectivity Devices, 20829 (CYW920829M2EVK-02) Devices, 89829 (CYW989829M2EVB-01) Devices, XMC7200 (KIT_XMC72_EVK) Devices, and H1-CP (CYW955913EVK-01) Devices, depending on the chosen bootloader. The library implements storage interface APIs required by ota-update library to complete OTA on supported platforms. Current version(v1.X) of <b>ota-bootloader-abstraction</b> has storage interface APIs for MCUBootloader and H1-CP Bootloader based OTA.<br />
+ The ModusToolbox MCUBootloader and H1-CP Bootloader based OTA code examples import this library automatically along with ota-update library.</p>
 <h1><a class="anchor" id="section_features"></a>
 Features and Functionality</h1>
-<p>This library has implementation of storage interface APIs required by ota-update library to complete OTA on supported platforms.</p>
-<p>Other features:</p>
-<ul>
+<p>This library has implementation of storage interface APIs required by ota-update library to complete OTA on supported platforms. </p>
+<p><b>Other features:</b></p><ul>
 <li>Template flashmaps for supported platforms.</li>
 <li>Template OTA linker files for supported platforms and toolchains.</li>
 <li>Prebuild and Postbuild scripts for generating BOOT and UPGRADE images of OTA Application.</li>
@@ -116,24 +112,24 @@ Features and Functionality</h1>
 </ul>
 <h1><a class="anchor" id="section_notes"></a>
 Integration Notes</h1>
-<p>To add different bootloader support on Infineon connectivity-enabled MCU platforms, ota-update library offloads bootloader dependent storage interface APIs using callback mechanism. To handle downloaded OTA upgrade images ota-update library calls registered storage interface callbacks. This ota-bootloader-abstraction library provides implementation of these storage interface APIs for different bootloaders along with build environment required to generate BOOT and UPGRADE images of OTA applications.<br />
- Current version of library supports only MCUBootloader based OTA image handling.</p>
-<p>The user is expected to:<br />
-</p><ol type="1">
-<li>Build and program MCUBootApp on the chosen platform(s) before enabling MCUBootloader based OTA in an application. Refer to refer to MCUBootApp README &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md.<br />
+<p>To add different bootloader support on Infineon connectivity-enabled MCU platforms, ota-update library offloads bootloader dependent storage interface APIs using callback mechanism. To handle downloaded OTA upgrade images ota-update library calls registered storage interface callbacks. This ota-bootloader-abstraction library provides implementation of these storage interface APIs for different bootloaders along with build environment required to generate BOOT and UPGRADE images of OTA applications. Current version of library supports only MCUBootloader and H1-CP bootloader based OTA image handling. <br />
+ </p>
+<p><b>1. MCUBootloader</b> <br />
+ The user is expected to:</p><ol type="1">
+<li>Build and program MCUBootApp on the chosen platform(s) before enabling MCUBootloader based OTA in an application. Refer to MCUBOOT_APP_README.md in ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/.<br />
 </li>
-<li>Update OTA Application Makefile by referring OTA Bootloader Abstraction Makefile Readme &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/MCUBOOT_OTA_MAKEFILE_INFO_README.md.<br />
+<li>Update OTA Application Makefile by referring OTA Bootloader Abstraction Makefile Readme MCUBOOT_OTA_MAKEFILE_INFO_README.md in ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/.<br />
 </li>
-<li><b>ota-bootloader-abstraction</b> library has makefile <b>mcuboot_support.mk</b> located in &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/makefiles/mcuboot/ which has necessary pre and post build scripts for generating MCUBootloader based BOOT and UPGRADE images of OTA application.<br />
+<li><b>ota-bootloader-abstraction</b> library has makefile <b>mcuboot_support.mk</b> located in ota-bootloader-abstraction/&lt;version&gt;/makefiles/mcuboot/ which has necessary pre and post build scripts for generating MCUBootloader based BOOT and UPGRADE images of OTA application.<br />
 </li>
-<li>Include <b>mcuboot_support.mk</b> which is located in &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/makefiles/mcuboot/ from OTA Application Makefile.<br />
+<li>Include <b>mcuboot_support.mk</b> from OTA Application Makefile.<br />
 </li>
 <li>Configure OTA storage interface callback APIs in OTA application, And pass the same storage interface while starting OTA agent.<br />
 </li>
-<li>OTA storage interface calls Flash operations(Read, Write, erase) to store upgrade images in UPGRADE slot. <b>ota-bootloader-abstraction</b> implements flash operation using <b>mtb-pdl-cat1</b> library APIs and implementation is available in configs folder &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/configs/COMPONENT_MCUBOOT/flash/. User can use same implementation by copying contents of &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/configs/COMPONENT_MCUBOOT/flash/) to application space or Can implement flash operation APIs defined in &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/cy_ota_flash.h. <br />
+<li>OTA storage interface calls Flash operations(Read, Write, erase) to store upgrade images in UPGRADE slot. <b>ota-bootloader-abstraction</b> provides template flash operations implemention(Using <b>mtb-pdl-cat1</b> library APIs) and implementation is available in configs folder ota-bootloader-abstraction/&lt;version&gt;/configs/COMPONENT_MCUBOOT/flash/. User can use template implementation by copying contents of ota-bootloader-abstraction/&lt;version&gt;/configs/COMPONENT_MCUBOOT/flash/ to application space or Can implement flash operation APIs defined in ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/cy_ota_flash.h. <br />
 </li>
 <li>For <b>MCUBootloader based OTA Support</b>, add the following to the project Makefile:<br />
-<div class="fragment"><div class="line">CY_BOOTLOADER=MCUBOOT</div>
+<div class="fragment"><div class="line">CY_BOOTLOADER=MCUBOOT </div>
 </div><!-- fragment --> <br />
 </li>
 <li>Add <b>Application Build Directory</b> in the project Makefile:<br />
@@ -141,27 +137,56 @@ Integration Notes</h1>
 </div><!-- fragment --> <br />
 </li>
 <li>Add <b>OTA platform</b> in the project Makefile:<br />
-<div class="fragment"><div class="line">OTA_PLATFORM=&lt;platform_type&gt;</div>
+<div class="fragment"><div class="line">OTA_PLATFORM=&lt;platform_type&gt; </div>
 </div><!-- fragment --> Refer OTA Bootloader Abstraction Makefile Readme &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/MCUBOOT_OTA_MAKEFILE_INFO_README.md.<br />
 <br />
 </li>
 <li>Add <b>linker file path for MCUBootloader based OTA on choosen platform</b> in the project Makefile:<br />
-<div class="fragment"><div class="line">OTA_LINKER_FILE=&lt;OTA linker file path&gt;</div>
+<div class="fragment"><div class="line">OTA_LINKER_FILE=&lt;OTA linker file path&gt; </div>
 </div><!-- fragment --> <br />
- There are other components that may be needed based on support. Please refer to the various readme files in the folder &lt;mtb_shared&gt;/ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/. <br />
- MCUBOOT_APP_README.md<br />
- MCUBOOT_BUILD_COMMANDS.md<br />
- MCUBOOT_OTA_FLASH_LAYOUT_README.md<br />
- MCUBOOT_OTA_MAKEFILE_INFO_README.md<br />
- README.md in library root directory. <br />
- </li>
+</li>
+<li>There are other components that may be needed based on support. Please refer to the various readme files in ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_MCUBOOT/.</li>
 </ol>
+<ul>
+<li>MCUBOOT_APP_README.md<br />
+</li>
+<li>MCUBOOT_BUILD_COMMANDS.md<br />
+</li>
+<li>MCUBOOT_OTA_FLASH_LAYOUT_README.md<br />
+</li>
+<li>MCUBOOT_OTA_MAKEFILE_INFO_README.md<br />
+</li>
+<li>README.md in library root directory.</li>
+</ul>
+<p><b>2. H1-CP Bootloader</b> <br />
+ The user is expected to:<br />
+</p><ol type="1">
+<li>Update OTA Application Makefile by referring OTA Bootloader Abstraction Makefile Readme H1-CP_OTA_MAKEFILE_INFO_README.md in ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_H1_CP/.<br />
+</li>
+<li>Configure OTA storage interface callback APIs in OTA application, And pass the same storage interface while starting OTA agent.<br />
+</li>
+<li>For <b>H1-CP Bootloader based OTA Support</b>, add the following to the project Makefile:<br />
+<div class="fragment"><div class="line">CY_BOOTLOADER=H1_CP </div>
+</div><!-- fragment --> <br />
+</li>
+<li>Add <b>Application Build Directory</b> in the project Makefile:<br />
+<div class="fragment"><div class="line">CY_BUILD_LOCATION=&lt;Application<span class="stringliteral">&#39;s Build Working Directory path&gt;</span></div>
+</div><!-- fragment --> <br />
+</li>
+<li>There are other components that may be needed based on support. Please refer to the various readme files in ota-bootloader-abstraction/&lt;version&gt;/source/COMPONENT_H1_CP/.</li>
+</ol>
+<ul>
+<li>H1-CP_OTA_MAKEFILE_INFO_README.md<br />
+</li>
+<li>README.md in library root directory.<br />
+</li>
+</ul>
 <h1><a class="anchor" id="section_concept"></a>
 General Concept</h1>
-<p>The OTA Bootloader Abstraction provides bootloader specific storage interface API implementation which can be used with <b>ota-update</b> library for handling downloaded OTA application upgrade images. During reboot bootloader validates and boots upgrade image.<br />
-<br />
- <b>The basic device boot sequence is as follows:</b> <br />
-</p><ol type="1">
+<p>The OTA Bootloader Abstraction provides bootloader specific storage interface API implementation which can be used with <b>ota-update</b> library for handling downloaded OTA application upgrade images. In case of MCUBootloader, during reboot bootloader validates and boots upgrade image and in case of H1-CP Bootloader bootloader validates the downloaded image then reboots with upgrade image. <br />
+ </p>
+<p><b>1. MCUBootloader</b> </p>
+<p><b>1.1 Basic device boot sequence</b></p><ol type="1">
 <li>ROM boot will start Bootloader.<br />
 </li>
 <li>Bootloader runs the current application(BOOT Image) in the Primary slot.<br />
@@ -169,8 +194,7 @@ General Concept</h1>
 <li>The OTA Agent downloads the update(UPGRADE Image) and stores it in the Secondary slot using storage interface APIs.<br />
 </li>
 <li>The OTA Agent marks the upgrade as ready using storage interface API.<br />
-<br />
- <b>On the next system boot:</b> <br />
+ <b>On the next system boot</b> <br />
 </li>
 </ol>
 <ol type="1">
@@ -180,16 +204,14 @@ General Concept</h1>
 </li>
 <li>Bootloader determines if there is an update in the Secondary Slot.<br />
 </li>
-<li>If there is an update available:<br />
+<li>If there is an update available<br />
  a. Bootloader verifies the update.<br />
  b. Bootloader boots upgrade image either by copying or switching Primary and Secondary Slots.<br />
  c. The updated application must call cy_ota_storage_validated() to validate the update.<br />
-<br />
- <b>MCUBootloader Support:</b> <br />
- This library has below support for MCUBootloader based OTA on PSoC6, 20829, 89829 and XMC7200 platforms.<br />
-</li>
+ </li>
 </ol>
-<ol type="1">
+<p><b>1.2 MCUBootloader Support</b><br />
+ This library has below support for MCUBootloader based OTA on PSoC6, 20829, 89829 and XMC7200 platforms.</p><ol type="1">
 <li>Template flashmaps for PSoC6, 20829, 89829 and XMC7200 platforms.<br />
 </li>
 <li>Template linker files for GCC_ARM, ARM, and IAR toolchains.<br />
@@ -197,7 +219,23 @@ General Concept</h1>
 <li>Storage operation callback APIs to handle MCUBootloader based upgrade image.<br />
 </li>
 <li>Prebuild and Postbuild scripts for generating and signing MCUBootloader based BOOT and UPGRADE image of an OTA Application.<br />
+ </li>
+</ol>
+<p><b>2. H1-CP Bootloader</b> </p>
+<p><b>2.1 Basic device boot sequence</b></p><ol type="1">
+<li>ROM boot will start H1-CP Bootloader.<br />
 </li>
+<li>H1-CP Bootloader starts the current application in Active DS.<br />
+</li>
+<li>If there is an update available in Non Active DS,<br />
+ a. H1-CP Bootloader verifies the update image headers and certificates.<br />
+ b. If a valid upgrade image is found, the H1-CP Bootloader will activate the non-active DS and deactivate the active DS.<br />
+ c. On reset, H1-CP Bootloader starts the application in Active DS.<br />
+ </li>
+</ol>
+<p><b>2.2 H1-CP Bootloader Support</b><br />
+ This library has below support for for H1-CP Bootloader based OTA on CYW955913EVK-01 platform.</p><ol type="1">
+<li>Storage operation callback APIs to handle H1-CP Bootloader based upgrade image.</li>
 </ol>
 <h1><a class="anchor" id="section_api_overview"></a>
 API Overview</h1>
@@ -412,9 +450,7 @@ Code Snippets</h1>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><p> <br />
-</p>
-<h1><a class="anchor" id="section_example"></a>
+</div><!-- fragment --><h1><a class="anchor" id="section_example"></a>
 ModusToolbox OTA Code Examples</h1>
 <p>ModusToolbox OTA Example using MQTT: <a href="https://github.com/infineon/mtb-example-ota-mqtt">https://github.com/infineon/mtb-example-ota-mqtt</a><br />
  ModusToolbox OTA Update Bluetooth® example: <a href="https://github.com/infineon/mtb-example-btstack-freertos-cyw20829-keyboard">https://github.com/infineon/mtb-example-btstack-freertos-cyw20829-keyboard</a><br />
