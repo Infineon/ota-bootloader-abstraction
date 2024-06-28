@@ -59,7 +59,9 @@
 #endif /* CYW20829 or CYW89829 */
 
 #if defined(XMC7200)
+#ifndef CY_XIP_BASE
 #define CY_XIP_BASE                         0x60000000UL
+#endif
 #define CY_FLASH_SIZE                       0x830000UL
 #define CY_FLASH_BASE                       0x10000000UL
 #endif /* XMC7200 */

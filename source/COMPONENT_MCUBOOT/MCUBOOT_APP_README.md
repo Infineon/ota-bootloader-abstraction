@@ -25,7 +25,7 @@
 - Change the branch to get the appropriate version:
 
    ```
-   git checkout v1.9.2-cypress
+   git checkout v1.9.3-cypress
    ```
 
 - Pull in sub-modules to build mcuboot:
@@ -78,9 +78,9 @@ Read **[MCUBoot Build Commands](./MCUBOOT_BUILD_COMMANDS.md)** to see the flashm
     ```
 
 - Alternatively, the board can be programmed using CyProgrammer, OpenOCD commands or the instructions in your Customer Example Application notes.
-    - [OpenOCD commands for PSOC6 devices](https://github.com/mcu-tools/mcuboot/blob/v1.9.2-cypress/boot/cypress/platforms/PSOC6.md#using-openocd-from-command-line)
-    - [OpenOCD commands for 20829 devices](https://github.com/mcu-tools/mcuboot/blob/v1.9.2-cypress/boot/cypress/platforms/CYW20829.md#using-openocd-from-command-line)
-    - [OpenOCD commands for XMC7200 devices](https://github.com/mcu-tools/mcuboot/blob/v1.9.2-cypress/boot/cypress/platforms/XMC7000.md#xmc7000-secure-boot-configuration-description)
+    - [OpenOCD commands for PSOC6 devices](https://github.com/mcu-tools/mcuboot/blob/v1.9.3-cypress/boot/cypress/platforms/PSOC6.md#using-openocd-from-command-line)
+    - [OpenOCD commands for 20829 devices](https://github.com/mcu-tools/mcuboot/blob/v1.9.3-cypress/boot/cypress/platforms/CYW20829.md#using-openocd-from-command-line)
+    - [OpenOCD commands for XMC7200 devices](https://github.com/mcu-tools/mcuboot/blob/v1.9.3-cypress/boot/cypress/platforms/XMC7000.md#xmc7000-secure-boot-configuration-description)
 
 <b>Notes:</b>
 - For XMC7200 devices, once the 'status_area' of the MCUBootApp has been erased, this flash area should be filled with the value '0xFF'.
@@ -99,7 +99,7 @@ For CY8CKIT-062B0S2-4343W kit, CYW20829 and CYW89829 devices (SECURE), we use a 
 <b>Note:</b>
 - For 20829 and 89829 NORMAL_NO_SECURE mode, MCUBootApp should be built and programmed separately.
 
-- The Windows version of ModusToolbox 3.2 does not include a Python package. Therefore, users are required to install python version 3.10 and the python module CySecureTools 5.0.0. For the mcuboot v1.9.2-cypress, CySecureTools v5.0.0 or later is necessary for the 20829 and XMC7200 platforms. Additionally, the 89829 platform specifically requires CySecureTools v5.1.0.
+- The Windows version of ModusToolbox 3.2 does not include a Python package. Therefore, users are required to install python version 3.10 and the python module CySecureTools 5.0.0. For the mcuboot v1.9.3-cypress, CySecureTools v5.0.0 or later is necessary for the 20829 and XMC7200 platforms. Additionally, the 89829 platform specifically requires CySecureTools v5.1.0.
 
 - The following command can be used in the modus-shell terminal to find the current version of CySecureTools.
     ````

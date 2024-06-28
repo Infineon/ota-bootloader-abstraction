@@ -1,6 +1,6 @@
 # MCUBoot Build Commands
 
-The JSON flash maps were verified to work with MCUBoot v1.9.2-cypress. The JSON flash map files are available in [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap/) folder.
+The JSON flash maps were verified to work with MCUBoot v1.9.3-cypress. The JSON flash map files are available in [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap/) folder.
 
 Choose the configuration to use from the information below and copy the flash map file to your **\<mcuboot\>/boot/cypress/** directory before building MCUBootApp.
 

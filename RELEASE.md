@@ -6,6 +6,10 @@ See the [README.md](./README.md) for a complete description of the OTA bootloade
 
 ## Changelog
 
+### v1.2.1
+
+- Minor Documentation update.
+
 ### v1.2.0
 
 - Added support for CYW955913EVK-01 kit.
@@ -39,7 +43,7 @@ This version of the library was validated for compatibility with the following s
 | ModusToolbox&trade; Software Environment                  | 3.2     |
 | - ModusToolbox&trade; Device Configurator                 | 4.20    |
 | - ModusToolbox&trade; CapSense Configurator / Tuner tools | 6.20.0  |
-| Peripheral Driver Library (PDL CAT1)                      | 3.10.0  |
+| Peripheral Driver Library (PDL CAT1)                      | 3.11.0  |
 | GCC Compiler                                              | 11.3.1  |
 | IAR Compiler                                              | 9.40.2  |
 | Arm Compiler 6                                            | 6.16    |

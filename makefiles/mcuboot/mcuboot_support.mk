@@ -66,6 +66,7 @@ DEFINES+=APP_BUILD_VERSION=$(APP_BUILD_VERSION)
 #----------------------------------
 ifeq ($(ACTUAL_TARGET), CYW989829M2EVB-01)
     OTA_PLATFORM?=CYW89829
+    DEFINES+=CYW89829B01MKSBG
 endif
 
 #----------------------------------
