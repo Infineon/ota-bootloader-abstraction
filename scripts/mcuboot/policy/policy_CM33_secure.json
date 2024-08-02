@@ -13,7 +13,7 @@
                 "ap_cm33": {
                     "description": "Configures the CM33 debug access port availability in the SECURE LCS",
                     "applicable_conf": "Enable, Disable, Permanently Disable",
-                    "value": "Disable"
+                    "value": "Enable"
                 },
                 "listen_window": {
                     "description": "Configures the listen window time to acquire the CM33 debug access port in the SECURE LCS",
@@ -35,7 +35,7 @@
                 "dead_ap_cm33": {
                     "description": "Configures the CM33 debug access port availability in the DEAD branch",
                     "applicable_conf": "Enable, Permanently Disable",
-                    "value": "Permanently Disable"
+                    "value": "Enable"
                 },
                 "dead_cm33_dbg":
                 {
@@ -123,7 +123,7 @@
             },
             "encryption": {
                 "description": "Enables SMIF encryption",
-                "value": false
+                "value": true
             }
         },
         "reprovisioning":

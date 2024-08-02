@@ -45,7 +45,6 @@ Flashmap : [psoc62_2m_int_swap_single.json](./../../configs/COMPONENT_MCUBOOT/fl
 | 0x101f7C00-0x101F8BFF | 0x00001000 | MCUBootApp Scratch Area (4k) |
 | 0x101F9C00-0x10200000 | 0x00006400 | Unused (25k) |
 
-
 ## 3. Internal Flash + External Flash Layout
 
 When the device has both internal and external flash, the Secondary Slot and the Swap Area can be moved to external flash, leaving more internal flash for the application code.
@@ -131,3 +130,17 @@ Flashmap : [cyw20829_xip_swap_single.json](./../../configs/COMPONENT_MCUBOOT/fla
 Sample flash layout (JSON) available in [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap/) folder.
 
 For a given target, the same flashmap should be used for [MCUBootApp](./MCUBOOT_BUILD_COMMANDS.md) and user ota applications.
+
+<br>Note: The size of the application including the MCUBoot header and trailer size after signing should be lesser than or equal to the configured Primary/Secondary Slot size. When Internal flash is used, user needs to consider the flash size restrictions.
+| Flashmap | Internal Flash Size | MCUBootloader Size | Available Internal Flash | Maximum Primary/Secondary Slot size |
+| ------------------|------------|--------------------|-----------------|----------------|
+| psoc62_2m_int_swap_single.json | 2M Internal Flash | 0x00028000 | 0x001D8000 | 0x000E9A00 |
+| psoc62_2m_int_overwrite_single.json | 2M Internal Flash | 0x00018000 | 0x001E8000 | 0x000F4000 |
+| psoc62_1m_cm0_int_swap_single.json | 1M Internal Flash | 0x00018000 | 0x000E8000 | 0x00070E00 |
+| psoc63_1m_cm0_int_swap_single.json | 1M Internal Flash | 0x00018000 | 0x000E8000 | 0x00070E00 |
+| psoc62_2m_ext_overwrite_single.json | 2M Internal Flash | 0x00018000 | 0x001E8000 | 0x001E8000 |
+| psoc62_2m_ext_swap_single.json | 2M Internal Flash | 0x00028000 | 0x001D8000 | 0x001D8000 |
+| psoc62_512k_ext_overwrite_single.json | 512K Internal Flash | 0x00018000 | 0x00068000 | 0x00068000 |
+| psoc62_512k_ext_swap_single.json | 512K Internal Flash | 0x00028000 | 0x00058000 | 0x00058000 |
+| xmc7200_int_swap_single.json | 7M INTERNAL_FLASH_CODE_LARGE | 0x00020000 | 0x003D0000 in Logical Bank 0 | 0x003D8000 |
+| xmc7200_int_overwrite_single.json | 7M INTERNAL_FLASH_CODE_LARGE | 0x00020000 | 0x003D0000 in Logical Bank 0 | 0x003D8000 |

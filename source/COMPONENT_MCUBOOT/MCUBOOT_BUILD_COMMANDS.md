@@ -1,6 +1,6 @@
 # MCUBoot Build Commands
 
-The JSON flash maps were verified to work with MCUBoot v1.9.3-cypress. The JSON flash map files are available in [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap/) folder.
+The JSON flash maps were verified to work with MCUBoot v1.9.4-cypress. The JSON flash map files are available in [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap/) folder.
 
 Choose the configuration to use from the information below and copy the flash map file to your **\<mcuboot\>/boot/cypress/** directory before building MCUBootApp.
 
@@ -9,6 +9,7 @@ Choose the configuration to use from the information below and copy the flash ma
 - CY8CPROTO-062-4343W
 - CY8CEVAL-062S2-MUR-43439M2
 - CY8CEVAL-062S2-LAI-4373M2
+- CY8CEVAL-062S2-CYW955513SDM2WLIPA
 
 There are flash maps for the upgrade slot in internal flash and in external flash. There are also versions for SWAP and OVERWRITE upgrade methods.
 
@@ -96,6 +97,7 @@ There are no flash maps for this device, the parameters are in the Makefile. We 
 
 The CYW920829M2EVK-02 platform only supports an external flash execution(XIP) configuration.
 
+### NORMAL_NO_SECURE Mode
 <b>Building MCUBoot</b>
 
 To build MCUBoot for external flash execute (XIP) SWAP configuration:
@@ -108,6 +110,21 @@ To build MCUBoot for external flash execute (XIP) OVERWRITE configuration:
 
 ```
 make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw20829_xip_overwrite_single.json
+```
+
+### SECURE Mode
+<b>Building MCUBoot with encryption support</b>
+
+To build MCUBoot for external flash execute (XIP) SWAP configuration with encryption:
+
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 LCS=SECURE SMIF_ENC=1 FLASH_MAP=./cyw20829_xip_swap_single.json
+```
+
+To build MCUBoot for external flash execute (XIP) OVERWRITE configuration with encryption:
+
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 LCS=SECURE SMIF_ENC=1 FLASH_MAP=./cyw20829_xip_overwrite_single.json
 ```
 
 ## 7. XMC7200 Evaluation Kit

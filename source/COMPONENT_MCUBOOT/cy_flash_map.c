@@ -567,13 +567,13 @@ int8_t flash_area_boot_set_pending(uint8_t image, uint8_t permanent)
          */
         if( (fap->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
         {
-            uint8_t swap_type;
             if((rc == 0) && permanent)
             {
                 rc = boot_write_image_ok(fap);
                 cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() boot_write_image_ok(fap) returned %d\n", __func__, rc);
             }
-
+#if(CY_ENC_IMG != 1)
+            uint8_t swap_type = 0;
             if(rc == 0)
             {
                 if(permanent)
@@ -587,6 +587,7 @@ int8_t flash_area_boot_set_pending(uint8_t image, uint8_t permanent)
                 rc = boot_write_swap_info(fap, swap_type, 0);
                 cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() boot_write_swap_info(fap) returned %d\n", __func__, rc);
             }
+#endif
         }
 
         flash_area_close(fap);

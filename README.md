@@ -9,9 +9,10 @@ See the [ota-update](https://github.com/Infineon/ota-update/) library documentat
 
 | Library Version                 | Supported MTB version    | Remarks                                   |
 |---------------------------------| -------------------------|-------------------------------------------|
-| ota-bootloader-abstraction v1.2.0  | ModusToolbox 3.2         | CYW955913EVK-01 platform support added |
-| ota-bootloader-abstraction v1.1.0  | ModusToolbox 3.2         | CYW89829 platform support added |
-| ota-bootloader-abstraction v1.0.0  | ModusToolbox 3.1         | cysecuretools v5.0 or greater is required |
+| ota-bootloader-abstraction v1.4.0  | ModusToolbox 3.2      | CY8CEVAL-062S2-CYW955513SDM2WLIPA kit support added.<br>Support for secure LCS and OTA image encryption has been added to the CYW920829 platform.<br>cysecuretools v6.1 or greater is required. |
+| ota-bootloader-abstraction v1.2.0  | ModusToolbox 3.2      | CYW955913EVK-01 platform support added |
+| ota-bootloader-abstraction v1.1.0  | ModusToolbox 3.2      | CYW89829 platform support added |
+| ota-bootloader-abstraction v1.0.0  | ModusToolbox 3.1      | cysecuretools v5.0 or greater is required |
 
 ## 1. Bootloader Support
 To add different bootloader support on Infineon connectivity-enabled MCU platforms, [ota-update](https://github.com/Infineon/ota-update/) library offloads bootloader specific storage interface APIs using callback mechanism.
@@ -73,15 +74,16 @@ typedef struct cy_ota_storage_interface_s
 - Prebuild and Postbuild scripts for generating and signing MCUBootloader based BOOT and UPGRADE image of an OTA Application.
 
 <b> Supported devices: </b><br>
-- PSoCâ„¢ 6 MCU with
-  - AIROCâ„¢ CYW4343W
-  - CYW43012 Wi-Fi & BluetoothÂ® combo chip
+- PSoC™ 6 MCU with
+  - AIROC™ CYW4343W
+  - CYW43012 Wi-Fi & Bluetooth® combo chip
 - CYW920829M2EVK-02 evaluation board.
 - CY8CKIT-062-BLE
 - CY8CPROTO-063-BLE
 - CYBLE-416045-EVAL
 - KIT_XMC72_EVK
 - CYW989829M2EVB-01
+- CY8CEVAL-062S2-CYW955513SDM2WLIPA
 
 The *ota-update* along with *ota-bootloader-abstraction* library works in concert with MCUBootloader to provide a no-fail solution to updating device software in the field.
 
@@ -100,7 +102,7 @@ User OTA application will include the *ota-update* library along with *ota-bootl
    d. The updated application must call cy_ota_storage_image_validate() to validate the update.<br>
    e. For SWAP, if the new application does not call cy_ota_storage_image_validate(), MCUBootloader will REVERT on the next reset.<br>
 
-<b> NOTE:</b> On secure MCUs such as PSoCâ„¢ 64, MCUBootloader is flashed as part of the provisioning step performed by the provisioning tools, and does not need to be built separately. For more information see [MCUBootloader App Information](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md#5-cysecuretools-for-psoc-64-and-cyw20829-devices).<br><br>
+<b> NOTE:</b> On secure MCUs such as PSoC™ 64, MCUBootloader is flashed as part of the provisioning step performed by the provisioning tools, and does not need to be built separately. For more information see [MCUBootloader App Information](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md#5-cysecuretools-for-psoc-64-and-cyw20829-devices).<br><br>
 
 <b> 2.1 Flash layout requirements</b><br>
 
@@ -125,7 +127,7 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 
 | Target | Internal<br>Flash size | OTA_PLATFORM | Flashmaps |
 |-------------------|---------------------|----|------|
-| CY8CPROTO-062-4343W<br>CY8CKIT-062S2-43012<br>CY8CPROTO-062-4343W<br>CY8CEVAL-062S2-LAI-4373M2<br>CY8CEVAL-062S2-MUR-43439M2| 2M | PSOC_062_2M | Default - psoc62_2m_ext_swap_single.json<br>psoc62_2m_ext_overwrite_single.json<br>psoc62_2m_int_overwrite_single.json<br>psoc62_2m_int_swap_single.json|
+| CY8CPROTO-062-4343W<br>CY8CKIT-062S2-43012<br>CY8CPROTO-062-4343W<br>CY8CEVAL-062S2-LAI-4373M2<br>CY8CEVAL-062S2-MUR-43439M2<br>CY8CEVAL-062S2-CYW955513SDM2WLIPA| 2M | PSOC_062_2M | Default - psoc62_2m_ext_swap_single.json<br>psoc62_2m_ext_overwrite_single.json<br>psoc62_2m_int_overwrite_single.json<br>psoc62_2m_int_swap_single.json|
 | CY8CKIT-062-BLE | 1M | PSOC_062_1M |Default - psoc62_1m_cm0_int_swap_single.json |
 | CY8CPROTO-063-BLE<br>CYBLE-416045-EVAL | 1M | PSOC_063_1M | Default - psoc63_1m_cm0_int_swap_single.json |
 | CY8CPROTO-062S3-4343W  | 512K | PSOC_062_512K | Default - psoc62_512k_xip_swap_single.json<br> psoc62_512k_ext_overwrite_single.json<br>psoc62_512k_ext_swap_single.json |
@@ -358,17 +360,17 @@ For the toolchain version information, please refer to [ota-bootloader-abstracti
 
 ## 10. Supported Kits
 
-- [PSoCâ„¢ 6 Wi-Fi BT Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062-4343w/) (CY8CPROTO-062-4343W)
-- [PSoCâ„¢ 62S2 Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/) (CY8CKIT-062S2-43012)
-- [PSoCâ„¢ 62S3 Wi-Fi BT Prototyping Kit ](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062s3-4343w/)(CY8CPROTO-062S3-4343W)
-- [PSoCâ„¢ 64 Secure Boot Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-064b0s2-4343w/) (CY8CKIT-064B0S2-4343W)
-- [CY8CEVAL-062S2 Evaluation Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ceval-062s2/)(CY8CEVAL-062S2-LAI-4373M2 and CY8CEVAL-062S2-MUR-43439M2)
-- [PSoCâ„¢ 6-BLE Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062-ble/) (CY8CKIT-062-BLE)
-- [PSoCâ„¢ 6 BLE Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-063-ble/) (CY8CPROTO-063-BLE)
+- [PSoC™ 6 Wi-Fi BT Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062-4343w/) (CY8CPROTO-062-4343W)
+- [PSoC™ 62S2 Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/) (CY8CKIT-062S2-43012)
+- [PSoC™ 62S3 Wi-Fi BT Prototyping Kit ](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062s3-4343w/)(CY8CPROTO-062S3-4343W)
+- [PSoC™ 64 Secure Boot Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-064b0s2-4343w/) (CY8CKIT-064B0S2-4343W)
+- [CY8CEVAL-062S2 Evaluation Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ceval-062s2/)(CY8CEVAL-062S2-LAI-4373M2, CY8CEVAL-062S2-MUR-43439M2 and CY8CEVAL-062S2-CYW955513SDM2WLIPA)
+- [PSoC™ 6-BLE Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062-ble/) (CY8CKIT-062-BLE)
+- [PSoC™ 6 BLE Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-063-ble/) (CY8CPROTO-063-BLE)
 - [EZ-BLE Arduino Evaluation Board](https://www.infineon.com/cms/en/product/evaluation-boards/cyble-416045-eval/) (CYBLE-416045-EVAL)
-- [AIROCâ„¢ CYW20829 BluetoothÂ® LE SoC](https://www.infineon.com/cms/en/product/promopages/airoc20829/) (CYW920829M2EVK-02)
+- [AIROC™ CYW20829 Bluetooth® LE SoC](https://www.infineon.com/cms/en/product/promopages/airoc20829/) (CYW920829M2EVK-02)
 - [XMC7200 Evaluation Kit](https://www.infineon.com/cms/en/product/evaluation-boards/kit_xmc72_evk/) (KIT_XMC72_EVK)
-- [AIROCâ„¢ CYW989820M2EVB-01 Evaluation kit](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/)(CYW989820M2EVB-01)
+- [AIROC™ CYW989820M2EVB-01 Evaluation kit](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/)(CYW989820M2EVB-01)
 - [CYW955913EVK-01 Wi-Fi Bluetooth&reg; Prototyping Kit (CYW955913EVK-01)](https://www.infineon.com/CYW955913EVK-01)
 
 ## 9. Hardware Setup
@@ -393,4 +395,4 @@ This example uses the board's default configuration. See the kit user guide to e
 
 Infineon also provides a wealth of data at www.infineon.com to help you select the right device, and quickly and effectively integrate it into your design.
 
-For PSoCâ„¢ 6 MCU devices, see [How to Design with PSoC 6 MCU - KBA223067](https://community.infineon.com/t5/Knowledge-Base-Articles/How-to-Design-with-PSoC-6-MCU-KBA223067/ta-p/248857) in the Infineon community.
+For PSoC™ 6 MCU devices, see [How to Design with PSoC 6 MCU - KBA223067](https://community.infineon.com/t5/Knowledge-Base-Articles/How-to-Design-with-PSoC-6-MCU-KBA223067/ta-p/248857) in the Infineon community.

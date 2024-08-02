@@ -6,6 +6,11 @@ See the [README.md](./README.md) for a complete description of the OTA bootloade
 
 ## Changelog
 
+### v1.4.0
+
+- Added support for CY8CEVAL-062S2-CYW955513SDM2WLIPA kit.
+- Support for secure LCS and OTA image encryption has been added to the CYW920829 platform.
+
 ### v1.2.1
 
 - Minor Documentation update.

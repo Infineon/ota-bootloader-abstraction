@@ -25,7 +25,7 @@
 - Change the branch to get the appropriate version:
 
    ```
-   git checkout v1.9.3-cypress
+   git checkout v1.9.4-cypress
    ```
 
 - Pull in sub-modules to build mcuboot:
@@ -97,9 +97,9 @@ For CY8CKIT-062B0S2-4343W kit, CYW20829 and CYW89829 devices (SECURE), we use a 
 [Provisioning Steps for CYW20829 and CYW89829 devices](https://github.com/Infineon/cysecuretools/blob/master/docs/README_CYW20829.md)
 
 <b>Note:</b>
-- For 20829 and 89829 NORMAL_NO_SECURE mode, MCUBootApp should be built and programmed separately.
+- For 20829 and 89829 NORMAL_NO_SECURE/SECURE mode, MCUBootApp should be built and programmed separately.
 
-- The Windows version of ModusToolbox 3.2 does not include a Python package. Therefore, users are required to install python version 3.10 and the python module CySecureTools 5.0.0. For the mcuboot v1.9.3-cypress, CySecureTools v5.0.0 or later is necessary for the 20829 and XMC7200 platforms. Additionally, the 89829 platform specifically requires CySecureTools v5.1.0.
+- The Windows version of ModusToolbox 3.2 does not include a Python package. Therefore, users are required to install python version 3.10 and the python module CySecureTools 6.1.0. For the mcuboot v1.9.4-cypress, CySecureTools v5.0.0 or later is necessary for the CYW920829 Non-Secure and XMC7200 platforms. Additionally, the CYW989829 platform specifically requires CySecureTools v5.1.0. Secure LCS and OTA image encryption on CYW920829 platform requires CySecureTools v6.1.0 or higher.
 
 - The following command can be used in the modus-shell terminal to find the current version of CySecureTools.
     ````

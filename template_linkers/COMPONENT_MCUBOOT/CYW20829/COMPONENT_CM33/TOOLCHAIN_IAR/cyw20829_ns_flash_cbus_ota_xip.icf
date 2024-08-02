@@ -54,19 +54,19 @@ define symbol FLASH_START_ADDR_SAHB_ORIG    = 0x60000000;
 define symbol USER_APP_START_OFFSET         = MCUBOOT_HEADER_SIZE + FLASH_AREA_IMG_1_PRIMARY_START;
 
 define symbol FLASH_START_ADDR_SAHB         = 0x60000000 + USER_APP_START_OFFSET;
+define symbol FLASH_END_ADDR_SAHB           = 0x60100000; /* 1MB */
 define symbol FLASH_START_ADDR_CBUS         = 0x08000000 + USER_APP_START_OFFSET;
 define symbol RAM_START_ADDR_SAHB           = 0x20000000;
-define symbol RAM_START_ADDR_CBUS           = 0x04000000;
 define symbol RAM_END_ADDR_SAHB             = 0x20040000; /* 256K */
+define symbol RAM_START_ADDR_CBUS           = 0x04000000;
 define symbol RAM_END_ADDR_CBUS             = 0x04040000; /* 256K */
-define symbol FLASH_END_ADDR_SAHB           = 0x60100000; /* 1MB */
 
 define symbol BOOTSTRAP_OFFSET_FLASH        = 0x00000050; /* toc2=0x10, l1_desc=0x1C, sign_header=0x20 */
 define symbol RAMVECTORS_ALIGNMENT          = 512;
 define symbol FLASH_ALIGNMENT_SIZE          = 0x00000200;
 
 /* vma for bootstrap code region */
-define symbol CODE_VMA                      = RAM_END_ADDR_SAHB - BOOTSTRAP_SIZE; /* 0x2003c600 */
+define symbol CODE_VMA                      = RAM_END_ADDR_CBUS - BOOTSTRAP_SIZE;
 /* lma for bootstrap code region */
 define symbol CODE_LMA                      = FLASH_START_ADDR_SAHB + BOOTSTRAP_OFFSET_FLASH; /* 0x60000050 */
 /* Size of Bootstrap data */
@@ -80,7 +80,7 @@ define symbol DATA_VMA                      = RAM_START_ADDR_SAHB; /* 0x20000000
 /* app data size */
 define symbol DATA_SIZE                     = RAM_END_ADDR_SAHB - DATA_VMA - BOOTSTRAP_SIZE; /* 0x3DC00 */
 /* vma for application XIP region */
-define symbol XIP_VMA                       = FLASH_START_ADDR_SAHB + BOOTSTRAP_SIZE + FLASH_ALIGNMENT_SIZE; /* 0x08002600 */
+define symbol XIP_VMA                       = FLASH_START_ADDR_CBUS + BOOTSTRAP_SIZE + FLASH_ALIGNMENT_SIZE;
 /* lma for application XIP region */
 define symbol XIP_LMA                       = FLASH_START_ADDR_SAHB + BOOTSTRAP_SIZE + FLASH_ALIGNMENT_SIZE; /* 0x60002600 */
 /* size of XIP region */
@@ -127,6 +127,7 @@ define block RAMVECTOR        with alignment = RAMVECTORS_ALIGNMENT { section .i
 define block APPTEXTRAM       with alignment = 8
 {
   section .cy_ramfunc,
+  readwrite code object cy_ota_flash.o,
   readwrite code object cy_smif.o,
   readwrite code object cy_smif_sfdp.o,
   readwrite code object cy_smif_memslot.o,
@@ -142,6 +143,7 @@ define block XIP              {readonly};
 /*-Initializations-*/
 initialize by copy { readwrite }; /* copy .data section from flash to ram and initialize by ILINK */
 initialize by copy { rw, section .cy_ramfunc }; /* copy .data section from flash to ram and initialize by ILINK */
+initialize by copy { readonly object cy_ota_flash.o };
 initialize by copy { readonly object cy_smif.o };
 initialize by copy { readonly object cy_smif_sfdp.o };
 initialize by copy { readonly object cy_smif_memslot.o };
@@ -167,12 +169,10 @@ place in          CODE_region     { readonly object *cy_syslib*.o };
 place in          CODE_region     { readonly object *ppu_v1.o };
 place in          CODE_region     { readonly object *cy_mpc.o };
 place in          CODE_region     { readonly object *cy_syspm_ppu.o };
-place in          CODE_region     { readonly object *ABImemcpy.o };
-place in          CODE_region     { readonly object *memcmp.o };
-place in          CODE_region     { readonly object *ABImemset.o };
-place in          CODE_region     { readonly object *ABImemset48.o };
-place in          CODE_region     { readonly object *ABImemclr.o };
-place in          CODE_region     { readonly object *ABImemclr4.o };
+place in          CODE_region     { readonly object *memcpy*.o };
+place in          CODE_region     { readonly object *memcmp*.o };
+place in          CODE_region     { readonly object *memset*.o };
+place in          CODE_region     { readonly object *memclr*.o };
 
 
 place in          DATA_BS_region  { readwrite object *startup_cat1b_cm33.o };

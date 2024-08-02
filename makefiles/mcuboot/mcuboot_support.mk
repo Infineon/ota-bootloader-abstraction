@@ -29,14 +29,14 @@ ifeq ($(UNAME_S),Darwin)
 
     ota_path := $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
     ota_dir:=$(shell cd $(shell dirname $(ota_path)); pwd)
-    current_dir := $(shell PWD)
+    CURRENT_DIRECTORY := $(shell PWD)
 
-    # current_dir = $(shell pwd -P)
-    RELATIVE_FILE1_FILE2:=$(shell perl -MFile::Spec::Functions=abs2rel -E 'say abs2rel(shift, shift)' $(ota_dir) $(current_dir))
+    # CURRENT_DIRECTORY = $(shell pwd -P)
+    RELATIVE_FILE1_FILE2:=$(shell perl -MFile::Spec::Functions=abs2rel -E 'say abs2rel(shift, shift)' $(ota_dir) $(CURRENT_DIRECTORY))
 else
     ota_dir := $(realpath $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST))))))
-    current_dir = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-    RELATIVE_FILE1_FILE2:=$(shell realpath --relative-to $(current_dir) $(ota_dir))
+    CURRENT_DIRECTORY = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+    RELATIVE_FILE1_FILE2:=$(shell realpath --relative-to $(CURRENT_DIRECTORY) $(ota_dir))
 endif
 
 ###################################################################################################
@@ -151,6 +151,13 @@ endif
 #----------------------------------
 ifeq ($(ACTUAL_TARGET), KIT_XMC72_EVK)
     OTA_PLATFORM?=XMC7200
+endif
+
+#----------------------------------
+# CY8CEVAL-062S2-CYW955513SDM2WLIPA
+#----------------------------------
+ifeq ($(ACTUAL_TARGET), CY8CEVAL-062S2-CYW955513SDM2WLIPA)
+OTA_PLATFORM?=PSOC_062_2M
 endif
 
 ###################################################################################################
@@ -330,7 +337,7 @@ else
         ifeq ($(CY_PYTHON_PATH),)
             $(error CY_PYTHON_PATH is not configured)
         else
-            $(info setting CY_PYTHON_PATH = $(CY_PYTHON_PATH))
+            $(info CY_PYTHON_PATH = $(CY_PYTHON_PATH))
         endif # checking for python path
 
         ifeq ($(OTA_PLATFORM),XMC7200)
@@ -346,8 +353,11 @@ else
             # Non-XMC7200 here
             FLASHMAP_PYTHON_SCRIPT=flashmap.py
             ifneq ($(FLASHMAP_PYTHON_SCRIPT),)
-                $(info : OTA_FLASH_MAP = $(OTA_FLASH_MAP))
-                $(info "flashmap.py $(CY_PYTHON_PATH) $(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/$(FLASHMAP_PYTHON_SCRIPT) -p $(FLASHMAP_PLATFORM) -i $(OTA_FLASH_MAP) -o $(RELATIVE_FILE1_FILE2)/../../source/COMPONENT_MCUBOOT/cy_flash_map.h > flashmap.mk")
+                $(info OTA_FLASH_MAP = $(OTA_FLASH_MAP))
+                $(info Parsing flashmap and generating flashmap.mk ...)
+                ifeq ($(OTA_BUILD_FLASH_VERBOSE),1)
+                    $(info "flashmap.py $(CY_PYTHON_PATH) $(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/$(FLASHMAP_PYTHON_SCRIPT) -p $(FLASHMAP_PLATFORM) -i $(OTA_FLASH_MAP) -o $(RELATIVE_FILE1_FILE2)/../../source/COMPONENT_MCUBOOT/cy_flash_map.h > flashmap.mk")
+                endif
                 $(shell $(CY_PYTHON_PATH) $(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/$(FLASHMAP_PYTHON_SCRIPT) -p $(FLASHMAP_PLATFORM) -i $(OTA_FLASH_MAP) -o $(RELATIVE_FILE1_FILE2)/../../source/COMPONENT_MCUBOOT/cy_flash_map.h > flashmap.mk)
             endif # check for flashmap name
         endif # XMC7200 check
@@ -600,30 +610,25 @@ endif    # SECOND STAGE of build
 # output directory for use in the sign_script.bash
 ifneq ($(CY_SECONDSTAGE),)
     OUTPUT_FILE_PATH=$(CY_BUILD_LOCATION)/$(TARGET)/$(CONFIG)
-    $(info CY_BUILD_LOCATION $(CY_BUILD_LOCATION))
-    $(info TARGET            $(TARGET))
-    $(info CONFIG            $(CONFIG))
-    $(info OUTPUT_FILE_PATH  $(OUTPUT_FILE_PATH))
+    $(info CY_BUILD_LOCATION     = $(CY_BUILD_LOCATION))
+    $(info TARGET                = $(TARGET))
+    $(info CONFIG                = $(CONFIG))
+    $(info OUTPUT_FILE_PATH      = $(OUTPUT_FILE_PATH))
     ifeq ($(CY_COMPILER_GCC_ARM_DIR),)
         CY_COMPILER_GCC_ARM_DIR=$(CY_TOOLS_DIR)/gcc
     endif
-    $(info CY_COMPILER_GCC_ARM_DIR $(CY_COMPILER_GCC_ARM_DIR))
 
     # POSTBUILD script is NOT provided by the Application. Use default OTA POSTBUILD scripts.
     ifeq ($(OTA_APP_POSTBUILD),)
-        $(info "")
         $(info Application Makefile has not defined OTA_APP_POSTBUILD. Using OTA library's default POSTBUILD commands.)
-        $(info "")
 
         # Check for Policy file path for 20829 devices
         ifneq ($(findstring $(OTA_PLATFORM),CYW20829 CYW89829),)
             ifeq ($(OTA_APP_POLICY_PATH),)
-                $(info "")
                 $(info Application makefile has not defined OTA_APP_POLICY_PATH. Using OTA library's default Policy file for 20829 & 89829 device.)
-                $(info "")
                 OTA_APP_POLICY_PATH?=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/policy/policy_CM33_no_secure.json
-                $(info OTA_APP_POLICY_PATH = $(OTA_APP_POLICY_PATH) )
             endif
+            $(info OTA_APP_POLICY_PATH   = $(OTA_APP_POLICY_PATH) )
         endif
 
         CY_HEX_TO_BIN="$(MTB_TOOLCHAIN_GCC_ARM__OBJCOPY)"
@@ -642,9 +647,42 @@ ifneq ($(CY_SECONDSTAGE),)
         # CYW20829 and CYW89829 POSTBUILD
         #--------------------------------------
         ifneq ($(filter $(OTA_PLATFORM),CYW20829 CYW89829),)
-            $(info Makefile: CYW20829 and CYW89829 POSTBUILD )
+            CY_ENC_IMG ?= 0
+            CY_ENCRYPTION ?= 0
+            FLASH_BASE_ADDRESS ?= 0x60000000
+            FLASH_BASE_CBUS_ADDRESS ?= 0x08000000
+            CY_SERVICE_APP_DESCR_ADDR = 0x0
+            CY_SIGN_TYPE ?= mcuboot_user_app
+            CY_IMG_ID ?= 1
+            CY_SIGN_IMG_ID ?= $(shell expr $(CY_IMG_ID) - 1)
+            CY_IMG_PAD ?=1
 
-            MCUBOOT_SCRIPT_FILE_PATH?=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/sign_script_20829.bash
+            ifeq ($(CY_ENC_IMG), 1)
+                ifeq ($(CY_OEM_PRIVATE_KEY),)
+                    $(error Application makefile must define CY_OEM_PRIVATE_KEY for signing image. For more info, see <ota-bootloader-abstraction>/configs/COMPONENT_MCUBOOT/flashmap/MCUBOOT_BUILD_COMMANDS.md)
+                else
+                    $(info CY_OEM_PRIVATE_KEY    = $(CY_OEM_PRIVATE_KEY))
+                endif
+            endif
+
+            ifeq ($(CY_ENC_IMG), 1)
+                ifeq ($(CY_NONCE),)
+                    $(error Application makefile must define CY_NONCE for Encrypting image. For more info, see <ota-bootloader-abstraction>/configs/COMPONENT_MCUBOOT/flashmap/MCUBOOT_BUILD_COMMANDS.md)
+                else
+                    $(info CY_NONCE              = $(CY_NONCE))
+                endif
+                ifeq ($(CY_ENC_KEY),)
+                    $(error Application makefile must define CY_ENC_KEY for Encrypting image. For more info, see <ota-bootloader-abstraction>/configs/COMPONENT_MCUBOOT/flashmap/MCUBOOT_BUILD_COMMANDS.md)
+                else
+                    $(info CY_ENC_KEY            = $(CY_ENC_KEY))
+                endif
+            endif
+
+            ifeq ($(CY_ENC_IMG), 1)
+                MCUBOOT_SCRIPT_FILE_PATH?=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/sign_script_secure_enc_20829.bash
+            else
+                MCUBOOT_SCRIPT_FILE_PATH?=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/sign_script_20829.bash
+            endif
             CY_ELF_TO_HEX=$(CY_HEX_TO_BIN)
 
             CY_TOC2_GENERATOR = $(SEARCH_recipe-make-cat1b)/make/scripts/20829/run_toc2_generator.sh
@@ -671,10 +709,6 @@ ifneq ($(CY_SECONDSTAGE),)
                 endif # IAR
             endif # ARM
 
-            CY_ENC_IMG ?= 0
-            FLASH_BASE_ADDRESS ?= 0x60000000
-            CY_SERVICE_APP_DESCR_ADDR = 0x0
-
             # If POSTBUILD fails, Turn this on to check that all args are present
             ifneq ($(CY_SECONDSTAGE),)
                 ifeq ($(OTA_BUILD_POST_VERBOSE),1)
@@ -689,15 +723,17 @@ ifneq ($(CY_SECONDSTAGE),)
                     $(info MCUBOOT_HEADER_SIZE              =$(MCUBOOT_HEADER_SIZE))
                     $(info APP_BUILD_VERSION                =$(APP_BUILD_VERSION))
                     $(info FLASH_BASE_ADDRESS               =$(FLASH_BASE_ADDRESS))
+                    $(info FLASH_BASE_CBUS_ADDRESS          =$(FLASH_BASE_CBUS_ADDRESS))
                     $(info FLASH_AREA_IMG_1_PRIMARY_START   =$(FLASH_AREA_IMG_1_PRIMARY_START))
                     $(info MCUBOOT_KEY_DIR                  =$(MCUBOOT_KEY_DIR))
                     $(info MCUBOOT_KEY_FILE                 =$(MCUBOOT_KEY_FILE))
                     $(info CY_TOC2_GENERATOR                =$(CY_TOC2_GENERATOR))
                     $(info CY_LCS                           =$(CY_LCS))
+                    $(info CY_SIGN_TYPE                     =$(CY_SIGN_TYPE))
                     $(info DEVICE_(MPN_LIST)_SRAM_KB        =$(DEVICE_$(MPN_LIST)_SRAM_KB))
                     $(info MTB_TOOLS__OUTPUT_CONFIG_DIR     =$(MTB_TOOLS__OUTPUT_CONFIG_DIR))
                     $(info APPTYPE                          =$(APPTYPE))
-                    $(info current_dir                      =$(current_dir))
+                    $(info CURRENT_DIRECTORY                =$(CURRENT_DIRECTORY))
                     $(info SMIF_CRYPTO_CONFIG               =$(SMIF_CRYPTO_CONFIG))
                     $(info MTB_TOOLCHAIN_GCC_ARM__BASE_DIR  =$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR))
                     $(info OTA_APP_POLICY_PATH              =$(OTA_APP_POLICY_PATH))
@@ -706,16 +742,40 @@ ifneq ($(CY_SECONDSTAGE),)
                     $(info CY_SERVICE_APP_DESCR_ADDR        =$(CY_SERVICE_APP_DESCR_ADDR))
                     $(info BOOTSTRAP_SIZE                   =$(BOOTSTRAP_SIZE))
                     $(info DEVICE_SRAM_SIZE_KB              =$(DEVICE_SRAM_SIZE_KB))
+                    $(info CY_IMG_PAD                       =$(CY_IMG_PAD))
+                    ifeq ($(CY_ENC_IMG), 1)
+                        $(info CY_ENC_IMG                       =$(CY_ENC_IMG))
+                        $(info CY_NONCE                         =$(CY_NONCE))
+                        $(info CY_ENC_KEY                       =$(CY_ENC_KEY))
+                        $(info CY_SIGN_IMG_ID                   =$(CY_SIGN_IMG_ID))
+                        $(info CY_OEM_PRIVATE_KEY               =$(CY_OEM_PRIVATE_KEY))
+                    endif
                 endif # OTA_BUILD_VERBOSE = POST
             endif # SECOND STAGE
 
-            # CYW920829/CYW89829 POSTBUILD call
-            POSTBUILD+=$(MCUBOOT_SCRIPT_FILE_PATH) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) $(CY_PYTHON_PATH) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) \
+            ifeq ($(CY_ENC_IMG), 1)
+                # CYW920829/CYW89829 POSTBUILD call for Secure LCS and Encryption
+                POSTBUILD+=$(MCUBOOT_SCRIPT_FILE_PATH) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) $(CY_PYTHON_PATH) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) \
+                $(CY_ELF_TO_HEX) $(CY_ELF_TO_HEX_OPTIONS) $(CY_ELF_TO_HEX_FILE_ORDER) $(CY_HEX_TO_BIN) \
+                $(FLASH_ERASE_SECONDARY_SLOT_VALUE) $(MCUBOOT_HEADER_SIZE) $(APP_BUILD_VERSION) $(OTA_PLATFORM) $(FLASH_BASE_ADDRESS) $(FLASH_BASE_CBUS_ADDRESS)\
+                $(FLASH_AREA_IMG_1_PRIMARY_START) $(FLASH_AREA_IMG_1_PRIMARY_SIZE) $(FLASH_AREA_IMG_1_SECONDARY_START) \
+                $(MCUBOOT_KEY_DIR) $(MCUBOOT_KEY_FILE)\
+                $(CY_TOC2_GENERATOR) $(CY_LCS) $(CY_SIGN_TYPE) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) \
+                $(APPNAME) $(APPTYPE) $(CURRENT_DIRECTORY) $(SMIF_CRYPTO_CONFIG) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) \
+                $(OTA_APP_POLICY_PATH) $(FLASH_AREA_IMG_1_PRIMARY_SIZE) $(CY_ENCRYPTION) \
+                $(CY_SERVICE_APP_DESCR_ADDR) $(BOOTSTRAP_SIZE) $(DEVICE_$(MPN_LIST)_SRAM_KB) $(CY_ENC_IMG)\
+                $(CY_NONCE) $(CY_ENC_KEY) $(CY_OEM_PRIVATE_KEY) $(CY_SIGN_IMG_ID) $(CY_IMG_PAD) $(OTA_BUILD_POST_VERBOSE);
+            else
+                # CYW920829/CYW89829 POSTBUILD call for Non Secure LCS
+                POSTBUILD+=$(MCUBOOT_SCRIPT_FILE_PATH) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) $(CY_PYTHON_PATH) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) \
                 $(CY_ELF_TO_HEX) $(CY_ELF_TO_HEX_OPTIONS) $(CY_ELF_TO_HEX_FILE_ORDER) $(CY_HEX_TO_BIN) \
                 $(FLASH_ERASE_SECONDARY_SLOT_VALUE) $(MCUBOOT_HEADER_SIZE) $(APP_BUILD_VERSION) $(OTA_PLATFORM) $(FLASH_BASE_ADDRESS) \
                 $(FLASH_AREA_IMG_1_PRIMARY_START) $(FLASH_AREA_IMG_1_PRIMARY_SIZE) $(FLASH_AREA_IMG_1_SECONDARY_START) \
                 $(MCUBOOT_KEY_DIR) $(MCUBOOT_KEY_FILE)\
-                $(CY_TOC2_GENERATOR) $(CY_LCS) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) $(APPTYPE) $(current_dir) $(SMIF_CRYPTO_CONFIG) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) $(OTA_APP_POLICY_PATH) $(FLASH_AREA_IMG_1_PRIMARY_SIZE) $(CY_ENC_IMG) $(CY_SERVICE_APP_DESCR_ADDR) $(BOOTSTRAP_SIZE) $(DEVICE_$(MPN_LIST)_SRAM_KB);
+                $(CY_TOC2_GENERATOR) $(CY_LCS) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) $(APPTYPE) $(CURRENT_DIRECTORY) \
+                $(SMIF_CRYPTO_CONFIG) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) $(OTA_APP_POLICY_PATH) $(FLASH_AREA_IMG_1_PRIMARY_SIZE) \
+                $(CY_ENC_IMG) $(CY_SERVICE_APP_DESCR_ADDR) $(BOOTSTRAP_SIZE) $(DEVICE_$(MPN_LIST)_SRAM_KB) $(CY_IMG_PAD) $(OTA_BUILD_POST_VERBOSE);
+            endif
 
         endif# end (CYW920829/CYW89829) section
 
@@ -780,7 +840,7 @@ ifneq ($(CY_SECONDSTAGE),)
                     $(info DEVICE_(MPN_LIST)_SRAM_KB        =$(DEVICE_$(MPN_LIST)_SRAM_KB))
                     $(info MTB_TOOLS__OUTPUT_CONFIG_DIR     =$(MTB_TOOLS__OUTPUT_CONFIG_DIR))
                     $(info APPTYPE                          =$(APPTYPE))
-                    $(info current_dir                      =$(current_dir))
+                    $(info CURRENT_DIRECTORY                =$(CURRENT_DIRECTORY))
                     $(info SMIF_CRYPTO_CONFIG               =$(SMIF_CRYPTO_CONFIG))
                     $(info MTB_TOOLCHAIN_GCC_ARM__BASE_DIR  =$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR))
                     $(info OTA_APP_POLICY_PATH              =$(OTA_APP_POLICY_PATH))
@@ -806,7 +866,7 @@ ifneq ($(CY_SECONDSTAGE),)
         #--------------------------------------
         ifneq ($(OTA_PLATFORM), XMC7200)
             ifneq ($(OTA_PLATFORM), CYW20829)
-	            ifneq ($(OTA_PLATFORM), CYW89829)
+                ifneq ($(OTA_PLATFORM), CYW89829)
                     # PSoC 062, PSoC 062s3, PSoC 064B0S2 Here
 
                     SIGN_SCRIPT_FILE_PATH=$(RELATIVE_FILE1_FILE2)/../../scripts/mcuboot/sign_script.bash
