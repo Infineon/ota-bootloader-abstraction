@@ -265,7 +265,7 @@ cy_rslt_t cy_ota_storage_image_validate(uint16_t app_id)
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s()\n", __func__);
     (void)app_id;
 
-#ifndef XMC7200
+#if !(defined (XMC7100) || defined (XMC7200))
     /* we copy this to a RAM buffer so that if we are running in XIP from external flash, the write routine won't fail */
     result = flash_area_boot_set_confirmed();
     if(result != CY_RSLT_SUCCESS)

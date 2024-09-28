@@ -116,7 +116,7 @@
 #define FLASH_DEVICE_EXTERNAL_FLASH(index)      (FLASH_DEVICE_EXTERNAL_FLAG | index)
 
 /* Code and Work flash regions for XMC */
-#ifdef XMC7200
+#if defined (XMC7100) || defined (XMC7200)
 /* Internal Code flash */
 #define INTERNAL_FLASH_CODE_LARGE               FLASH_DEVICE_INTERNAL_FLASH
 #define INTERNAL_FLASH_CODE_SMALL               FLASH_DEVICE_INTERNAL_FLASH

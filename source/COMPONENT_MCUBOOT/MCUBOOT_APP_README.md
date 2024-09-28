@@ -6,40 +6,36 @@
 - You need to first build and program the bootloader app *MCUBootApp* that is available in the [MCUBoot GitHub repo](https://github.com/mcu-tools/mcuboot) before using an MCUBootloader based OTA application.
 
     - MCUBootApp runs on the CM0+ CPU and starts any OTA enabled application on CM4 core in case of multicore Psoc6 devices.
-    - MCUBootApp runs on the CM0+ CPU and starts any OTA enabled application on CM7 core in case of multicore XMC7200 devices.
+    - MCUBootApp runs on the CM0+ CPU and starts any OTA enabled application on CM7 core in case of multicore XMC7100 and XMC7200 devices.
     - MCUBootApp runs on CM33 CPU along with the OTA enabled applications in the case of 20829 and 89829 devices.
 
 - Clone the MCUBoot repository onto your local machine, **outside of your application directory.**
 
 -  Open a CLI terminal and run the following command:
-
-   ```
-   git clone https://github.com/JuulLabs-OSS/mcuboot.git
-   ```
+```
+git clone https://github.com/JuulLabs-OSS/mcuboot.git
+```
 
 - Navigate to the cloned *mcuboot* folder:
-   ```
-   cd mcuboot
-   ```
+```
+cd mcuboot
+```
 
 - Change the branch to get the appropriate version:
-
-   ```
-   git checkout v1.9.4-cypress
-   ```
+```
+git checkout v1.9.4-cypress
+```
 
 - Pull in sub-modules to build mcuboot:
-
-   ```
-   git submodule update --init --recursive
-   ```
+```
+git submodule update --init --recursive
+```
 
 - Install the required Python packages mentioned in *mcuboot/scripts/requirements.txt*. Be sure to use the python instance in ModusToolbox/tools_XX/python:
-   ```
-   cd mcuboot/scripts
-
-   pip install -r requirements.txt
-   ```
+```
+cd mcuboot/scripts
+pip install -r requirements.txt
+```
 
 <b>Note:</b>
 - The **CY8CKIT-064B0S2-4343W** is a special kit that uses cysecureboot. See [cysecuretools for PSoC™ 64, CYW20829 and CYW89829 devices](#5-cysecuretools-for-psoc-64-and-cyw20829-devices) information section below.
@@ -50,9 +46,9 @@ The UART Tx and Rx pins are common across most TARGET boards. However, there are
 
 To change default UART Tx and Rx, pass the `UART_RX_DEFAULT=XX` and `UART_TX_DEFAULT=xx` parameters to the MCUBootApp `make` command.
 ```
-    make clean app APP_NAME=MCUBootApp PLATFORM=XXXX FLASH_MAP=XXXX UART_TX_DEFAULT?=P10_1 UART_RX_DEFAULT?=P10_0
-    `UART_RX_DEFAULT` - Sets the pin number in the GPIO port used as RX of the debug serial port.
-    `UART_TX_DEFAULT` - Sets the pin number in the GPIO port used as TX of the debug serial port.
+make clean app APP_NAME=MCUBootApp PLATFORM=XXXX FLASH_MAP=XXXX UART_TX_DEFAULT?=P10_1 UART_RX_DEFAULT?=P10_0
+`UART_RX_DEFAULT` - Sets the pin number in the GPIO port used as RX of the debug serial port.
+`UART_TX_DEFAULT` - Sets the pin number in the GPIO port used as TX of the debug serial port.
 ```
 
 ## 3. Build MCUBoot
@@ -73,9 +69,9 @@ Read **[MCUBoot Build Commands](./MCUBOOT_BUILD_COMMANDS.md)** to see the flashm
 - Erase flash area before programming MCUBootApp.
 
 - From the terminal, execute the make program command to program the application using the default toolchain to the default target.
-    ```
-    make program TARGET=<BSP> TOOLCHAIN=<toolchain>
-    ```
+```
+make program TARGET=<BSP> TOOLCHAIN=<toolchain>
+```
 
 - Alternatively, the board can be programmed using CyProgrammer, OpenOCD commands or the instructions in your Customer Example Application notes.
     - [OpenOCD commands for PSOC6 devices](https://github.com/mcu-tools/mcuboot/blob/v1.9.3-cypress/boot/cypress/platforms/PSOC6.md#using-openocd-from-command-line)
@@ -83,10 +79,10 @@ Read **[MCUBoot Build Commands](./MCUBOOT_BUILD_COMMANDS.md)** to see the flashm
     - [OpenOCD commands for XMC7200 devices](https://github.com/mcu-tools/mcuboot/blob/v1.9.3-cypress/boot/cypress/platforms/XMC7000.md#xmc7000-secure-boot-configuration-description)
 
 <b>Notes:</b>
-- For XMC7200 devices, once the 'status_area' of the MCUBootApp has been erased, this flash area should be filled with the value '0xFF'.
-    ```
-    flash fillb 0x14030000 0xFF 0x2800
-    ```
+- For XMC7200/XMC7100 devices, once the 'status_area' of the MCUBootApp has been erased, this flash area should be filled with the value '0xFF'.
+```
+flash fillb 0x14030000 0xFF 0x2800
+```
 
 ## 5. cysecuretools for PSoC™ 64, CYW20829 and CYW89829 devices
 
@@ -102,16 +98,16 @@ For CY8CKIT-062B0S2-4343W kit, CYW20829 and CYW89829 devices (SECURE), we use a 
 - The Windows version of ModusToolbox 3.2 does not include a Python package. Therefore, users are required to install python version 3.10 and the python module CySecureTools 6.1.0. For the mcuboot v1.9.4-cypress, CySecureTools v5.0.0 or later is necessary for the CYW920829 Non-Secure and XMC7200 platforms. Additionally, the CYW989829 platform specifically requires CySecureTools v5.1.0. Secure LCS and OTA image encryption on CYW920829 platform requires CySecureTools v6.1.0 or higher.
 
 - The following command can be used in the modus-shell terminal to find the current version of CySecureTools.
-    ````
-    cysecuretools version
-    ````
+````
+cysecuretools version
+````
 
 - If the current CySecureTools is not the required version, the following command can be used in modus-shell terminal to update it.
-    ````
-    pip install --upgrade --force-reinstall cysecuretools
-    ````
+````
+pip install --upgrade --force-reinstall cysecuretools
+````
 
 - Additionally, the following command can be used to view the supported targets and families of devices.
-    ````
-    cysecuretools device-list
-    ````
+````
+cysecuretools device-list
+````

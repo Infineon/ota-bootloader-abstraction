@@ -66,7 +66,15 @@
 #define CY_FLASH_BASE                       0x10000000UL
 #endif /* XMC7200 */
 
-#if (defined (CY_IP_MXSMIF) && !defined (XMC7200))
+#if defined(XMC7100)
+#ifndef CY_XIP_BASE
+#define CY_XIP_BASE                         0x60000000UL
+#endif
+#define CY_FLASH_SIZE                       0x410000UL
+#define CY_FLASH_BASE                       0x10000000UL
+#endif /* XMC7100 */
+
+#if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
 /* UN-comment to test the write functionality */
 //#define READBACK_SMIF_WRITE_TEST
 
@@ -146,7 +154,7 @@ extern const cy_stc_smif_block_config_t smifBlockConfig;
 /* Used for testing the write functionality */
 static uint8_t read_back_test[1024];
 #endif
-#endif /* CY_IP_MXSMIF & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
 
 #ifdef ENABLE_ON_THE_FLY_ENCRYPTION
 /**
@@ -195,7 +203,7 @@ static uint32_t cy_flash_addr_to_cbus_addr(uint32_t secondary_addr)
 }
 #endif
 
-#if defined(CY_IP_MXSMIF) && !defined(PSOC_062_1M) && !defined(XMC7200)
+#if defined(CY_IP_MXSMIF) && !defined(PSOC_062_1M) && !defined(XMC7100) && !defined(XMC7200)
 #if defined(OTA_USE_EXTERNAL_FLASH)
 /*******************************************************************************
 * Function Name: IsMemoryReady
@@ -298,9 +306,9 @@ static cy_en_smif_status_t EnableQuadMode(cy_stc_smif_mem_config_t const *memCon
     return status;
 }
 #endif /* OTA_USE_EXTERNAL_FLASH */
-#endif /* CY_IP_MXSMIF & !PSOC_062_1M & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !PSOC_062_1M & !XMC7100 & !XMC7200 */
 
-#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG) || defined (XMC7200))
+#if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG) || defined (XMC7100) || defined (XMC7200))
 static int psoc6_internal_flash_write(uint8_t data[], uint32_t address, size_t len)
 {
     int retCode;
@@ -467,7 +475,7 @@ static int psoc6_internal_flash_erase(uint32_t addr, size_t size)
 }
 #endif
 
-#if defined (XMC7200)
+#if defined (XMC7100) || defined (XMC7200)
 CY_SECTION_RAMFUNC_BEGIN
 static int xmc_internal_flash_erase(uint32_t addr, size_t size)
 {
@@ -497,13 +505,9 @@ static int xmc_internal_flash_erase(uint32_t addr, size_t size)
         row_addr = row_start_addr + row_number * (uint32_t)erase_sz;
 
         flashEraseStatus = Cy_Flash_EraseSector((uint32_t) row_addr);
-        // Wait for completion with counting
-        while(Cy_Flash_IsOperationComplete() != CY_FLASH_DRV_SUCCESS)
-        {
-        }
         if (flashEraseStatus != CY_FLASH_DRV_SUCCESS)
         {
-            rc = 1; /* BOOT_EFLASH */
+            rc = 1;
             break;
         } else {
             rc = 0;
@@ -571,12 +575,13 @@ static int xmc_internal_flash_write(uint8_t data[], uint32_t address, size_t len
 
             if(rowsNotEqual != 0u)
             {
+                int intr_status = 0;
+                intr_status = Cy_SysLib_EnterCriticalSection();
                 rc = Cy_Flash_ProgramRow((rowId * CY_FLASH_SIZEOF_ROW) + CY_FLASH_BASE, writeBuffer);
-                if(rc == CY_FLASH_DRV_SUCCESS)
+                Cy_SysLib_ExitCriticalSection(intr_status);
+                if(rc != CY_FLASH_DRV_SUCCESS)
                 {
-                    while(Cy_Flash_IsOperationComplete() != CY_FLASH_DRV_SUCCESS)
-                    {
-                    }
+                    break;
                 }
             }
 
@@ -608,9 +613,9 @@ static int xmc_internal_flash_write(uint8_t data[], uint32_t address, size_t len
     return(retCode);
 }
 CY_SECTION_RAMFUNC_END
-#endif /* XMC7200 */
+#endif /* XMC7100/XMC7200 */
 
-#if (defined (CY_IP_MXSMIF) && !defined (XMC7200))
+#if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
 static uint32_t ota_smif_get_memory_size(void)
 {
     uint32_t size = 0;
@@ -622,7 +627,7 @@ static uint32_t ota_smif_get_memory_size(void)
 
     return size;
 }
-#endif /* CY_IP_MXSMIF & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
 
 /**********************************************************************************************************************************
  * External Functions
@@ -637,7 +642,7 @@ cy_rslt_t cy_ota_mem_init( void )
 {
     cy_rslt_t result = CY_RSLT_SUCCESS;
 
-#if (defined (CY_IP_MXSMIF) && !defined (XMC7200))
+#if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
 #if defined(OTA_USE_EXTERNAL_FLASH)
     cy_rslt_t smif_status = CY_SMIF_BAD_PARAM;    /* Does not return error if SMIF Quad fails */
     bool QE_status = false;
@@ -737,7 +742,7 @@ cy_rslt_t cy_ota_mem_init( void )
     POST_SMIF_ACCESS_TURN_ON_XIP;
 #endif
 #endif
-#endif /* CY_IP_MXSMIF & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
     return result;
 }
 
@@ -773,7 +778,7 @@ cy_rslt_t cy_ota_mem_read( cy_ota_mem_type_t mem_type, uint32_t addr, void *data
     }
     else if( mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH )
     {
-#if (defined (CY_IP_MXSMIF) && !defined (XMC7200))
+#if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
         cy_en_smif_status_t cy_smif_result = CY_SMIF_SUCCESS;
         if (addr >= CY_SMIF_BASE_MEM_OFFSET)
         {
@@ -794,7 +799,7 @@ cy_rslt_t cy_ota_mem_read( cy_ota_mem_type_t mem_type, uint32_t addr, void *data
         return (cy_smif_result == CY_SMIF_SUCCESS) ? CY_RSLT_SUCCESS : CY_RSLT_TYPE_ERROR;
 #else
         return CY_RSLT_TYPE_ERROR;
-#endif /* CY_IP_MXSMIF & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
     }
     else
     {
@@ -815,7 +820,7 @@ static cy_rslt_t cy_ota_mem_write_row_size( cy_ota_mem_type_t mem_type, uint32_t
         /* flash_area_write() uses offsets, we need absolute address here */
         addr += CY_FLASH_BASE;
 
-#if defined (XMC7200)
+#if defined (XMC7100) || defined (XMC7200)
         rc = xmc_internal_flash_write((uint8_t *)data, addr, len);
         if (rc != 0 )
         {
@@ -840,7 +845,7 @@ static cy_rslt_t cy_ota_mem_write_row_size( cy_ota_mem_type_t mem_type, uint32_t
     }
     else if( mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH )
     {
-#if (defined (CY_IP_MXSMIF) && !defined (XMC7200))
+#if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
         cy_en_smif_status_t cy_smif_result = CY_SMIF_SUCCESS;
 #ifdef ENABLE_ON_THE_FLY_ENCRYPTION
         uint32_t cbus_addr = 0;
@@ -948,7 +953,7 @@ static cy_rslt_t cy_ota_mem_write_row_size( cy_ota_mem_type_t mem_type, uint32_t
         return (cy_smif_result == CY_SMIF_SUCCESS) ? CY_RSLT_SUCCESS : CY_RSLT_TYPE_ERROR;
 #else
         return CY_RSLT_TYPE_ERROR;
-#endif /* CY_IP_MXSMIF & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
     }
     else
     {
@@ -1093,8 +1098,11 @@ cy_rslt_t cy_ota_mem_erase( cy_ota_mem_type_t mem_type, uint32_t addr, size_t le
 #if !(defined (CYW20829B0LKML) || defined (CYW89829B01MKSBG))
         int rc = 0;
 
-#if defined (XMC7200)
+#if defined (XMC7100) || defined (XMC7200)
+        int intr_status = 0;
+        intr_status = Cy_SysLib_EnterCriticalSection();
         rc = xmc_internal_flash_erase(addr, len);
+        Cy_SysLib_ExitCriticalSection(intr_status);
         if (rc != 0 )
         {
             printf("xmc_internal_flash_erase(0x%08x, %u) FAILED rc:%d\n", (unsigned int)addr, len, rc);
@@ -1116,7 +1124,7 @@ cy_rslt_t cy_ota_mem_erase( cy_ota_mem_type_t mem_type, uint32_t addr, size_t le
     }
     else if( mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH )
     {
-#if (defined (CY_IP_MXSMIF) && !defined (XMC7200))
+#if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
         cy_en_smif_status_t cy_smif_result = CY_SMIF_SUCCESS;
 
         if (addr >= CY_SMIF_BASE_MEM_OFFSET)
@@ -1168,7 +1176,7 @@ cy_rslt_t cy_ota_mem_erase( cy_ota_mem_type_t mem_type, uint32_t addr, size_t le
         return (cy_smif_result == CY_SMIF_SUCCESS) ? CY_RSLT_SUCCESS : CY_RSLT_TYPE_ERROR;
 #else
         return CY_RSLT_TYPE_ERROR;
-#endif /* CY_IP_MXSMIF & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
     }
     else
     {
@@ -1197,7 +1205,7 @@ size_t cy_ota_mem_get_prog_size ( cy_ota_mem_type_t mem_type, uint32_t addr )
     }
     else if( mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH )
     {
-#if (defined (CY_IP_MXSMIF) && !defined (XMC7200))
+#if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
         uint32_t    program_size = 0;
         (void)addr; /* Hybrid parts not yet supported */
         /* pre-access to SMIF is not needed, as we are just reading data from RAM */
@@ -1213,7 +1221,7 @@ size_t cy_ota_mem_get_prog_size ( cy_ota_mem_type_t mem_type, uint32_t addr )
         return program_size;
 #else
         return 0;
-#endif /* CY_IP_MXSMIF & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
     }
     else
     {
@@ -1241,7 +1249,7 @@ size_t cy_ota_mem_get_erase_size ( cy_ota_mem_type_t mem_type, uint32_t addr )
     }
     else if( mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH )
     {
-#if (defined (CY_IP_MXSMIF) && !defined (XMC7200))
+#if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
         uint32_t                            erase_sector_size = 0;
         cy_stc_smif_hybrid_region_info_t*   hybrid_info = NULL;
         cy_en_smif_status_t                 smif_status;
@@ -1271,7 +1279,7 @@ size_t cy_ota_mem_get_erase_size ( cy_ota_mem_type_t mem_type, uint32_t addr )
         return erase_sector_size;
 #else
         return 0;
-#endif /* CY_IP_MXSMIF & !XMC7200 */
+#endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
     }
     else
     {

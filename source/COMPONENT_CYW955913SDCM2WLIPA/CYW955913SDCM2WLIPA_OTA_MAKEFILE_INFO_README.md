@@ -1,11 +1,11 @@
-# H1-CP Bootloader Support Makefile Settings for a User OTA Application
+# OTA application Makefile settings for CYW955913EVK-01 kit
 
 ## 1. Introduction
 
 This guide shows Makefile variables and build DEFINES used when building an application with ota-bootloader-abstraction library along with ota-update library support.
 
 
-## 2. Standard H1-CP Bootloader based OTA Application Makefile Defines
+## 2. Standard Makefile Defines
 
 
 | Makefile Variable | Example | Description |
@@ -16,7 +16,7 @@ This guide shows Makefile variables and build DEFINES used when building an appl
 | TOOLCHAIN?=\<toolchain\> | TOOLCHAIN?=GCC_ARM | GCC_ARM |
 | CONFIG?=\<build_level\> | CONFIG?=Debug | Build level<br>- Debug |
 
-## 3. H1-CP Bootloader based OTA Specific Makefile Defines
+## 3. OTA Specific Makefile Defines
 
 | Makefile addition | Required | Default if not defined | Description |
 | ----------------- | -------- | ---------------------- | ----------- |

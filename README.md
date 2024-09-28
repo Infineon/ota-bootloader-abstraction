@@ -1,7 +1,7 @@
 # Over-the-Air (OTA) Bootloader Abstraction Middleware Library
 
 The OTA Bootloader Abstraction library has implementation for bootloader specific storage interface APIs for handling OTA upgrade images.
-This library is expected to work only with the Infineon [ota-update](https://github.com/Infineon/ota-update/) library which downloads OTA upgrade images on PSoC6, 20829, 89829 and XMC7200 platforms.
+This library is expected to work only with the Infineon [ota-update](https://github.com/Infineon/ota-update/) library which downloads OTA upgrade images on PSoC6, 20829, 89829, XMC7100 and XMC7200 platforms.
 Application should not directly call the bootloader-specific storage interface APIs. Rather, during Infineon OTA Agent initialization, the application needs to register these bootloader-specific storage interface APIs as callback APIs.
 See the [ota-update](https://github.com/Infineon/ota-update/) library documentation for more details.
 
@@ -9,6 +9,7 @@ See the [ota-update](https://github.com/Infineon/ota-update/) library documentat
 
 | Library Version                 | Supported MTB version    | Remarks                                   |
 |---------------------------------| -------------------------|-------------------------------------------|
+| ota-bootloader-abstraction v1.5.0  | ModusToolbox 3.2      | XMC7100(KIT_XMC71_EVK_LITE_V1) platform support added.<br>Image encryption support added for 20829 platform. |
 | ota-bootloader-abstraction v1.4.0  | ModusToolbox 3.2      | CY8CEVAL-062S2-CYW955513SDM2WLIPA kit support added.<br>Support for secure LCS and OTA image encryption has been added to the CYW920829 platform.<br>cysecuretools v6.1 or greater is required. |
 | ota-bootloader-abstraction v1.2.0  | ModusToolbox 3.2      | CYW955913EVK-01 platform support added |
 | ota-bootloader-abstraction v1.1.0  | ModusToolbox 3.2      | CYW89829 platform support added |
@@ -49,23 +50,23 @@ typedef struct cy_ota_storage_interface_s
 | ota_file_validate          | MCUBootloader  |  cy_ota_storage_image_validate() | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
 | ota_file_get_app_info      | MCUBootloader  |  cy_ota_storage_get_app_info()   | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
 
-| Storage operation callback |   Bootloader   |             API                  |   Remarks        |
-|----------------------------| ---------------|----------------------------------|------------------|
-| ota_file_open              | H1-CP          |  cy_ota_storage_open()           | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
-| ota_file_read              | H1-CP          |  cy_ota_storage_read()           | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
-| ota_file_write             | H1-CP          |  cy_ota_storage_write()          | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
-| ota_file_close             | H1-CP          |  cy_ota_storage_close()          | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
-| ota_file_verify            | H1-CP          |  cy_ota_storage_verify()         | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
-| ota_file_validate          | H1-CP          |  cy_ota_storage_image_validate() | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
-| ota_file_get_app_info      | H1-CP          |  cy_ota_storage_get_app_info()   | Available in source/COMPONENT_H1_CP/cy_ota_storage_api.c |
+| Storage operation callback |   Bootloader                 |             API                  |   Remarks        |
+|----------------------------| -----------------------------|----------------------------------|------------------|
+| ota_file_open              | CYW955913SDCM2WLIPA          |  cy_ota_storage_open()           | Available in source/COMPONENT_CYW955913SDCM2WLIPA/cy_ota_storage_api.c |
+| ota_file_read              | CYW955913SDCM2WLIPA          |  cy_ota_storage_read()           | Available in source/COMPONENT_CYW955913SDCM2WLIPA/cy_ota_storage_api.c |
+| ota_file_write             | CYW955913SDCM2WLIPA          |  cy_ota_storage_write()          | Available in source/COMPONENT_CYW955913SDCM2WLIPA/cy_ota_storage_api.c |
+| ota_file_close             | CYW955913SDCM2WLIPA          |  cy_ota_storage_close()          | Available in source/COMPONENT_CYW955913SDCM2WLIPA/cy_ota_storage_api.c |
+| ota_file_verify            | CYW955913SDCM2WLIPA          |  cy_ota_storage_verify()         | Available in source/COMPONENT_CYW955913SDCM2WLIPA/cy_ota_storage_api.c |
+| ota_file_validate          | CYW955913SDCM2WLIPA          |  cy_ota_storage_image_validate() | Available in source/COMPONENT_CYW955913SDCM2WLIPA/cy_ota_storage_api.c |
+| ota_file_get_app_info      | CYW955913SDCM2WLIPA          |  cy_ota_storage_get_app_info()   | Available in source/COMPONENT_CYW955913SDCM2WLIPA/cy_ota_storage_api.c |
 
-<b>NOTE:</b>  The current version of ota-bootloader-abstraction library implements only storage interface APIs for MCUBootloader based OTA and H1-CP bootloader based OTA.
+<b>NOTE:</b>  The current version of ota-bootloader-abstraction library implements only storage interface APIs for MCUBootloader based OTA and CYW955913EVK-01 in-built Bootloader based OTA.
 
 ## 2. MCUBootloader Support
 
-*ota-bootloader-abstraction* library has below support for MCUBootloader based OTA on PSoC6, 20829, 89829 and XMC7200 platforms.
+*ota-bootloader-abstraction* library has below support for MCUBootloader based OTA on PSoC6, 20829, 89829, XMC7100 and XMC7200 platforms.
 
-- Template flashmaps for PSoC6, 20829, 89829 and XMC7200 platforms.
+- Template flashmaps for PSoC6, 20829, 89829, XMC7100 and XMC7200 platforms.
 
 - Template linker files for GCC_ARM, ARM, and IAR toolchains.
 
@@ -74,14 +75,16 @@ typedef struct cy_ota_storage_interface_s
 - Prebuild and Postbuild scripts for generating and signing MCUBootloader based BOOT and UPGRADE image of an OTA Application.
 
 <b> Supported devices: </b><br>
-- PSoC™ 6 MCU with
-  - AIROC™ CYW4343W
-  - CYW43012 Wi-Fi & Bluetooth® combo chip
+- PSoCâ„¢ 6 MCU with
+  - AIROCâ„¢ CYW4343W
+  - CYW43012 Wi-Fi & BluetoothÂ® combo chip
 - CYW920829M2EVK-02 evaluation board.
 - CY8CKIT-062-BLE
 - CY8CPROTO-063-BLE
 - CYBLE-416045-EVAL
 - KIT_XMC72_EVK
+- KIT_XMC72_EVK_MUR_43439M2
+- KIT_XMC71_EVK_LITE_V1
 - CYW989829M2EVB-01
 - CY8CEVAL-062S2-CYW955513SDM2WLIPA
 
@@ -102,7 +105,7 @@ User OTA application will include the *ota-update* library along with *ota-bootl
    d. The updated application must call cy_ota_storage_image_validate() to validate the update.<br>
    e. For SWAP, if the new application does not call cy_ota_storage_image_validate(), MCUBootloader will REVERT on the next reset.<br>
 
-<b> NOTE:</b> On secure MCUs such as PSoC™ 64, MCUBootloader is flashed as part of the provisioning step performed by the provisioning tools, and does not need to be built separately. For more information see [MCUBootloader App Information](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md#5-cysecuretools-for-psoc-64-and-cyw20829-devices).<br><br>
+<b> NOTE:</b> On secure MCUs such as PSoCâ„¢ 64, MCUBootloader is flashed as part of the provisioning step performed by the provisioning tools, and does not need to be built separately. For more information see [MCUBootloader App Information](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md#5-cysecuretools-for-psoc-64-and-cyw20829-devices).<br><br>
 
 <b> 2.1 Flash layout requirements</b><br>
 
@@ -134,7 +137,8 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 | CY8CKIT-064B0S2-4343W | 2M | PSOC_064_2M | Default - policy_single_CM0_CM4_smif_swap.json |
 | CYW920829M2EVK-02 | 0K | CYW20829 | Default - cyw20829_xip_swap_single.json<br> cyw20829_xip_overwrite_single.json |
 | CYW989829M2EVB-01 | 0K | CYW89829 | Default - cyw89829_xip_swap_single.json<br> cyw89829_xip_overwrite_single.json |
-| KIT_XMC72_EVK | 8MB | XMC7200 | Default - xmc7200_int_swap_single.json<br> xmc7200_int_overwrite_single.json |
+| KIT_XMC71_EVK_LITE_V1 | 4MB | XMC7100 | Default - xmc7100_int_swap_single.json<br> xmc7100_int_overwrite_single.json |
+| KIT_XMC72_EVK<br>KIT_XMC72_EVK_MUR_43439M2 | 8MB | XMC7200 | Default - xmc7200_int_swap_single.json<br> xmc7200_int_overwrite_single.json |
 
 <br>
 
@@ -150,13 +154,11 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 | psoc62_1m_cm0_int_swap_single.json    | Internal only (primary and secondary) |
 | psoc63_1m_cm0_int_swap_single.json    | Internal only (primary and secondary) |
 
-
 | 512K Internal Flash Maps | Memory Usage |
 |--------------------------------|--------------|
 | psoc62_512k_ext_overwrite_single.json | Internal primary, external secondary |
 | psoc62_512k_ext_swap_single.json      | Internal primary, external secondary |
 | psoc62_512k_xip_swap_single.json      | External only (primary and secondary) |
-
 
 | 0K Internal Flash Maps | Memory Usage |
 |--------------------------------|--------------|
@@ -165,6 +167,10 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 | cyw89829_xip_overwrite_single.json       | External only (primary and secondary) |
 | cyw89829_xip_swap_single.json            | External only (primary and secondary) |
 
+| 4M Internal Flash Maps | Memory Usage |
+|--------------------------------|--------------|
+| xmc7100_int_swap_single.json         | Internal only (primary and secondary) |
+| xmc7100_int_overwrite_single.json    | Internal only (primary and secondary) |
 
 | 8M Internal Flash Maps | Memory Usage |
 |--------------------------------|--------------|
@@ -175,35 +181,35 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 
 MCUBootloader Application i.e MCUBootApp is a standalone application. It is an open source software taken and customized in terms of Flash map and is built outside of ModusToolbox. MCUBootApp is programmed/flashed on the device one time, at manufacture (or for development).
 
-- MCUBootApp runs on the CM0+ CPU and starts any OTA enabled application on CM4 core in case of multicore Psoc6 devices and on CM7 core in case of XMC7200 devices.
+- MCUBootApp runs on the CM0+ CPU and starts any OTA enabled application on CM4 core in case of multicore Psoc6 devices and on CM7 core in case of XMC7100 and XMC7200 devices.
 - In case of 20829 and 89829 devices, MCUBootApp runs on CM33 CPU along with the OTA enabled applications.
 
 MCUBoot itself is not OTA upgradable.
 
 For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md).
 
-## 3. H1-CP Bootloader Support
+## 3. CYW955913EVK-01 in-built Bootloader Support
 
-*ota-bootloader-abstraction* library has below support for H1-CP Bootloader based OTA on CYW955913EVK-01 platform.
+*ota-bootloader-abstraction* library has below support for CYW955913EVK-01 in-built Bootloader based OTA.
 
-- Storage operation callback APIs to handle H1-CP Bootloader based upgrade image.
+- Storage operation callback APIs to handle the in-built Bootloader based upgrade image.
 
 <b> Supported devices: </b><br>
 - CYW955913EVK-01.
 
-The *ota-update* along with *ota-bootloader-abstraction* library works in concert with H1-CP Bootloader to provide a no-fail solution to updating device software in the field.
+The *ota-update* along with *ota-bootloader-abstraction* library works in concert with CYW955913EVK-01 in-built Bootloader to provide a no-fail solution to updating device software in the field.
 
-H1-CP Bootloader is preprogrammed on CYW955913EVK-01 and is not updated for the life of the device.
+An in-built Bootloader is preprogrammed on CYW955913EVK-01 and is not updated for the life of the device.
 
-User OTA application will include the *ota-update* library along with *ota-bootloader-abstraction* library, which will set the appropriate flags so that H1-CP bootloader knows when to perform an update of your application. The OTA library will download a new (updated) application, store it in flash, and set flags so that on the next reset, Bootloader will see there is an update available.
+User OTA application will include the *ota-update* library along with *ota-bootloader-abstraction* library, which will set the appropriate flags so that CYW955913EVK-01 in-built bootloader knows when to perform an update of your application. The OTA library will download a new (updated) application, store it in flash, and set flags so that on the next reset, Bootloader will see there is an update available.
 
 <b> The basic device boot sequence is as follows: </b>
-1. ROM boot will start H1-CP Bootloader.
-2. H1-CP Bootloader starts the current application in Active DS.
+1. ROM boot will start CYW955913EVK-01 in-built Bootloader.
+2. The in-built Bootloader starts the current application in Active DS.
 3. If an update is available, the OTA application uses the *ota-update* and *ota-bootloader-abstraction* library to download and store it in the Non-Active DS. Subsequently,<br>
-   a. When the switch image API (cy_ota_storage_switch_to_new_image) is called, the H1-CP Bootloader verifies the update image headers and certificates.<br>
-   b. Upon finding a valid upgrade image, the H1-CP Bootloader activates the Non-Active DS and designates the active DS as Non-Active DS.<br>
-   c. Following a reset, the H1-CP Bootloader initiates the application (Upgraded Image) in the Active DS.<br>
+   a. When the switch image API (cy_ota_storage_switch_to_new_image) is called, the CYW955913EVK-01 in-built Bootloader verifies the update image headers and certificates.<br>
+   b. Upon finding a valid upgrade image, the CYW955913EVK-01 in-built Bootloader activates the Non-Active DS and designates the active DS as Non-Active DS.<br>
+   c. Following a reset, the CYW955913EVK-01 in-built Bootloader initiates the application (Upgraded Image) in the Active DS.<br>
 
 ## 4. Enabling MCUBootloader based OTA in an Application
 
@@ -220,6 +226,11 @@ User OTA application will include the *ota-update* library along with *ota-bootl
     ```
 
 - Update OTA Application makefile by referring [OTA Bootloader Abstraction Makefile Readme](./source/COMPONENT_MCUBOOT/MCUBOOT_OTA_MAKEFILE_INFO_README.md).
+
+- For *MCUBootloader based OTA Support*, add the following components to the Application makefile.
+    ```
+    COMPONENTS+=MCUBOOT
+    ```
 
 - Make sure that the Python module is installed on your computer, preferably Python version 3.8. Additionally, Application need to provide the path to the installed Python module by setting CY_PYTHON_PATH in the OTA Application makefile. The pre and post build scripts of the *ota-bootloader-abstraction* library use this Python module to parse memory configurations.
     ```
@@ -285,11 +296,11 @@ User OTA application will include the *ota-update* library along with *ota-bootl
 
 - During provisioning, the MCU bootloader is also loaded and executed from the CM0 core upon reboot.
 
-## 5. Enabling H1-CP bootloader based OTA in an Application
+## 5. Enabling OTA on CYW955913EVK-01 applications
 
 - Create an *ota-bootloader-abstraction.mtb* file to pull *ota-bootloader-abstraction* library which has storage APIs to handle the MCUBootloader based OTA upgrade files. Place *ota-bootloader-abstraction.mtb* in the application *deps* folder. The contents of *ota-bootloader-abstraction.mtb* should be as follows:
     ```
-    https://github.com/Infineon/ota-bootloader-abstraction#release-1.1.090#$$ASSET_REPO$$/ota-bootloader-abstraction/release-1.1.090
+    https://github.com/Infineon/ota-bootloader-abstraction#latest-v1.X#$$ASSET_REPO$$/ota-bootloader-abstraction/latest-v1.X
     ```
 
 - After adding *ota-bootloader-abstraction.mtb* file to the *deps* folder of your application, Run the command 'make getlibs' to fetch *ota-bootloader-abstraction* library and its dependencies.
@@ -297,7 +308,12 @@ User OTA application will include the *ota-update* library along with *ota-bootl
     make getlibs
     ```
 
-- Update OTA Application makefile by referring [OTA Bootloader Abstraction Makefile Readme](./source/COMPONENT_H1_CP/H1-CP_OTA_MAKEFILE_INFO_README.md).
+- Update OTA Application makefile by referring [OTA Bootloader Abstraction Makefile Readme](./source/COMPONENT_COMPONENT_CYW955913SDCM2WLIPA/COMPONENT_CYW955913SDCM2WLIPA_OTA_MAKEFILE_INFO_README.md).
+
+- For *CYW955913EVK-01 in-built Bootloader based OTA Support*, add the following components to the Application makefile.
+    ```
+    COMPONENTS+=CYW955913SDCM2WLIPA
+    ```
 
 - Configure OTA storage interface callback APIs in OTA application, And pass the same storage interface while starting OTA agent.
     ```
@@ -320,7 +336,7 @@ User OTA application will include the *ota-update* library along with *ota-bootl
 
 - OTA storage interface calls Flash operations(Read, Write, erase) to store upgrade images in Non active DS.
 
-- Once after succesfully downloading OTA upgrade image, switch to new image by calling cy_ota_storage_switch_to_new_image() which is available in *source/COMPONENT_H1_CP/cy_ota_storage_api.c*.
+- Once after succesfully downloading OTA upgrade image, switch to new image by calling cy_ota_storage_switch_to_new_image() which is available in *source/COMPONENT_CYW955913SDCM2WLIPA/cy_ota_storage_api.c*.
 
 - During application build, Required BOOT and UPGRADE images(.bin) of OTA application will get generated in configured build directory.
 
@@ -360,17 +376,19 @@ For the toolchain version information, please refer to [ota-bootloader-abstracti
 
 ## 10. Supported Kits
 
-- [PSoC™ 6 Wi-Fi BT Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062-4343w/) (CY8CPROTO-062-4343W)
-- [PSoC™ 62S2 Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/) (CY8CKIT-062S2-43012)
-- [PSoC™ 62S3 Wi-Fi BT Prototyping Kit ](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062s3-4343w/)(CY8CPROTO-062S3-4343W)
-- [PSoC™ 64 Secure Boot Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-064b0s2-4343w/) (CY8CKIT-064B0S2-4343W)
+- [PSoCâ„¢ 6 Wi-Fi BT Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062-4343w/) (CY8CPROTO-062-4343W)
+- [PSoCâ„¢ 62S2 Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/) (CY8CKIT-062S2-43012)
+- [PSoCâ„¢ 62S3 Wi-Fi BT Prototyping Kit ](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-062s3-4343w/)(CY8CPROTO-062S3-4343W)
+- [PSoCâ„¢ 64 Secure Boot Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-064b0s2-4343w/) (CY8CKIT-064B0S2-4343W)
 - [CY8CEVAL-062S2 Evaluation Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ceval-062s2/)(CY8CEVAL-062S2-LAI-4373M2, CY8CEVAL-062S2-MUR-43439M2 and CY8CEVAL-062S2-CYW955513SDM2WLIPA)
-- [PSoC™ 6-BLE Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062-ble/) (CY8CKIT-062-BLE)
-- [PSoC™ 6 BLE Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-063-ble/) (CY8CPROTO-063-BLE)
+- [PSoCâ„¢ 6-BLE Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062-ble/) (CY8CKIT-062-BLE)
+- [PSoCâ„¢ 6 BLE Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-063-ble/) (CY8CPROTO-063-BLE)
 - [EZ-BLE Arduino Evaluation Board](https://www.infineon.com/cms/en/product/evaluation-boards/cyble-416045-eval/) (CYBLE-416045-EVAL)
-- [AIROC™ CYW20829 Bluetooth® LE SoC](https://www.infineon.com/cms/en/product/promopages/airoc20829/) (CYW920829M2EVK-02)
-- [XMC7200 Evaluation Kit](https://www.infineon.com/cms/en/product/evaluation-boards/kit_xmc72_evk/) (KIT_XMC72_EVK)
-- [AIROC™ CYW989820M2EVB-01 Evaluation kit](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/)(CYW989820M2EVB-01)
+- [AIROCâ„¢ CYW20829 BluetoothÂ® LE SoC](https://www.infineon.com/cms/en/product/promopages/airoc20829/) (CYW920829M2EVK-02)
+- [XMC7200 Evaluation Kit](https://www.infineon.com/KIT_XMC72_EVK) (KIT_XMC72_EVK)
+- [XMC7200 Evaluation Kit](https://www.infineon.com/KIT_XMC72_EVK) (KIT_XMC72_EVK_MUR_43439M2)
+- [XMC7100 Evaluation Kit](https://www.infineon.com/KIT_XMC71_EVK_LITE_V1) (KIT_XMC71_EVK_LITE_V1)
+- [AIROCâ„¢ CYW989820M2EVB-01 Evaluation kit](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/)(CYW989820M2EVB-01)
 - [CYW955913EVK-01 Wi-Fi Bluetooth&reg; Prototyping Kit (CYW955913EVK-01)](https://www.infineon.com/CYW955913EVK-01)
 
 ## 9. Hardware Setup
@@ -395,4 +413,4 @@ This example uses the board's default configuration. See the kit user guide to e
 
 Infineon also provides a wealth of data at www.infineon.com to help you select the right device, and quickly and effectively integrate it into your design.
 
-For PSoC™ 6 MCU devices, see [How to Design with PSoC 6 MCU - KBA223067](https://community.infineon.com/t5/Knowledge-Base-Articles/How-to-Design-with-PSoC-6-MCU-KBA223067/ta-p/248857) in the Infineon community.
+For PSoCâ„¢ 6 MCU devices, see [How to Design with PSoC 6 MCU - KBA223067](https://community.infineon.com/t5/Knowledge-Base-Articles/How-to-Design-with-PSoC-6-MCU-KBA223067/ta-p/248857) in the Infineon community.

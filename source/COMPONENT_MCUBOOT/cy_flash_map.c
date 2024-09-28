@@ -97,7 +97,7 @@
     #define BOOT_MAX_ALIGN          256u
 #endif
 
-#if defined(XMC7200)
+#if defined(XMC7100) || defined (XMC7200)
     #define BOOT_MAX_ALIGN          8u
 #endif
 
@@ -259,7 +259,7 @@ int8_t flash_area_read(const struct flash_area *fa, uint32_t off, void *dst, uin
         /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
         return BOOT_EBADARGS;
 #endif
-#if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined(XMC7200)
+#if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined (XMC7100) || defined(XMC7200)
         result = cy_ota_mem_read(CY_OTA_MEM_TYPE_INTERNAL_FLASH, addr, dst, len);
 #endif
     }
@@ -305,7 +305,7 @@ int8_t flash_area_write(const struct flash_area *fa, uint32_t off, const void *s
         /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
         return BOOT_EBADARGS;
 #endif
-#if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined(XMC7200)
+#if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined (XMC7100) || defined(XMC7200)
         result = cy_ota_mem_write(CY_OTA_MEM_TYPE_INTERNAL_FLASH, addr, (void *)src, len);
 #endif
     }
@@ -354,7 +354,7 @@ int8_t flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
         /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
         return BOOT_EBADARGS;
 #endif
-#if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined(XMC7200)
+#if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined (XMC7100) || defined(XMC7200)
         result = cy_ota_mem_erase(CY_OTA_MEM_TYPE_INTERNAL_FLASH, addr, len);
 #endif
     }
@@ -408,7 +408,7 @@ size_t flash_area_align(const struct flash_area *fa)
     {
         if(fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
         {
-#ifdef XMC7200
+#if defined (XMC7100) || defined (XMC7200)
             rc = BOOT_MAX_ALIGN;
 #else
             rc = cy_ota_mem_get_prog_size(CY_OTA_MEM_TYPE_INTERNAL_FLASH, 0);

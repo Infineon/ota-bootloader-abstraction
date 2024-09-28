@@ -323,8 +323,8 @@ cy_rslt_t cy_ota_storage_read(cy_ota_storage_context_t *storage_ptr, cy_ota_stor
         return CY_RSLT_OTA_ERROR_READ_STORAGE;
     }
 
-    /* Not Available for H1-CP Platforms. */
-    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "READ NOT SUPPORTED FOR H1-CP...\r\n");
+    /* Not Available for CYW955913SDCM2WLIPA Platforms. */
+    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "READ NOT SUPPORTED FOR CYW955913SDCM2WLIPA...\r\n");
     return CY_RSLT_OTA_ERROR_UNSUPPORTED;
 }
 
@@ -717,7 +717,7 @@ cy_rslt_t cy_ota_storage_image_validate(uint16_t app_id)
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s()\n", __func__);
     (void)app_id;
 
-    /* Not required for H1-CP platform. */
+    /* Not required for CYW955913SDCM2WLIPA platform. */
     return CY_RSLT_SUCCESS;
 }
 

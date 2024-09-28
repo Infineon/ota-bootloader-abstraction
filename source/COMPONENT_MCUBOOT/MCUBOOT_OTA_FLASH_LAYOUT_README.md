@@ -17,7 +17,7 @@ In order to get these areas to match, we use a common JSON formatted file to def
 
 All flash erase operations (ex: erasing a slot for a new download) will erase full sectors at a time. PSoC™ 6 MCUs have internal flash that use 512 byte sector sizes. External flash devices will have different sector sizes, from 4k to 256k. If you are going to modify a flash layout, be aware of the sector sizes.
 
-For CAT1C devices (XMC7200 MCUs), Flash memory controller has logical banks feature and flash memory region is split into two banks. These banks are referred as Logical Bank 0 and Logical Bank 1. User needs to be aware of the following :
+For CAT1C devices (XMC7000 MCUs), Flash memory controller has logical banks feature and flash memory region is split into two banks. These banks are referred as Logical Bank 0 and Logical Bank 1. User needs to be aware of the following :
 - Primary and Secondary slots should be kept in different logical banks.
 - While executing from one logical bank, we cannot erase sectors of the same logical bank.
 
