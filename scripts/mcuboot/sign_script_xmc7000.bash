@@ -48,8 +48,15 @@ shift
 MCUBOOT_KEY_FILE=$1
 
 # Export these values for python3 click module
-export LC_ALL=C.UTF-8
-export LANG=C.UTF-8
+OS_NAME=$(uname -s)
+if [ "$OS_NAME" == "Darwin" ]
+then
+    export LC_ALL=en_US.UTF-8
+    export LANG=en_US.UTF-8
+else
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+fi
 
 CY_OUTPUT_ELF=$CY_OUTPUT_PATH/$CY_OUTPUT_NAME.elf
 CY_OUTPUT_BIN=$CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin

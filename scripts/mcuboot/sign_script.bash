@@ -89,13 +89,18 @@ echo "FW_DATA_BLOCK_OUTPUT_FILE_NAME  = $FW_DATA_BLOCK_OUTPUT_FILE_NAME"
 echo "CY_EXTERNAL_FLASH_ERASE_VALUE   = $CY_EXTERNAL_FLASH_ERASE_VALUE"
 echo "CY_BOOT_PRIMARY_1_IMAGE_2_START = $CY_BOOT_PRIMARY_1_IMAGE_2_START"
 echo "CY_BOOT_PRIMARY_1_IMAGE_2_SIZE  = $CY_BOOT_PRIMARY_1_IMAGE_2_SIZE"
-
 fi
 
-
 # Export these values for python3 click module
-export LC_ALL=C.UTF-8
-export LANG=C.UTF-8
+OS_NAME=$(uname -s)
+if [ "$OS_NAME" == "Darwin" ]
+then
+    export LC_ALL=en_US.UTF-8
+    export LANG=en_US.UTF-8
+else
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+fi
 
 CY_OUTPUT_BIN=$CY_OUTPUT_PATH/$CY_OUTPUT_NAME.bin
 CY_OUTPUT_ELF=$CY_OUTPUT_PATH/$CY_OUTPUT_NAME.elf

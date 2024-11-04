@@ -6,6 +6,11 @@ See the [README.md](./README.md) for a complete description of the OTA bootloade
 
 ## Changelog
 
+### v1.5.1
+
+- Bug fixes.
+- Minor Documentation updates.
+
 ### v1.5.0
 
 - Added support for XMC7100(KIT_XMC71_EVK_LITE_V1) kit.
