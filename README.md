@@ -9,11 +9,11 @@ See the [ota-update](https://github.com/Infineon/ota-update/) library documentat
 
 | Library Version                 | Supported MTB version    | Remarks                                   |
 |---------------------------------| -------------------------|-------------------------------------------|
-| ota-bootloader-abstraction v1.5.0  | ModusToolbox 3.2      | XMC7100(KIT_XMC71_EVK_LITE_V1) platform support added.<br>Image encryption support added for 20829 platform. |
-| ota-bootloader-abstraction v1.4.0  | ModusToolbox 3.2      | CY8CEVAL-062S2-CYW955513SDM2WLIPA kit support added.<br>Support for secure LCS and OTA image encryption has been added to the CYW920829 platform.<br>cysecuretools v6.1 or greater is required. |
-| ota-bootloader-abstraction v1.2.0  | ModusToolbox 3.2      | CYW955913EVK-01 platform support added |
-| ota-bootloader-abstraction v1.1.0  | ModusToolbox 3.2      | CYW89829 platform support added |
-| ota-bootloader-abstraction v1.0.0  | ModusToolbox 3.1      | cysecuretools v5.0 or greater is required |
+| ota-bootloader-abstraction v1.5  | ModusToolbox 3.3      | XMC7100(KIT_XMC71_EVK_LITE_V1) platform support added.<br>Image encryption support added for 20829 platform. |
+| ota-bootloader-abstraction v1.4  | ModusToolbox 3.2      | CY8CEVAL-062S2-CYW955513SDM2WLIPA kit support added.<br>Support for secure LCS and OTA image encryption has been added to the CYW920829 platform.<br>cysecuretools v6.1 or greater is required. |
+| ota-bootloader-abstraction v1.2  | ModusToolbox 3.2      | CYW955913EVK-01 platform support added |
+| ota-bootloader-abstraction v1.1  | ModusToolbox 3.2      | CYW89829 platform support added |
+| ota-bootloader-abstraction v1.0  | ModusToolbox 3.1      | cysecuretools v5.0 or greater is required |
 
 ## 1. Bootloader Support
 To add different bootloader support on Infineon connectivity-enabled MCU platforms, [ota-update](https://github.com/Infineon/ota-update/) library offloads bootloader specific storage interface APIs using callback mechanism.

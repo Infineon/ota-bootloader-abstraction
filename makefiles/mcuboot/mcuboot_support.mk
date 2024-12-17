@@ -557,7 +557,7 @@ endif
 #
 ###################################################################################################
 
-ifneq ($(CY_SECONDSTAGE),)
+ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_proj eclipse vscode ewarm ewarm8 uvision uvision5 all),)
     ifeq ($(OTA_BUILD_VERBOSE),1)
         $(info Makefile:)
         $(info Makefile: TARGET                         = $(TARGET))
@@ -615,7 +615,7 @@ ifneq ($(CY_SECONDSTAGE),)
         $(info CY_IGNORE)
         $(info CY_IGNORE=$(CY_IGNORE))
     endif # OTA_BUILD_VERBOSE = COMPONENTS
-endif    # SECOND STAGE of build
+endif # MAKECMDGOALS
 
 
 ###################################################################################################
@@ -627,7 +627,7 @@ endif    # SECOND STAGE of build
 ######################################
 
 # output directory for use in the sign_script.bash
-ifneq ($(CY_SECONDSTAGE),)
+ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_proj eclipse vscode ewarm ewarm8 uvision uvision5 all),)
     OUTPUT_FILE_PATH=$(CY_BUILD_LOCATION)/$(TARGET)/$(CONFIG)
     $(info CY_BUILD_LOCATION     = $(CY_BUILD_LOCATION))
     $(info TARGET                = $(TARGET))
@@ -796,7 +796,7 @@ ifneq ($(CY_SECONDSTAGE),)
             CY_ADD_ARG="$(CY_ADD_ARGS)"
 
             # If POSTBUILD fails, Turn this on to check that all args are present
-            ifneq ($(CY_SECONDSTAGE),)
+            ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_proj eclipse vscode ewarm ewarm8 uvision uvision5 all),)
                 ifeq ($(OTA_BUILD_POST_VERBOSE),1)
                     # Check that all arguments for the POSTBUILD functionality are present
                     $(info ======================================================================= )
@@ -844,7 +844,7 @@ ifneq ($(CY_SECONDSTAGE),)
                     endif
                     $(info CY_ADD_ARG                       = $(CY_ADD_ARG))
                 endif # OTA_BUILD_VERBOSE = POST
-            endif # SECOND STAGE
+            endif # MAKECMDGOALS
 
             ifeq ($(CY_DEVICE_LCS), SECURE)
                 # CYW920829/CYW89829 POSTBUILD call for Secure LCS and Encryption
@@ -923,7 +923,7 @@ ifneq ($(CY_SECONDSTAGE),)
             endif
 
             # If POSTBUILD fails, Turn this on to check that all args are present
-            ifneq ($(CY_SECONDSTAGE),)
+            ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_proj eclipse vscode ewarm ewarm8 uvision uvision5 all),)
                 ifeq ($(OTA_BUILD_POST_VERBOSE),1)
                     # Check that all arguments for the POSTBUILD functionality are present
                     $(info MCUBOOT_XMC_SCRIPT_FILE_PATH     =$(MCUBOOT_XMC_SCRIPT_FILE_PATH))
@@ -952,7 +952,7 @@ ifneq ($(CY_SECONDSTAGE),)
                     $(info CY_SERVICE_APP_DESCR_ADDR        =$(CY_SERVICE_APP_DESCR_ADDR))
                     $(info BOOTSTRAP_SIZE                   =$(BOOTSTRAP_SIZE))
                 endif # OTA_BUILD_VERBOSE = POST
-            endif # SECOND STAGE
+            endif # MAKECMDGOALS
 
             # XMC7000 POSTBUILD call
             POSTBUILD+=$(MCUBOOT_XMC_SCRIPT_FILE_PATH) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) $(CY_PYTHON_PATH) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) \
@@ -978,7 +978,7 @@ ifneq ($(CY_SECONDSTAGE),)
             endif
 
             # If POSTBUILD fails, Turn this on to check all args are present
-            ifneq ($(CY_SECONDSTAGE),)
+            ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_proj eclipse vscode ewarm ewarm8 uvision uvision5 all),)
                 ifeq ($(OTA_BUILD_POST_VERBOSE),1)
                     $(info SIGN_SCRIPT_FILE_PATH            =$(SIGN_SCRIPT_FILE_PATH))
                     $(info OUTPUT_FILE_PATH                 =$(OUTPUT_FILE_PATH))
@@ -998,7 +998,7 @@ ifneq ($(CY_SECONDSTAGE),)
                     $(info CY_HEX_TO_BIN                    =$(CY_HEX_TO_BIN))
                     $(info CY_SIGNING_KEY_ARG               =$(CY_SIGNING_KEY_ARG))
                 endif # OTA_BUILD_VERBOSE = POST
-            endif # SECOND STAGE
+            endif # MAKECMDGOALS
 
             POSTBUILD=$(SIGN_SCRIPT_FILE_PATH) $(OUTPUT_FILE_PATH) $(APPNAME) $(CY_PYTHON_PATH)\
                         $(CY_ELF_TO_HEX) $(CY_ELF_TO_HEX_OPTIONS) $(CY_ELF_TO_HEX_FILE_ORDER)\
@@ -1008,11 +1008,11 @@ ifneq ($(CY_SECONDSTAGE),)
         endif # Not PSoC
     else
         # POSTBUILD script provided by the Application.
-        ifneq ($(CY_SECONDSTAGE),)
+        ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_proj eclipse vscode ewarm ewarm8 uvision uvision5 all),)
             $(info "")
             $(info OTA_APP_POSTBUILD is defined by Application Makefile.)
             $(info "")
-        endif # SECOND STAGE
+        endif # MAKECMDGOALS
         POSTBUILD=$(OTA_APP_POSTBUILD)
     endif #OTA_APP_POSTBUILD
-endif #CY_SECONDSTAGE
+endif # MAKECMDGOALS
