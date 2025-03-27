@@ -7,7 +7,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2024, Cypress Semiconductor Corporation (an Infineon company)
+# Copyright 2018-2025, Cypress Semiconductor Corporation (an Infineon company)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -653,6 +653,8 @@ ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_p
         MCUBOOT_KEY_FILE := $(shell echo $(CY_SIGN_KEY_PATH)|rev|cut -d "/" -f1 |rev )
         MCUBOOT_KEY_DIR := $(shell echo "$(CY_SIGN_KEY_PATH)" | sed "s@/$(MCUBOOT_KEY_FILE)@@")
 
+        HEADER_OFFSET?=0
+
         #--------------------------------------
         # CYW20829 and CYW89829 POSTBUILD
         #--------------------------------------
@@ -1001,7 +1003,7 @@ ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_p
             endif # MAKECMDGOALS
 
             POSTBUILD=$(SIGN_SCRIPT_FILE_PATH) $(OUTPUT_FILE_PATH) $(APPNAME) $(CY_PYTHON_PATH)\
-                        $(CY_ELF_TO_HEX) $(CY_ELF_TO_HEX_OPTIONS) $(CY_ELF_TO_HEX_FILE_ORDER)\
+                        $(CY_ELF_TO_HEX) $(HEADER_OFFSET) $(CY_ELF_TO_HEX_OPTIONS) $(CY_ELF_TO_HEX_FILE_ORDER)\
                         $(MCUBOOT_SCRIPT_FILE_DIR) $(IMGTOOL_SCRIPT_NAME) $(IMGTOOL_COMMAND_ARG) $(FLASH_ERASE_SECONDARY_SLOT_VALUE) $(MCUBOOT_HEADER_SIZE)\
                         $(MCUBOOT_MAX_IMG_SECTORS) $(APP_BUILD_VERSION) $(FLASH_AREA_IMG_1_PRIMARY_START) $(FLASH_AREA_IMG_1_PRIMARY_SIZE)\
                         $(CY_HEX_TO_BIN) $(CY_SIGNING_KEY_ARG)

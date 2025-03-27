@@ -6,6 +6,11 @@ See the [README.md](./README.md) for a complete description of the OTA bootloade
 
 ## Changelog
 
+### v1.5.3
+
+- Minor postbuild script update for PSOC62.
+- Minor Documentation updates.
+
 ### v1.5.2
 
 - Template linkers updated for XMC7200 and XMC7100.
@@ -61,11 +66,11 @@ This version of the library was validated for compatibility with the following s
 
 | Software and Tools                                        | Version |
 | :---                                                      | :----:  |
-| ModusToolbox&trade; Software Environment                  | 3.3     |
-| - ModusToolbox&trade; Device Configurator                 | 5.10    |
-| - ModusToolbox&trade; Bluetooth Configurator              | 3.00    |
-| - ModusToolbox&trade; CapSense Configurator / Tuner tools | 6.30.0  |
-| Peripheral Driver Library (PDL CAT1)                      | 3.14    |
+| ModusToolbox&trade; Software Environment                  | 3.4     |
+| - ModusToolbox&trade; Device Configurator                 | 5.20    |
+| - ModusToolbox&trade; Bluetooth Configurator              | 3.10    |
+| - ModusToolbox&trade; CapSense Configurator / Tuner tools | 6.40.0  |
+| Peripheral Driver Library (PDL CAT1)                      | 3.16    |
 | GCC Compiler                                              | 11.3.1  |
 | IAR Compiler                                              | 9.50.2  |
 | Arm Compiler 6                                            | 6.22    |

@@ -76,6 +76,11 @@ SECTIONS
         *(.dtors)
 
         KEEP(*(.eh_frame*))
+
+        /* Moving files under the cy_xip region to flash because this template is modified to run flash from XIP ORIGIN */
+        /* Change required from wifi-resources release-v2.0.0, to move wifi firmware resources to XIP region */
+        KEEP(*(.cy_xip))
+        KEEP(*(.cy_xip.*))
     } > flash
 
     .ARM.extab :
