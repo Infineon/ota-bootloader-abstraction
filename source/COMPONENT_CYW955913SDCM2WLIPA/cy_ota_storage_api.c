@@ -759,9 +759,11 @@ cy_rslt_t cy_ota_storage_switch_to_new_image(uint16_t app_id)
     }
 }
 
-cy_rslt_t cy_ota_storage_get_app_info(void* file_des, cy_ota_app_info_t *app_info)
+cy_rslt_t cy_ota_storage_get_app_info(uint16_t slot_id, uint16_t image_num, cy_ota_app_info_t *app_info)
 {
     cy_rslt_t result = CY_RSLT_SUCCESS;
-
+    (void)slot_id;
+    (void)image_num;
+    (void)app_info;
     return result;
 }

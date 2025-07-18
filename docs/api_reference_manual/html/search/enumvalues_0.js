@@ -3,5 +3,11 @@ var searchData=
   ['cy_5fota_5fmem_5ftype_5fexternal_5fflash',['CY_OTA_MEM_TYPE_EXTERNAL_FLASH',['../group__group__ota__bootsupport__typedefs.html#ggaab757db963c4503260e549eadfdbaf09a62af14d0a3f7a5928e8b3d31ba74c9e4',1,'cy_ota_flash.h']]],
   ['cy_5fota_5fmem_5ftype_5finternal_5fflash',['CY_OTA_MEM_TYPE_INTERNAL_FLASH',['../group__group__ota__bootsupport__typedefs.html#ggaab757db963c4503260e549eadfdbaf09aaaba78afcb0a2d0e2ecce4d38985f249',1,'cy_ota_flash.h']]],
   ['cy_5fota_5fmem_5ftype_5fnone',['CY_OTA_MEM_TYPE_NONE',['../group__group__ota__bootsupport__typedefs.html#ggaab757db963c4503260e549eadfdbaf09ad422b17cdb988fcc9e56655cc8e52326',1,'cy_ota_flash.h']]],
-  ['cy_5fota_5fmem_5ftype_5frram',['CY_OTA_MEM_TYPE_RRAM',['../group__group__ota__bootsupport__typedefs.html#ggaab757db963c4503260e549eadfdbaf09a2665c22f1ff174dea35b677a57ba76ec',1,'cy_ota_flash.h']]]
+  ['cy_5fota_5fmem_5ftype_5frram',['CY_OTA_MEM_TYPE_RRAM',['../group__group__ota__bootsupport__typedefs.html#ggaab757db963c4503260e549eadfdbaf09a2665c22f1ff174dea35b677a57ba76ec',1,'cy_ota_flash.h']]],
+  ['cy_5fota_5fslot_5fstate_5factive',['CY_OTA_SLOT_STATE_ACTIVE',['../group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aafaa5e229d159713998f62b79f02ca585',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fslot_5fstate_5finactive',['CY_OTA_SLOT_STATE_INACTIVE',['../group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aa9def02392c30142a305508ede83671a5',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fslot_5fstate_5fno_5fimage',['CY_OTA_SLOT_STATE_NO_IMAGE',['../group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aa9ece5541fbf2a3e32aa25faec662a765',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fslot_5fstate_5fpending',['CY_OTA_SLOT_STATE_PENDING',['../group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aa4ff35824453fd5455780157a63a75c32',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fslot_5fstate_5funknown',['CY_OTA_SLOT_STATE_UNKNOWN',['../group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aa40e48c51b071e86d5fdb06c5371c1c21',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fslot_5fstate_5fverifying',['CY_OTA_SLOT_STATE_VERIFYING',['../group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aaa10067bca0ec30ccfd1d70dbba24110f',1,'cy_ota_storage_api.h']]]
 ];

@@ -7,7 +7,6 @@ This guide shows Makefile variables and build DEFINES used when building an appl
 
 ## 2. Standard MCUBootloader based OTA Application Makefile Defines
 
-
 | Makefile Variable | Example | Description |
 | ----------------- | ------- | ----------- |
 | TARGET?=\<target_name\> | TARGET?=CY8CPROTO-062-4343W | Target Kit for build |

@@ -118,6 +118,22 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:gaab757db963c4503260e549eadfdbaf09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration of OTA storage types.  <a href="group__group__ota__bootsupport__typedefs.html#gaab757db963c4503260e549eadfdbaf09">More...</a><br /></td></tr>
 <tr class="separator:gaab757db963c4503260e549eadfdbaf09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7c9d2f801f8307ef5691de969247ea8a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__typedefs.html#ga7c9d2f801f8307ef5691de969247ea8a">cy_ota_slot_state_t</a> { <br />
+&#160;&#160;<a class="el" href="group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aa9ece5541fbf2a3e32aa25faec662a765">CY_OTA_SLOT_STATE_NO_IMAGE</a> = 0,
+<br />
+&#160;&#160;<a class="el" href="group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aafaa5e229d159713998f62b79f02ca585">CY_OTA_SLOT_STATE_ACTIVE</a>,
+<br />
+&#160;&#160;<a class="el" href="group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aa4ff35824453fd5455780157a63a75c32">CY_OTA_SLOT_STATE_PENDING</a>,
+<br />
+&#160;&#160;<a class="el" href="group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aaa10067bca0ec30ccfd1d70dbba24110f">CY_OTA_SLOT_STATE_VERIFYING</a>,
+<br />
+&#160;&#160;<a class="el" href="group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aa9def02392c30142a305508ede83671a5">CY_OTA_SLOT_STATE_INACTIVE</a>,
+<br />
+&#160;&#160;<a class="el" href="group__group__ota__bootsupport__typedefs.html#gga7c9d2f801f8307ef5691de969247ea8aa40e48c51b071e86d5fdb06c5371c1c21">CY_OTA_SLOT_STATE_UNKNOWN</a>
+<br />
+ }</td></tr>
+<tr class="memdesc:ga7c9d2f801f8307ef5691de969247ea8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration of MCUboot based image state.  <a href="group__group__ota__bootsupport__typedefs.html#ga7c9d2f801f8307ef5691de969247ea8a">More...</a><br /></td></tr>
+<tr class="separator:ga7c9d2f801f8307ef5691de969247ea8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
 <a class="anchor" id="gaab757db963c4503260e549eadfdbaf09"></a>
@@ -143,6 +159,41 @@ Enumerations</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="ggaab757db963c4503260e549eadfdbaf09ad422b17cdb988fcc9e56655cc8e52326"></a>CY_OTA_MEM_TYPE_NONE&#160;</td><td class="fielddoc">
 <p>Default value. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<a class="anchor" id="ga7c9d2f801f8307ef5691de969247ea8a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__group__ota__bootsupport__typedefs.html#ga7c9d2f801f8307ef5691de969247ea8a">cy_ota_slot_state_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Enumeration of MCUboot based image state. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="gga7c9d2f801f8307ef5691de969247ea8aa9ece5541fbf2a3e32aa25faec662a765"></a>CY_OTA_SLOT_STATE_NO_IMAGE&#160;</td><td class="fielddoc">
+<p>Corrupted or no image. </p>
+</td></tr>
+<tr><td class="fieldname"><a class="anchor" id="gga7c9d2f801f8307ef5691de969247ea8aafaa5e229d159713998f62b79f02ca585"></a>CY_OTA_SLOT_STATE_ACTIVE&#160;</td><td class="fielddoc">
+<p>Confirmed Image. </p>
+<p>Active slot. </p>
+</td></tr>
+<tr><td class="fieldname"><a class="anchor" id="gga7c9d2f801f8307ef5691de969247ea8aa4ff35824453fd5455780157a63a75c32"></a>CY_OTA_SLOT_STATE_PENDING&#160;</td><td class="fielddoc">
+<p>Boot in next reboot. </p>
+</td></tr>
+<tr><td class="fieldname"><a class="anchor" id="gga7c9d2f801f8307ef5691de969247ea8aaa10067bca0ec30ccfd1d70dbba24110f"></a>CY_OTA_SLOT_STATE_VERIFYING&#160;</td><td class="fielddoc">
+<p>Image in slot being verified. </p>
+</td></tr>
+<tr><td class="fieldname"><a class="anchor" id="gga7c9d2f801f8307ef5691de969247ea8aa9def02392c30142a305508ede83671a5"></a>CY_OTA_SLOT_STATE_INACTIVE&#160;</td><td class="fielddoc">
+<p>Verified image but in disabled slot. </p>
+</td></tr>
+<tr><td class="fieldname"><a class="anchor" id="gga7c9d2f801f8307ef5691de969247ea8aa40e48c51b071e86d5fdb06c5371c1c21"></a>CY_OTA_SLOT_STATE_UNKNOWN&#160;</td><td class="fielddoc">
+<p>Reserved. </p>
 </td></tr>
 </table>
 

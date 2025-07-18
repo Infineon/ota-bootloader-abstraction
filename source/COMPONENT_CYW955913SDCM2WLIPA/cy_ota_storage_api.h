@@ -142,12 +142,12 @@ cy_rslt_t cy_ota_storage_switch_to_new_image(uint16_t app_id);
  *
  * This call needs to be after reboot and Bootloader has started the upgrade version of Application.
  *
- * @param[in]        file_des        Pointer to the storage context.
- * @param[in]        app_info        Pointer to the OTA Application information structure.
+ * @param[in]        slot_id         Memory slot ID.
+ * @param[in]        image_num       Image number.
+ * @param[out]       app_info        Pointer to the OTA Application information structure.
  *
  * @return  CY_RSLT_SUCCESS
  *          CY_RSLT_OTA_ERROR_GENERAL
  */
-cy_rslt_t cy_ota_storage_get_app_info(void* file_des, cy_ota_app_info_t *app_info);
-
+cy_rslt_t cy_ota_storage_get_app_info(uint16_t slot_id, uint16_t image_num, cy_ota_app_info_t *app_info);
 #endif /* CY_OTA_STORAGE_API_H_ */

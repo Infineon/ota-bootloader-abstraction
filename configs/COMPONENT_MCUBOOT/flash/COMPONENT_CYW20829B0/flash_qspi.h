@@ -31,47 +31,41 @@
  * so agrees to indemnify Cypress against all liability.
  */
 
-#ifndef SYSFLASH_H
-#define SYSFLASH_H
+/*
+ *  Header file for 20829 external flash driver adoption layer.
+ */
+
+#ifndef FLASH_QSPI_H
+#define FLASH_QSPI_H
 
 #include <stdint.h>
-#include "cy_syslib.h"
+#include "cy_sysint.h"
+#include "cy_smif.h"
+#include "cy_smif_memslot.h"
 
-#ifndef MCUBOOT_IMAGE_NUMBER
-#ifdef MCUBootApp
-#warning Undefined MCUBOOT_IMAGE_NUMBER. Assuming 1 (single-image).
-#endif /* MCUBootApp */
-#define MCUBOOT_IMAGE_NUMBER 1
-#endif /* MCUBOOT_IMAGE_NUMBER */
+#define EXT_FLASH_DEV_DISABLED  0
+#define EXT_FLASH_DEV_FAILED    -1
 
-#if ((MCUBOOT_IMAGE_NUMBER < 1) || (MCUBOOT_IMAGE_NUMBER > 4))
-#error Unsupported MCUBOOT_IMAGE_NUMBER. Set it to between 1 and 4.
-#endif /* ((MCUBOOT_IMAGE_NUMBER < 1) || (MCUBOOT_IMAGE_NUMBER > 4)) */
+#ifndef EXTERNAL_MEMORY_ERASE_VALUE_PLATFORM
+/* This is the value of external flash bytes after an erase */
+#define EXTERNAL_MEMORY_ERASE_VALUE_PLATFORM    (0xFFu)
+#endif /* EXTERNAL_MEMORY_ERASE_VALUE_PLATFORM */
 
-#define FLASH_AREA_BOOTLOADER        (0u)
+cy_en_smif_status_t qspi_init_sfdp(uint32_t smif_id);
+cy_en_smif_status_t qspi_init(cy_stc_smif_block_config_t *blk_config);
+cy_en_smif_status_t qspi_init_hardware(void);
+void qspi_deinit(uint32_t smif_id);
+uint8_t qspi_get_erased_val(void);
+uint32_t qspi_get_prog_size(void);
+uint32_t qspi_get_erase_size(void);
+uint32_t qspi_get_mem_size(void);
+int32_t qspi_get_status(void);
 
-#define FLASH_AREA_IMG_1_PRIMARY     (1u)
-#define FLASH_AREA_IMG_1_SECONDARY   (2u)
+void qspi_enable(void);
+void qspi_disable(void);
 
-#define FLASH_AREA_IMAGE_SCRATCH     (3u)
+SMIF_Type *qspi_get_device(void);
+cy_stc_smif_context_t *qspi_get_context(void);
+cy_stc_smif_mem_config_t *qspi_get_memory_config(uint8_t index);
 
-#if MCUBOOT_IMAGE_NUMBER >= 2
-#define FLASH_AREA_IMG_2_PRIMARY     (4u)
-#define FLASH_AREA_IMG_2_SECONDARY   (5u)
-#endif /* MCUBOOT_IMAGE_NUMBER >= 2 */
-
-#define FLASH_AREA_IMAGE_SWAP_STATUS (7u)
-
-#if MCUBOOT_IMAGE_NUMBER >= 3
-#define FLASH_AREA_IMG_3_PRIMARY     (8u)
-#define FLASH_AREA_IMG_3_SECONDARY   (9u)
-#endif /* MCUBOOT_IMAGE_NUMBER >= 3 */
-
-#if MCUBOOT_IMAGE_NUMBER == 4
-#define FLASH_AREA_IMG_4_PRIMARY     (10u)
-#define FLASH_AREA_IMG_4_SECONDARY   (11u)
-#endif /* MCUBOOT_IMAGE_NUMBER == 4 */
-
-#define FLASH_AREA_ERROR             255u  /* Invalid flash area */
-
-#endif /* SYSFLASH_H */
+#endif /* FLASH_QSPI_H */

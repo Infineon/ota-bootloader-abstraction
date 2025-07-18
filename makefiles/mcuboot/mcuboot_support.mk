@@ -54,9 +54,92 @@ APP_BOOTSTRAP_SIZE=0x2400
 CY_INTERNAL_FLASH_ERASE_VALUE=0x00
 CY_EXTERNAL_FLASH_ERASE_VALUE=0xFF
 
-# Define App version
-APP_BUILD_VERSION?=$(APP_VERSION_MAJOR).$(APP_VERSION_MINOR).$(APP_VERSION_BUILD)
+APP_VERSION_REVISION?=0
+APP_VERSION_SLOT?=0
+CY_COMPANY_ID?=0x1234
+CY_PRODUCT_ID?=0x5678
+CY_TLV_INDEX_COMPANY_ID ?=0x80
+CY_TLV_INDEX_PRODUCT_ID ?=0x81
+
+ifeq ($(CY_MCUBOOT_OTA_IMAGE_VERIFICATION),1)
+    CY_OTA_IMAGE_VERIFICATION ?=1
+    CY_OTA_DIRECT_XIP ?=1
+    ifeq ($(CY_OTA_IMAGE_VERIFICATION),1)
+        DEFINES+=CY_OTA_IMAGE_VERIFICATION=$(CY_OTA_IMAGE_VERIFICATION)
+    endif
+
+    ifeq ($(ENABLE_ON_THE_FLY_ENCRYPTION),1)
+        MCUBOOT_ENC_IMAGES_SMIF =1
+        DEFINES+=MCUBOOT_ENC_IMAGES_SMIF=$(MCUBOOT_ENC_IMAGES_SMIF)
+    endif
+
+    ifeq ($(CY_OTA_DIRECT_XIP),1)
+        DEFINES+=CY_OTA_DIRECT_XIP=$(CY_OTA_DIRECT_XIP)
+        # APP revision is combination of app revision and app slot id(0 or 1)
+        NEW_REVISION := $(shell echo $$(( $(APP_VERSION_REVISION) << 8 | $(APP_VERSION_SLOT) )))
+        override APP_VERSION_REVISION := $(NEW_REVISION)
+    endif
+    # Define App version
+    APP_BUILD_VERSION=$(APP_VERSION_MAJOR).$(APP_VERSION_MINOR).$(APP_VERSION_REVISION)+$(APP_VERSION_BUILD)
+else
+    CY_OTA_DIRECT_XIP ?=0
+    CY_OTA_IMAGE_VERIFICATION ?=0
+    APP_BUILD_VERSION?=$(APP_VERSION_MAJOR).$(APP_VERSION_MINOR).$(APP_VERSION_BUILD)
+endif
+
 DEFINES+=APP_BUILD_VERSION=$(APP_BUILD_VERSION)
+
+###################################################################################################
+# MCUBoot Includes and source for IMAGE_VERIFY
+###################################################################################################
+ifeq ($(CY_OTA_IMAGE_VERIFICATION),1)
+    CY_OTA_IGNORE ?= $(SEARCH_mcuboot)
+
+    # Define mcuboot root path
+    MCUBOOT_PATH ?= $(SEARCH_mcuboot)
+    MCUBOOT_CY_PATH ?= $(MCUBOOT_PATH)/boot/cypress
+    MBEDTLS_PATH ?= $(MCUBOOT_CY_PATH)/../../ext
+
+    CY_MCUBOOT_INCLUDE ?= $(MCUBOOT_CY_PATH)/platforms/utils/CYW20829 \
+    $(MCUBOOT_CY_PATH)/platforms/BSP/CYW20829/system \
+    $(MCUBOOT_CY_PATH)/platforms/boot_rng \
+    $(MCUBOOT_CY_PATH)/platforms/security_counter/CYW20829 \
+    $(MCUBOOT_CY_PATH)/platforms/security_counter \
+    $(MCUBOOT_CY_PATH)/platforms/memory \
+    $(MCUBOOT_CY_PATH)/platforms/memory/flash_map_backend \
+    $(MCUBOOT_CY_PATH)/platforms/memory/CYW20829 \
+    $(MCUBOOT_CY_PATH)/platforms/memory/CYW20829/include \
+    $(MCUBOOT_CY_PATH)/platforms/memory/external_memory \
+    $(MCUBOOT_CY_PATH)/platforms/memory/CYW20829/flash_qspi \
+    $(MCUBOOT_CY_PATH)/libs/cy-mbedtls-acceleration \
+    $(MCUBOOT_CY_PATH)/libs/cy-mbedtls-acceleration/COMPONENT_CAT1/include \
+    $(MCUBOOT_CY_PATH)/libs/cy-mbedtls-acceleration/COMPONENT_CAT1/mbedtls_MXCRYPTOLITE \
+    $(MCUBOOT_CY_PATH)/../bootutil/include \
+    $(MCUBOOT_CY_PATH)/../bootutil/include/bootutil \
+    $(MCUBOOT_CY_PATH)/../bootutil/include/bootutil/crypto \
+    $(MCUBOOT_CY_PATH)/../bootutil/src \
+    $(MCUBOOT_CY_PATH)/.. \
+    $(MCUBOOT_CY_PATH) \
+    $(MCUBOOT_CY_PATH)/MCUBootApp \
+    $(MCUBOOT_CY_PATH)/MCUBootApp/config \
+    $(MCUBOOT_CY_PATH)/MCUBootApp/os \
+    $(MCUBOOT_CY_PATH)/platforms/crypto/CYW20829 \
+    $(MCUBOOT_CY_PATH)/../../ext/mbedtls/include \
+    $(MCUBOOT_CY_PATH)/../../ext/mbedtls/include/mbedtls \
+    $(MCUBOOT_CY_PATH)/../../ext/mbedtls/include/psa \
+    $(MCUBOOT_CY_PATH)/../../ext/mbedtls/library
+
+    CY_MCUBOOT_SOURCE ?= $(wildcard $(MCUBOOT_CY_PATH)/../bootutil/src/*.c) \
+    $(MCUBOOT_CY_PATH)/MCUBootApp/keys.c \
+    $(MCUBOOT_CY_PATH)/platforms/utils/CYW20829/platform_utils.c \
+    $(wildcard $(MCUBOOT_CY_PATH)/platforms/memory/*.c) \
+    $(wildcard $(MCUBOOT_CY_PATH)/platforms/memory/external_memory/*.c) \
+    $(wildcard $(MBEDTLS_PATH)/mbedtls/library/*.c)
+
+    CY_IGNORE+=$(CY_OTA_IGNORE)
+    SOURCES+=$(CY_MCUBOOT_SOURCE)
+    INCLUDES+=$(CY_MCUBOOT_INCLUDE)
+endif #CY_OTA_IMAGE_VERIFICATION
 
 ###################################################################################################
 # Default OTA_PLATFORM based on TARGET
@@ -251,6 +334,10 @@ ifneq ($(findstring $(OTA_PLATFORM), $(OTA_PSOC_06X_SUPPORTED_PLATFORMS)),)
     COMPONENTS+=OTA_PSOC_062
 endif
 
+ifeq ($(CY_OTA_IMAGE_VERIFICATION), 1)
+    COMPONENTS+=OTA_VERIFY
+endif
+
 ###################################################################################################
 # OTA Flashmap JSON file Usage
 ###################################################################################################
@@ -297,19 +384,19 @@ endif
 # Example output that is piped into flashmap.mk for an XIP application:
 #
 # AUTO-GENERATED FILE, DO NOT EDIT. ALL CHANGES WILL BE LOST!
-# FLASH_AREA_BOOTLOADER_DEV_ID :=FLASH_DEVICE_INTERNAL_FLASH
+# FLASH_AREA_BOOTLOADER_DEV_ID :=CY_FLASH_DEVICE_INTERNAL_FLASH
 # FLASH_AREA_BOOTLOADER_START :=0x000000
 # FLASH_AREA_BOOTLOADER_SIZE :=0x018000
-# FLASH_AREA_IMG_1_PRIMARY_DEV_ID :=FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)
+# FLASH_AREA_IMG_1_PRIMARY_DEV_ID :=CY_FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)
 # FLASH_AREA_IMG_1_PRIMARY_START :=0x000000
 # FLASH_AREA_IMG_1_PRIMARY_SIZE :=0x140200
-# FLASH_AREA_IMG_1_SECONDARY_DEV_ID :=FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)
+# FLASH_AREA_IMG_1_SECONDARY_DEV_ID :=CY_FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)
 # FLASH_AREA_IMG_1_SECONDARY_START :=0x180000
 # FLASH_AREA_IMG_1_SECONDARY_SIZE :=0x140200
-# FLASH_AREA_IMAGE_SWAP_STATUS_DEV_ID :=FLASH_DEVICE_INTERNAL_FLASH
+# FLASH_AREA_IMAGE_SWAP_STATUS_DEV_ID :=CY_FLASH_DEVICE_INTERNAL_FLASH
 # FLASH_AREA_IMAGE_SWAP_STATUS_START :=0x018000
 # FLASH_AREA_IMAGE_SWAP_STATUS_SIZE :=0x003c00
-# FLASH_AREA_IMAGE_SCRATCH_DEV_ID :=FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)
+# FLASH_AREA_IMAGE_SCRATCH_DEV_ID :=CY_FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)
 # FLASH_AREA_IMAGE_SCRATCH_START :=0x440000
 # FLASH_AREA_IMAGE_SCRATCH_SIZE :=0x080000
 # MCUBOOT_IMAGE_NUMBER := 1
@@ -331,19 +418,19 @@ ifeq ($(OTA_PLATFORM),PSOC_064_2M)
     FLASHMAP_PYTHON_SCRIPT=
 
     $(shell echo "# AUTO-GENERATED FILE, DO NOT EDIT. ALL CHANGES WILL BE LOST!" > flashmap.mk)
-    $(shell echo "FLASH_AREA_BOOTLOADER_DEV_ID :=FLASH_DEVICE_INTERNAL_FLASH" >> flashmap.mk)
+    $(shell echo "FLASH_AREA_BOOTLOADER_DEV_ID :=CY_FLASH_DEVICE_INTERNAL_FLASH" >> flashmap.mk)
     $(shell echo "FLASH_AREA_BOOTLOADER_START :=0x1e0000" >> flashmap.mk)
     $(shell echo "FLASH_AREA_BOOTLOADER_SIZE :=0x018000" >> flashmap.mk)
-    $(shell echo "FLASH_AREA_IMG_1_PRIMARY_DEV_ID :=FLASH_DEVICE_INTERNAL_FLASH" >> flashmap.mk)
+    $(shell echo "FLASH_AREA_IMG_1_PRIMARY_DEV_ID :=CY_FLASH_DEVICE_INTERNAL_FLASH" >> flashmap.mk)
     $(shell echo "FLASH_AREA_IMG_1_PRIMARY_START :=0x000000" >> flashmap.mk)
     $(shell echo "FLASH_AREA_IMG_1_PRIMARY_SIZE :=0x1c8000" >> flashmap.mk)
-    $(shell echo "FLASH_AREA_IMG_1_SECONDARY_DEV_ID :=FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)" >> flashmap.mk)
+    $(shell echo "FLASH_AREA_IMG_1_SECONDARY_DEV_ID :=CY_FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)" >> flashmap.mk)
     $(shell echo "FLASH_AREA_IMG_1_SECONDARY_START :=0x038400" >> flashmap.mk)
     $(shell echo "FLASH_AREA_IMG_1_SECONDARY_SIZE :=0x1c8000" >> flashmap.mk)
-    $(shell echo "FLASH_AREA_IMAGE_SWAP_STATUS_DEV_ID :=FLASH_DEVICE_INTERNAL_FLASH" >> flashmap.mk)
+    $(shell echo "FLASH_AREA_IMAGE_SWAP_STATUS_DEV_ID :=CY_FLASH_DEVICE_INTERNAL_FLASH" >> flashmap.mk)
     $(shell echo "FLASH_AREA_IMAGE_SWAP_STATUS_START :=0x1cc000" >> flashmap.mk)
     $(shell echo "FLASH_AREA_IMAGE_SWAP_STATUS_SIZE :=0x006c00" >> flashmap.mk)
-    $(shell echo "FLASH_AREA_IMAGE_SCRATCH_DEV_ID :=FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)" >> flashmap.mk)
+    $(shell echo "FLASH_AREA_IMAGE_SCRATCH_DEV_ID :=CY_FLASH_DEVICE_EXTERNAL_FLASH(CY_BOOT_EXTERNAL_DEVICE_INDEX)" >> flashmap.mk)
     $(shell echo "FLASH_AREA_IMAGE_SCRATCH_START :=0x280000" >> flashmap.mk)
     $(shell echo "FLASH_AREA_IMAGE_SCRATCH_SIZE :=0x0c0000" >> flashmap.mk)
     $(shell echo "MCUBOOT_IMAGE_NUMBER := 1" >> flashmap.mk)
@@ -433,7 +520,7 @@ endif # USE_XIP
 
 # TODO: Can we base this on the flash area at RUNTIME rather than defining it at build time?
 #       Flash areas / images are allowed to be placed willy-nilly
-ifeq ($(FLASH_AREA_IMG_1_SECONDARY_DEV_ID),FLASH_DEVICE_INTERNAL_FLASH)
+ifeq ($(FLASH_AREA_IMG_1_SECONDARY_DEV_ID),CY_FLASH_DEVICE_INTERNAL_FLASH)
     FLASH_ERASE_SECONDARY_SLOT_VALUE= $(CY_INTERNAL_FLASH_ERASE_VALUE)
 else
     FLASH_ERASE_SECONDARY_SLOT_VALUE= $(CY_EXTERNAL_FLASH_ERASE_VALUE)
@@ -491,14 +578,49 @@ endif
 
 ifeq ($(USE_EXTERNAL_FLASH),1)
     DEFINES+=OTA_USE_EXTERNAL_FLASH=1
+    ifeq ($(CY_OTA_IMAGE_VERIFICATION), 1)
+        DEFINES+=CY_BOOT_USE_EXTERNAL_FLASH
+    endif
 endif
 
 ifeq ($(CY_RUN_CODE_FROM_XIP),1)
     DEFINES+=CY_RUN_CODE_FROM_XIP=1
+    ifeq ($(CY_OTA_IMAGE_VERIFICATION), 1)
+        DEFINES+=USE_XIP
+    endif
 endif
 
 ifeq ($(CY_XIP_SMIF_MODE_CHANGE),1)
     DEFINES+=CY_XIP_SMIF_MODE_CHANGE=1
+endif
+
+ifeq ($(CY_OTA_IMAGE_VERIFICATION), 1)
+    USE_SWAP_STATUS ?=1
+    USE_SHARED_SLOT ?=0
+    MCUBOOT_PLATFORM_CHUNK_SIZE ?=4096U
+    MEMORY_ALIGN ?=0x1000
+    PLATFORM_MAX_TRAILER_PAGE_SIZE ?=0x1000
+    CY_MAX_EXT_FLASH_ERASE_SIZE ?=4096U
+    MCUBOOT_LOG_LEVEL ?=MCUBOOT_LOG_LEVEL_OFF
+    ifeq ($(CY_OTA_DIRECT_XIP), 1)
+        MCUBOOT_DIRECT_XIP ?=1
+        MCUBOOT_DIRECT_XIP_REVERT ?=1
+    endif
+
+    DEFINES+=MCUBOOT_FIH_PROFILE_OFF CY_FLASH_MAP_JSON MCUBOOT_BOOTSTRAP \
+    USE_SWAP_STATUS=$(USE_SWAP_STATUS) \
+    USE_SHARED_SLOT=$(USE_SHARED_SLOT) \
+    MCUBOOT_PLATFORM_CHUNK_SIZE=$(MCUBOOT_PLATFORM_CHUNK_SIZE) \
+    MEMORY_ALIGN=$(MEMORY_ALIGN) \
+    PLATFORM_MAX_TRAILER_PAGE_SIZE=$(PLATFORM_MAX_TRAILER_PAGE_SIZE) \
+    CY_MAX_EXT_FLASH_ERASE_SIZE=$(CY_MAX_EXT_FLASH_ERASE_SIZE) \
+    MCUBOOT_LOG_LEVEL=$(MCUBOOT_LOG_LEVEL) \
+    cy_stc_cryptolite_context_sha256_t=cy_stc_cryptolite_context_sha_t
+
+    ifeq ($(CY_OTA_DIRECT_XIP), 1)
+        DEFINES+=MCUBOOT_DIRECT_XIP=$(MCUBOOT_DIRECT_XIP) \
+        MCUBOOT_DIRECT_XIP_REVERT=$(MCUBOOT_DIRECT_XIP_REVERT)
+    endif
 endif
 
 ##################################
@@ -652,8 +774,48 @@ ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_p
         MCUBOOT_SCRIPT_FILE_DIR := $(shell echo "$(IMG_SIGNING_SCRIPT_TOOL_PATH)" | sed "s@/$(IMGTOOL_SCRIPT_NAME)@@")
         MCUBOOT_KEY_FILE := $(shell echo $(CY_SIGN_KEY_PATH)|rev|cut -d "/" -f1 |rev )
         MCUBOOT_KEY_DIR := $(shell echo "$(CY_SIGN_KEY_PATH)" | sed "s@/$(MCUBOOT_KEY_FILE)@@")
+        ifeq ($(CY_OTA_IMAGE_VERIFICATION), 1)
+            ECC256_KEY_FILE?=keys/cypress-test-ec-p256.pub
+            DEFINES+=ECC256_KEY_FILE="\"$(ECC256_KEY_FILE)\""
+        endif
 
         HEADER_OFFSET?=0
+
+        ifeq ($(CY_OTA_DIRECT_XIP), 1)
+            ifneq ($(filter $(APP_VERSION_SLOT),0 1),)
+                ifeq ($(APP_VERSION_SLOT), 0)
+                    $(info Application slot is Primary/0)
+                    SLOT_OFFSET ?=0
+                else
+                    $(info Application slot is Secondary/1)
+                    SLOT_OFFSET ?=$(FLASH_AREA_IMG_1_PRIMARY_SIZE)
+                endif
+                APP_ACTIVE_SLOT ?=$(APP_VERSION_SLOT)
+                DEFINES+=APP_ACTIVE_SLOT=$(APP_ACTIVE_SLOT)
+            else
+                $(error Invalid slot number !!!!!)
+            endif
+        else
+            SLOT_OFFSET ?=0
+            APP_ACTIVE_SLOT ?=0
+            DEFINES+=APP_ACTIVE_SLOT=$(APP_ACTIVE_SLOT)
+        endif
+
+        DEFINES+=SLOT_OFFSET=$(SLOT_OFFSET)
+
+        ifeq ($(TOOLCHAIN),GCC_ARM)
+             LDFLAGS+="-Wl,--defsym,SLOT_OFFSET=$(SLOT_OFFSET),--defsym,FLASH_AREA_IMG_1_PRIMARY_SIZE=$(FLASH_AREA_IMG_1_PRIMARY_SIZE)"
+        else
+            ifeq ($(TOOLCHAIN),IAR)
+                LDFLAGS+=--config_def SLOT_OFFSET=$(SLOT_OFFSET) --config_def FLASH_AREA_IMG_1_PRIMARY_SIZE=$(FLASH_AREA_IMG_1_PRIMARY_SIZE)
+            else
+                ifeq ($(TOOLCHAIN),ARM)
+                    LDFLAGS+=--pd=-DSLOT_OFFSET=$(SLOT_OFFSET) --pd=-DFLASH_AREA_IMG_1_PRIMARY_SIZE=$(FLASH_AREA_IMG_1_PRIMARY_SIZE)
+                else
+                    $(error Must define toolchain ! GCC_ARM, ARM, or IAR)
+                endif #ARM
+            endif #IAR
+        endif #GCC_ARM
 
         #--------------------------------------
         # CYW20829 and CYW89829 POSTBUILD
@@ -674,6 +836,11 @@ ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_p
             APPTYPE ?= flash
             OTA_BUILD_POST_VERBOSE ?=0
 
+            ifeq ($(CY_OTA_DIRECT_XIP), 1)
+                DEFINES+=CY_TLV_INDEX_COMPANY_ID=$(CY_TLV_INDEX_COMPANY_ID) \
+                CY_TLV_INDEX_PRODUCT_ID=$(CY_TLV_INDEX_PRODUCT_ID)
+            endif
+
             ifeq ($(CY_DEVICE_LCS), NORMAL_NO_SECURE)
                 ifeq ($(OTA_APP_POLICY_PATH),)
                     $(info Application makefile has not defined OTA_APP_POLICY_PATH. Using OTA library's default Policy file for 20829 & 89829 device.)
@@ -689,7 +856,9 @@ ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_p
             endif
 
             ifeq ($(CY_ENC_IMG), 1)
-                CY_IMG_PAD ?= 1
+                ifeq ($(CY_OTA_DIRECT_XIP), 0)
+                    CY_IMG_PAD ?= 1
+                endif
                 DEFINES+=CY_ENC_IMG=1
                 CY_OTA_APP_ADDRESS ?= $(shell expr $(shell printf "%d" $(FLASH_BASE_CBUS_ADDRESS)) + $(shell printf "%d" $(FLASH_AREA_IMG_1_PRIMARY_START)))
                 ifeq ($(CY_SMIF_ENC), 1)
@@ -865,7 +1034,23 @@ ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_p
                 $(CY_SIGN_IMG_ID) $(OTA_BUILD_POST_VERBOSE) \
                 $(CY_ENC_IMG) $(CY_ENC_KEY) $(CY_OEM_PRIVATE_KEY) $(CY_OTA_APP_ADDRESS) \
                 $(CY_OTA_APP_SECONDARY_ADDRESS) $(CY_SMIF_ENC) $(CY_NONCE) \
+                $(CY_OTA_DIRECT_XIP) \
+                $(CY_COMPANY_ID) $(CY_TLV_INDEX_COMPANY_ID) \
+                $(CY_PRODUCT_ID) $(CY_TLV_INDEX_PRODUCT_ID) \
                 $(CY_ADD_ARG);
+
+                ifeq ($(CY_OTA_DIRECT_XIP), 1)
+                    $(info "Creating $(CY_UPGRADE_FOLDER_NAME) for upgrade files")
+                    POSTBUILD+=mkdir $(CY_UPGRADE_FOLDER_NAME);
+
+                    ifeq ($(APP_ACTIVE_SLOT), 0)
+                        $(info "Copying upgrade image $(APPNAME)_$(APP_BUILD_VERSION)_ota_upgrade.bin for Primary slot(0)")
+                    else
+                        $(info "Copying upgrade image $(APPNAME)_$(APP_BUILD_VERSION)_ota_upgrade.bin for Secondary slot(1)")
+                    endif
+                    POSTBUILD+=cp $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/$(APPNAME).upgrade_signed.bin ./$(CY_UPGRADE_FOLDER_NAME);
+                    POSTBUILD+=mv ./$(CY_UPGRADE_FOLDER_NAME)/$(APPNAME).upgrade_signed.bin ./$(CY_UPGRADE_FOLDER_NAME)/$(APPNAME)_$(APP_BUILD_VERSION)_ota_upgrade.bin;
+                endif
             else
                 POSTBUILD+=$(MCUBOOT_SCRIPT_FILE_PATH) $(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR) \
                 $(CY_PYTHON_PATH) $(MTB_TOOLS__OUTPUT_CONFIG_DIR) $(APPNAME) \
@@ -881,7 +1066,23 @@ ifneq ($(findstring $(MAKECMDGOALS), build prebuild build_proj program program_p
                 $(CY_SERVICE_APP_DESCR_ADDR) $(BOOTSTRAP_SIZE) $(DEVICE_$(MPN_LIST)_SRAM_KB) \
                 $(CY_SIGN_IMG_ID) $(OTA_BUILD_POST_VERBOSE) \
                 $(CY_ENC_IMG) $(CY_ENC_KEY) $(CY_OEM_PRIVATE_KEY) $(CY_OTA_APP_ADDRESS) \
+                $(CY_OTA_DIRECT_XIP) \
+                $(CY_COMPANY_ID) $(CY_TLV_INDEX_COMPANY_ID) \
+                $(CY_PRODUCT_ID) $(CY_TLV_INDEX_PRODUCT_ID) \
                 $(CY_ADD_ARG);
+
+                ifeq ($(CY_OTA_DIRECT_XIP), 1)
+                    $(info "Creating $(CY_UPGRADE_FOLDER_NAME) for upgrade files")
+                    POSTBUILD+=mkdir $(CY_UPGRADE_FOLDER_NAME);
+
+                    ifeq ($(APP_ACTIVE_SLOT), 0)
+                        $(info "Copying upgrade image $(APPNAME)_$(APP_BUILD_VERSION)_ota_upgrade.bin for Primary slot(0)")
+                    else
+                        $(info "Copying upgrade image $(APPNAME)_$(APP_BUILD_VERSION)_ota_upgrade.bin for Secondary slot(1)")
+                    endif
+                    POSTBUILD+=cp $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/$(APPNAME).update.signed.bin ./$(CY_UPGRADE_FOLDER_NAME);
+                    POSTBUILD+=mv ./$(CY_UPGRADE_FOLDER_NAME)/$(APPNAME).update.signed.bin ./$(CY_UPGRADE_FOLDER_NAME)/$(APPNAME)_$(APP_BUILD_VERSION)_ota_upgrade.bin;
+                endif
             endif
         endif# end (CYW920829/CYW89829) section
 

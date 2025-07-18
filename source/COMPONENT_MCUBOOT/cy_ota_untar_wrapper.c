@@ -48,7 +48,7 @@
 #include "cyabs_rtos.h"
 
 #include "cy_ota_untar.h"
-#include "flash_map_backend.h"
+#include "cy_flash_map_backend.h"
 
 /* define CY_TEST_APP_VERSION_IN_TAR to test the application version in the
  * TAR archive at start of OTA image download.
@@ -154,6 +154,7 @@ static cy_untar_result_t ota_untar_write_callback(cy_untar_context_ptr ctxt, uin
     const struct flash_area *fap;
     cy_ota_storage_context_t *storage_ptr = (cy_ota_storage_context_t *)cb_arg;
 
+    (void)image;
     if((ctxt == NULL) || (buffer == NULL) || (storage_ptr == NULL))
     {
         return CY_UNTAR_ERROR;
@@ -182,13 +183,13 @@ static cy_untar_result_t ota_untar_write_callback(cy_untar_context_ptr ctxt, uin
         return CY_UNTAR_ERROR;
     }
 
-    if(flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image), &fap) != 0)
+    if(cy_flash_area_open(CY_FLASH_UPGRADE_AREA(APP_INACTIVE_SLOT, image), &fap) != 0)
     {
-        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() flash_area_open(%d) failed\n", __func__, image);
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() cy_flash_area_open(%d) failed\n", __func__, image);
         return CY_UNTAR_ERROR;
     }
 
-    if(flash_area_write(fap, file_offset, buffer, chunk_size) != 0)
+    if(cy_flash_area_write(fap, file_offset, buffer, chunk_size) != 0)
     {
         result = CY_RSLT_OTA_ERROR_WRITE_STORAGE;
     }
@@ -196,11 +197,11 @@ static cy_untar_result_t ota_untar_write_callback(cy_untar_context_ptr ctxt, uin
     if(result != CY_RSLT_SUCCESS)
     {
         cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() failed\n", __func__);
-        flash_area_close(fap);
+        cy_flash_area_close(fap);
         return CY_UNTAR_ERROR;
     }
 
-    flash_area_close(fap);
+    cy_flash_area_close(fap);
 
     return CY_UNTAR_SUCCESS;
 }
@@ -443,15 +444,15 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
         const struct flash_area *fap;
 
         cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() NON-TAR file\n", __func__);
-        if(flash_area_open(FLASH_AREA_IMAGE_SECONDARY(0), &fap) != 0)
+        if(cy_flash_area_open(CY_FLASH_UPGRADE_AREA(APP_INACTIVE_SLOT, 0), &fap) != 0)
         {
-            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() flash_area_open()\n", __func__);
+            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() cy_flash_area_open()\n", __func__);
             return CY_RSLT_OTA_ERROR_WRITE_STORAGE;
         }
 
         if(file_header.buffer_size)
         {
-            if(flash_area_write(fap, 0, file_header.buffer, file_header.buffer_size) != 0)
+            if(cy_flash_area_write(fap, 0, file_header.buffer, file_header.buffer_size) != 0)
             {
                 result = CY_RSLT_OTA_ERROR_WRITE_STORAGE;
             }
@@ -467,7 +468,7 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
             }
         }
 
-        if(flash_area_write(fap, chunk_info->offset, (chunk_info->buffer + copy_offset), chunk_info->size) != 0)
+        if(cy_flash_area_write(fap, chunk_info->offset, (chunk_info->buffer + copy_offset), chunk_info->size) != 0)
         {
             result = CY_RSLT_OTA_ERROR_WRITE_STORAGE;
         }
@@ -478,7 +479,7 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
             return CY_RSLT_OTA_ERROR_WRITE_STORAGE;
         }
 
-        flash_area_close( fap);
+        cy_flash_area_close( fap);
     }
 
     return CY_RSLT_SUCCESS;

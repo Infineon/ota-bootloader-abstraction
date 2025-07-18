@@ -64,6 +64,33 @@
 
 /***********************************************************************
  *
+ * defines & enums
+ *
+ **********************************************************************/
+/**
+ * \addtogroup group_ota_bootsupport_typedefs
+ * \{
+ */
+
+/**
+ * @brief Enumeration of MCUboot based image state.
+ */
+typedef enum
+{
+    CY_OTA_SLOT_STATE_NO_IMAGE = 0,   /**<  Corrupted or no image. */
+    CY_OTA_SLOT_STATE_ACTIVE,         /**<  Confirmed Image. Active slot. */
+    CY_OTA_SLOT_STATE_PENDING,        /**<  Boot in next reboot. */
+    CY_OTA_SLOT_STATE_VERIFYING,      /**<  Image in slot being verified. */
+    CY_OTA_SLOT_STATE_INACTIVE,       /**<  Verified image but in disabled slot. */
+    CY_OTA_SLOT_STATE_UNKNOWN         /**<  Reserved. */
+} cy_ota_slot_state_t;
+
+/** \} group_ota_typedefs */
+
+#define APP_INACTIVE_SLOT   (APP_ACTIVE_SLOT ^ 1)
+
+/***********************************************************************
+ *
  * Functions
  *
  **********************************************************************/
@@ -142,10 +169,37 @@ cy_rslt_t cy_ota_storage_close(cy_ota_storage_context_t *storage_ptr);
 cy_rslt_t cy_ota_storage_verify(cy_ota_storage_context_t *storage_ptr);
 
 /**
- * @brief Application has validated the new OTA Image
+ * @brief Set boot pending
+ *
+ * Marks the image in the inactive slot as pending.
+ * On the next reboot, the system will perform a one-time boot of the the inactive slot image.
+ *
+ * @param[in]   storage_ptr     Pointer to the OTA Agent storage context @ref cy_ota_storage_context_t
+ *
+ * @return      CY_RSLT_SUCCESS
+ *              CY_RSLT_OTA_ERROR_GENERAL
+ */
+cy_rslt_t cy_ota_storage_set_boot_pending(cy_ota_storage_context_t *storage_ptr);
+
+/**
+ * @brief Get boot pending status of the image in inactive slot
+ *
+ * @param[in]   app_id          Application ID.
+ * @param[out]  status          Pointer to the status variable to store boot pending status.
+ *                              CY_MCUBOOT_SWAP_TYPE_NONE(1)
+ *                              CY_MCUBOOT_SWAP_TYPE_TEST(2)
+ *                              CY_MCUBOOT_SWAP_TYPE_PERM(3)
+ *                              CY_MCUBOOT_SWAP_TYPE_REVERT(4)
+ *
+ * @return      CY_RSLT_SUCCESS
+ *              CY_RSLT_OTA_ERROR_GENERAL
+ */
+cy_rslt_t cy_ota_storage_get_boot_pending_status(uint16_t app_id, uint8_t *status);
+
+/**
+ * @brief Application has validated the new OTA Image in active slot and committing it.
  *
  * This call needs to be after reboot and Bootloader has started the upgrade version of Application.
- *      to the Primary Slot.
  *
  * @param[in]   app_id          Application ID.
  *
@@ -155,18 +209,60 @@ cy_rslt_t cy_ota_storage_verify(cy_ota_storage_context_t *storage_ptr);
 cy_rslt_t cy_ota_storage_image_validate(uint16_t app_id);
 
 /**
+ * @brief Get validate/commit status of the OTA Image in active slot.
+ *
+ * This call needs to be after reboot and Bootloader has started the upgrade version of Application.
+ *
+ * @param[in]   app_id          Application ID.
+ * @param[out]  status          Pointer to the status variable to store image validate status.
+ *                              CY_MCUBOOT_FLAG_SET(1)
+ *                              CY_MCUBOOT_FLAG_BAD(2)
+ *                              CY_MCUBOOT_FLAG_UNSET(3)
+ *                              CY_MCUBOOT_FLAG_ANY(4)
+ *
+ * @return      CY_RSLT_SUCCESS
+ *              CY_RSLT_OTA_ERROR_GENERAL
+ */
+cy_rslt_t cy_ota_storage_get_image_validate_status(uint16_t app_id, uint8_t *status);
+
+/**
  * @brief Get Application image information
  *
  * This call needs to be after reboot and Bootloader has started the upgrade version of Application.
- *      to the Primary Slot.
  *
- * @param[in]        file_des        Pointer to the storage context.
- * @param[in]        app_info        Pointer to the OTA Application information structure.
+ * @param[in]        slot_id         Memory slot ID.
+ * @param[in]        image_num       Image number.
+ * @param[out]       app_info        Pointer to the OTA Application information structure.
  *
  * @return  CY_RSLT_SUCCESS
  *          CY_RSLT_OTA_ERROR_GENERAL
  */
-cy_rslt_t cy_ota_storage_get_app_info(void* file_des, cy_ota_app_info_t *app_info);
+cy_rslt_t cy_ota_storage_get_app_info(uint16_t slot_id, uint16_t image_num, cy_ota_app_info_t *app_info);
+
+/**
+ * @brief Get Application slot state information
+ *
+ * @param[in]        slot_id         Slot ID.
+ * @param[in]        image_num       Image number.
+ * @param[out]       state           Pointer to the OTA Application state variable.
+ *
+ * @return  CY_RSLT_SUCCESS
+ *          CY_RSLT_OTA_ERROR_GENERAL
+ */
+cy_rslt_t cy_ota_storage_get_slot_state(uint16_t slot_id, uint16_t image_num, cy_ota_slot_state_t *state);
+
+/**
+ * @brief Set Application slot state information
+ *
+ * @param[in]        slot_id         Slot ID.
+ * @param[in]        image_num       Image number.
+ * @param[out]       state           OTA Application state variable.
+ *
+ * @return  CY_RSLT_SUCCESS
+ *          CY_RSLT_OTA_ERROR_GENERAL
+ */
+cy_rslt_t cy_ota_storage_set_slot_state(uint16_t slot_id, uint16_t image_num, cy_ota_slot_state_t state);
+
 
 /** \} group_ota_bootsupport_functions */
 

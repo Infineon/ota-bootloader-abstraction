@@ -123,13 +123,18 @@
                     (void)Cy_SMIF_SetMode(SMIF0, CY_SMIF_MEMORY);   \
                     Cy_SysLib_ExitCriticalSection(interruptState);
 
-
 #else
 #define PRE_SMIF_ACCESS_TURN_OFF_XIP
 #define POST_SMIF_ACCESS_TURN_ON_XIP
 #endif
 
 #define CY_BOOT_TRAILER_MAX_UPDATE_SIZE             (16)
+
+#define CY_SS0_SMIF_ID         (1U) /* Assume SlaveSelect_0 is used for External Memory */
+
+#if defined(CY_OTA_DIRECT_XIP)
+#define CY_GET_XIP_REMAP_ADDR(addr) ((addr) - CY_XIP_BASE + CY_XIP_CBUS_BASE)
+#endif
 
 /**********************************************************************************************************************************
  * local variables & data
@@ -715,6 +720,22 @@ cy_rslt_t cy_ota_mem_init( void )
             goto _bail;
         }
     }
+
+#if (defined (CY_MCUBOOT_OTA_IMAGE_VERIFICATION) || defined (CY_OTA_IMAGE_VERIFICATION))
+    #include "flash_qspi.h"
+    cy_en_smif_status_t qspi_status = CY_SMIF_SUCCESS;
+    qspi_status = qspi_init_sfdp(CY_SS0_SMIF_ID);
+    if(CY_SMIF_SUCCESS == qspi_status)
+    {
+        result = CY_RSLT_SUCCESS;
+    }
+    else
+    {
+        result = CY_RSLT_TYPE_ERROR;
+        goto _bail;
+    }
+#endif
+
 #else /* NON - CYW20829B0LKML/CYW89829B01MKSBG */
     #if !defined(CY_RUN_CODE_FROM_XIP) && (OTA_USE_EXTERNAL_FLASH)
         {
@@ -723,10 +744,9 @@ cy_rslt_t cy_ota_mem_init( void )
              * 0 - SMIF disabled (no external memory);
              * 1, 2, 3 or 4 - slave select line memory module is connected to.
              */
-    #define SMIF_ID         (1U) /* Assume SlaveSelect_0 is used for External Memory */
-    #include "flash_qspi.h"
+            #include "flash_qspi.h"
             cy_en_smif_status_t qspi_status = CY_SMIF_SUCCESS;
-            qspi_status = qspi_init_sfdp(SMIF_ID);
+            qspi_status = qspi_init_sfdp(CY_SS0_SMIF_ID);
             if(CY_SMIF_SUCCESS == qspi_status)
             {
                 result = CY_RSLT_SUCCESS;
@@ -801,6 +821,32 @@ cy_rslt_t cy_ota_mem_read( cy_ota_mem_type_t mem_type, uint32_t addr, void *data
     else if( mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH )
     {
 #if (defined (CY_IP_MXSMIF) && !defined (XMC7100) && !defined (XMC7200))
+#if (defined (CY_OTA_DIRECT_XIP) && defined (ENABLE_ON_THE_FLY_ENCRYPTION))
+        if (addr <= CY_SMIF_BASE_MEM_OFFSET)
+        {
+            addr += CY_SMIF_BASE_MEM_OFFSET;
+        }
+
+        uintptr_t src = CY_GET_XIP_REMAP_ADDR(addr);
+        size_t mem_sz = 0;
+        if (IS_FLAG_SET(FLAG_HAL_INIT_DONE))
+        {
+            if (SMIF0 != NULL)
+            {
+                mem_sz = smifBlockConfig.memConfig[MEM_SLOT]->deviceCfg->memSize;
+            }
+        }
+
+        if ((src >= CY_XIP_CBUS_BASE) && (src <= (CY_XIP_CBUS_BASE + mem_sz)))
+        {
+            if ((src + len) <= (CY_XIP_CBUS_BASE + mem_sz))
+            {
+                memcpy((void *)data, (const void *)src, len);
+                return CY_RSLT_SUCCESS;
+            }
+        }
+        return CY_RSLT_TYPE_ERROR;
+#else
         cy_en_smif_status_t cy_smif_result = CY_SMIF_SUCCESS;
         if (addr >= CY_SMIF_BASE_MEM_OFFSET)
         {
@@ -817,8 +863,8 @@ cy_rslt_t cy_ota_mem_read( cy_ota_mem_type_t mem_type, uint32_t addr, void *data
             /* post-access to SMIF */
             POST_SMIF_ACCESS_TURN_ON_XIP;
         }
-
         return (cy_smif_result == CY_SMIF_SUCCESS) ? CY_RSLT_SUCCESS : CY_RSLT_TYPE_ERROR;
+#endif
 #else
         return CY_RSLT_TYPE_ERROR;
 #endif /* CY_IP_MXSMIF & !XMC7100 & !XMC7200 */
@@ -1011,8 +1057,10 @@ cy_rslt_t cy_ota_mem_write( cy_ota_mem_type_t mem_type, uint32_t addr, void *dat
     uint8_t *curr_src = data;
 
 #ifdef ENABLE_ON_THE_FLY_ENCRYPTION
+#ifndef CY_OTA_DIRECT_XIP
     cy_en_smif_status_t cy_smif_result = CY_SMIF_SUCCESS;
     uint32_t cbus_addr = 0;
+#endif
 #endif
 
     while(bytes_to_write > 0x0U)
@@ -1045,6 +1093,7 @@ cy_rslt_t cy_ota_mem_write( cy_ota_mem_type_t mem_type, uint32_t addr, void *dat
             }
 
 #ifdef ENABLE_ON_THE_FLY_ENCRYPTION
+#ifndef CY_OTA_DIRECT_XIP
             cbus_addr = cy_flash_addr_to_cbus_addr(row_base);
 
             /* pre-access to SMIF */
@@ -1061,9 +1110,11 @@ cy_rslt_t cy_ota_mem_write( cy_ota_mem_type_t mem_type, uint32_t addr, void *dat
                 printf("[Error] Data encryption failed with error %d\r\n\r\n", cy_smif_result);
             }
 #endif
+#endif
             memcpy (&block_buffer[row_offset], curr_src, chunk_size);
 
 #ifdef ENABLE_ON_THE_FLY_ENCRYPTION
+#ifndef CY_OTA_DIRECT_XIP
             if(mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH)
             {
                 /* Erase while updating Image trailers */
@@ -1077,6 +1128,7 @@ cy_rslt_t cy_ota_mem_write( cy_ota_mem_type_t mem_type, uint32_t addr, void *dat
                     }
                 }
             }
+#endif
 #endif
             result = cy_ota_mem_write_row_size(mem_type, row_base, (void *)(&block_buffer[0]), sizeof(block_buffer));
             if(result != CY_RSLT_SUCCESS)

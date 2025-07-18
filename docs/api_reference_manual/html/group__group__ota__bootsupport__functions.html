@@ -146,12 +146,27 @@ Functions</h2></td></tr>
 <tr class="memitem:gafec15fe9e456d05c41e5e8803d18193d"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gafec15fe9e456d05c41e5e8803d18193d">cy_ota_storage_verify</a> (cy_ota_storage_context_t *storage_ptr)</td></tr>
 <tr class="memdesc:gafec15fe9e456d05c41e5e8803d18193d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify downloaded UPGRADE OTA image.  <a href="#gafec15fe9e456d05c41e5e8803d18193d">More...</a><br /></td></tr>
 <tr class="separator:gafec15fe9e456d05c41e5e8803d18193d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#ga3c9c62b6c769e88515a05d1d5aba3242">cy_ota_storage_set_boot_pending</a> (cy_ota_storage_context_t *storage_ptr)</td></tr>
+<tr class="memdesc:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set boot pending.  <a href="#ga3c9c62b6c769e88515a05d1d5aba3242">More...</a><br /></td></tr>
+<tr class="separator:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaab1cb38d45bb7a4e6ed4e6cd8497a3de"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gaab1cb38d45bb7a4e6ed4e6cd8497a3de">cy_ota_storage_get_boot_pending_status</a> (uint16_t app_id, uint8_t *status)</td></tr>
+<tr class="memdesc:gaab1cb38d45bb7a4e6ed4e6cd8497a3de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get boot pending status of the image in inactive slot.  <a href="#gaab1cb38d45bb7a4e6ed4e6cd8497a3de">More...</a><br /></td></tr>
+<tr class="separator:gaab1cb38d45bb7a4e6ed4e6cd8497a3de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5afcd58a2720b61217def6d2fd86cf7f"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#ga5afcd58a2720b61217def6d2fd86cf7f">cy_ota_storage_image_validate</a> (uint16_t app_id)</td></tr>
-<tr class="memdesc:ga5afcd58a2720b61217def6d2fd86cf7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application has validated the new OTA Image.  <a href="#ga5afcd58a2720b61217def6d2fd86cf7f">More...</a><br /></td></tr>
+<tr class="memdesc:ga5afcd58a2720b61217def6d2fd86cf7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application has validated the new OTA Image in active slot and committing it.  <a href="#ga5afcd58a2720b61217def6d2fd86cf7f">More...</a><br /></td></tr>
 <tr class="separator:ga5afcd58a2720b61217def6d2fd86cf7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac4a3664a8d4f9e33e3bcc877e78f84f8"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gac4a3664a8d4f9e33e3bcc877e78f84f8">cy_ota_storage_get_app_info</a> (void *file_des, cy_ota_app_info_t *app_info)</td></tr>
-<tr class="memdesc:gac4a3664a8d4f9e33e3bcc877e78f84f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Application image information.  <a href="#gac4a3664a8d4f9e33e3bcc877e78f84f8">More...</a><br /></td></tr>
-<tr class="separator:gac4a3664a8d4f9e33e3bcc877e78f84f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaebbc5011b9ec65fb9e3963d9acad0c16"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gaebbc5011b9ec65fb9e3963d9acad0c16">cy_ota_storage_get_image_validate_status</a> (uint16_t app_id, uint8_t *status)</td></tr>
+<tr class="memdesc:gaebbc5011b9ec65fb9e3963d9acad0c16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get validate/commit status of the OTA Image in active slot.  <a href="#gaebbc5011b9ec65fb9e3963d9acad0c16">More...</a><br /></td></tr>
+<tr class="separator:gaebbc5011b9ec65fb9e3963d9acad0c16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadf685fddbc5707ff912e1b91682dc952"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gadf685fddbc5707ff912e1b91682dc952">cy_ota_storage_get_app_info</a> (uint16_t slot_id, uint16_t image_num, cy_ota_app_info_t *app_info)</td></tr>
+<tr class="memdesc:gadf685fddbc5707ff912e1b91682dc952"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Application image information.  <a href="#gadf685fddbc5707ff912e1b91682dc952">More...</a><br /></td></tr>
+<tr class="separator:gadf685fddbc5707ff912e1b91682dc952"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaccdf56d5efd1e5d3d782942a4f50457d"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gaccdf56d5efd1e5d3d782942a4f50457d">cy_ota_storage_get_slot_state</a> (uint16_t slot_id, uint16_t image_num, <a class="el" href="group__group__ota__bootsupport__typedefs.html#ga7c9d2f801f8307ef5691de969247ea8a">cy_ota_slot_state_t</a> *state)</td></tr>
+<tr class="memdesc:gaccdf56d5efd1e5d3d782942a4f50457d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Application slot state information.  <a href="#gaccdf56d5efd1e5d3d782942a4f50457d">More...</a><br /></td></tr>
+<tr class="separator:gaccdf56d5efd1e5d3d782942a4f50457d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf5a14d9eff1fdd34ae77d174a18a9c04"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gaf5a14d9eff1fdd34ae77d174a18a9c04">cy_ota_storage_set_slot_state</a> (uint16_t slot_id, uint16_t image_num, <a class="el" href="group__group__ota__bootsupport__typedefs.html#ga7c9d2f801f8307ef5691de969247ea8a">cy_ota_slot_state_t</a> state)</td></tr>
+<tr class="memdesc:gaf5a14d9eff1fdd34ae77d174a18a9c04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set Application slot state information.  <a href="#gaf5a14d9eff1fdd34ae77d174a18a9c04">More...</a><br /></td></tr>
+<tr class="separator:gaf5a14d9eff1fdd34ae77d174a18a9c04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="ga8992438c302b7b07295524c1ff9a1103"></a>
@@ -562,6 +577,68 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ga3c9c62b6c769e88515a05d1d5aba3242"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">cy_rslt_t cy_ota_storage_set_boot_pending </td>
+          <td>(</td>
+          <td class="paramtype">cy_ota_storage_context_t *&#160;</td>
+          <td class="paramname"><em>storage_ptr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set boot pending. </p>
+<p>Marks the image in the inactive slot as pending. On the next reboot, the system will perform a one-time boot of the the inactive slot image.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">storage_ptr</td><td>Pointer to the OTA Agent storage context cy_ota_storage_context_t</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>CY_RSLT_SUCCESS CY_RSLT_OTA_ERROR_GENERAL </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="gaab1cb38d45bb7a4e6ed4e6cd8497a3de"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">cy_rslt_t cy_ota_storage_get_boot_pending_status </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>app_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get boot pending status of the image in inactive slot. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">app_id</td><td>Application ID. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">status</td><td>Pointer to the status variable to store boot pending status. CY_MCUBOOT_SWAP_TYPE_NONE(1) CY_MCUBOOT_SWAP_TYPE_TEST(2) CY_MCUBOOT_SWAP_TYPE_PERM(3) CY_MCUBOOT_SWAP_TYPE_REVERT(4)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>CY_RSLT_SUCCESS CY_RSLT_OTA_ERROR_GENERAL </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="ga5afcd58a2720b61217def6d2fd86cf7f"></a>
 <div class="memitem">
 <div class="memproto">
@@ -576,8 +653,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Application has validated the new OTA Image. </p>
-<p>This call needs to be after reboot and Bootloader has started the upgrade version of Application. to the Primary Slot.</p>
+<p>Application has validated the new OTA Image in active slot and committing it. </p>
+<p>This call needs to be after reboot and Bootloader has started the upgrade version of Application.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">app_id</td><td>Application ID.</td></tr>
@@ -588,15 +665,58 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="gac4a3664a8d4f9e33e3bcc877e78f84f8"></a>
+<a class="anchor" id="gaebbc5011b9ec65fb9e3963d9acad0c16"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">cy_rslt_t cy_ota_storage_get_image_validate_status </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>app_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get validate/commit status of the OTA Image in active slot. </p>
+<p>This call needs to be after reboot and Bootloader has started the upgrade version of Application.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">app_id</td><td>Application ID. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">status</td><td>Pointer to the status variable to store image validate status. CY_MCUBOOT_FLAG_SET(1) CY_MCUBOOT_FLAG_BAD(2) CY_MCUBOOT_FLAG_UNSET(3) CY_MCUBOOT_FLAG_ANY(4)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>CY_RSLT_SUCCESS CY_RSLT_OTA_ERROR_GENERAL </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="gadf685fddbc5707ff912e1b91682dc952"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">cy_rslt_t cy_ota_storage_get_app_info </td>
           <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>file_des</em>, </td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>slot_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>image_num</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -613,11 +733,98 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get Application image information. </p>
-<p>This call needs to be after reboot and Bootloader has started the upgrade version of Application. to the Primary Slot.</p>
+<p>This call needs to be after reboot and Bootloader has started the upgrade version of Application.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">file_des</td><td>Pointer to the storage context. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">app_info</td><td>Pointer to the OTA Application information structure.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slot_id</td><td>Memory slot ID. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">image_num</td><td>Image number. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">app_info</td><td>Pointer to the OTA Application information structure.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>CY_RSLT_SUCCESS CY_RSLT_OTA_ERROR_GENERAL </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="gaccdf56d5efd1e5d3d782942a4f50457d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">cy_rslt_t cy_ota_storage_get_slot_state </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>slot_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>image_num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__group__ota__bootsupport__typedefs.html#ga7c9d2f801f8307ef5691de969247ea8a">cy_ota_slot_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get Application slot state information. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">slot_id</td><td>Slot ID. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">image_num</td><td>Image number. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">state</td><td>Pointer to the OTA Application state variable.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>CY_RSLT_SUCCESS CY_RSLT_OTA_ERROR_GENERAL </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="gaf5a14d9eff1fdd34ae77d174a18a9c04"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">cy_rslt_t cy_ota_storage_set_slot_state </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>slot_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>image_num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__group__ota__bootsupport__typedefs.html#ga7c9d2f801f8307ef5691de969247ea8a">cy_ota_slot_state_t</a>&#160;</td>
+          <td class="paramname"><em>state</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set Application slot state information. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">slot_id</td><td>Slot ID. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">image_num</td><td>Image number. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">state</td><td>OTA Application state variable.</td></tr>
   </table>
   </dd>
 </dl>

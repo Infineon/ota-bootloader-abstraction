@@ -247,7 +247,7 @@ class AreaList:
     def process_int_area(self, title, fa_addr, fa_size,
                          img_trailer_size, shared_slot):
         """Process internal flash area"""
-        fa_device_id = 'FLASH_DEVICE_INTERNAL_FLASH'
+        fa_device_id = 'CY_FLASH_DEVICE_INTERNAL_FLASH'
         fa_off = fa_addr - self.plat['flashAddr']
         if img_trailer_size is not None:
             if self.use_overwrite:
@@ -290,7 +290,7 @@ class AreaList:
         if fa_addr + fa_size <= \
                 self.plat['smifAddr'] + self.flash['flashSize']:
             flash_idx = 'CY_BOOT_EXTERNAL_DEVICE_INDEX'
-            fa_device_id = f'FLASH_DEVICE_EXTERNAL_FLASH({flash_idx})'
+            fa_device_id = f'CY_FLASH_DEVICE_EXTERNAL_FLASH({flash_idx})'
             fa_off = fa_addr - self.plat['smifAddr']
         else:
             print('Misfitting', title, file=sys.stderr)

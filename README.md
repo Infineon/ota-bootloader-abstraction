@@ -9,6 +9,7 @@ See the [ota-update](https://github.com/Infineon/ota-update/) library documentat
 
 | Library Version                 | Supported MTB version    | Remarks                                   |
 |---------------------------------| -------------------------|-------------------------------------------|
+| ota-bootloader-abstraction v1.6  | ModusToolbox 3.5      | MCUBootloader based direct xip OTA support added for CYW20829. |
 | ota-bootloader-abstraction v1.5  | ModusToolbox 3.3      | XMC7100(KIT_XMC71_EVK_LITE_V1) platform support added.<br>Image encryption support added for 20829 platform. |
 | ota-bootloader-abstraction v1.4  | ModusToolbox 3.2      | CY8CEVAL-062S2-CYW955513SDM2WLIPA kit support added.<br>Support for secure LCS and OTA image encryption has been added to the CYW920829 platform.<br>cysecuretools v6.1 or greater is required. |
 | ota-bootloader-abstraction v1.2  | ModusToolbox 3.2      | CYW955913EVK-01 platform support added |
@@ -27,28 +28,30 @@ Refer [ota-update library API header file](https://github.com/Infineon/ota-updat
 ```
 typedef struct cy_ota_storage_interface_s
 {
-    cy_ota_file_open           ota_file_open;         /**< Creates and open new receive file for the data chunks as they come in. */
-    cy_ota_file_read           ota_file_read;         /**< Reads the flash data starting from the given offset.                   */
-    cy_ota_file_write          ota_file_write;        /**< Write a data to the flash at the given offset.                         */
-    cy_ota_file_close          ota_file_close;        /**< Close the underlying receive file in the specified OTA context.        */
-    cy_ota_file_verify         ota_file_verify;       /**< Authenticate received OTA update file specified in the OTA context.    */
-    cy_ota_file_validate       ota_file_validate;     /**< The application has validated the new OTA image.                       */
-    cy_ota_file_get_app_info   ota_file_get_app_info; /**< Get Application info like Application version and Application ID.      */
+    cy_ota_file_open           ota_file_open;             /**< Creates and open new receive file for the data chunks as they come in. */
+    cy_ota_file_read           ota_file_read;             /**< Reads the flash data starting from the given offset.                   */
+    cy_ota_file_write          ota_file_write;            /**< Write a data to the flash at the given offset.                         */
+    cy_ota_file_close          ota_file_close;            /**< Close the underlying receive file in the specified OTA context.        */
+    cy_ota_file_verify         ota_file_verify;           /**< Authenticate received OTA update file specified in the OTA context.    */
+    cy_ota_file_set_pending    ota_file_set_boot_pending; /**< To Mark the image in the inactive slot as pending. */
+    cy_ota_file_validate       ota_file_validate;         /**< The application has validated the new OTA image.                       */
+    cy_ota_file_get_app_info   ota_file_get_app_info;     /**< Get Application info like Application version and Application ID.      */
 } cy_ota_storage_interface_t;
 ```
 <br>
 
 <b> 1.2 OTA storage interface APIs implementation </b><br>
 
-| Storage operation callback |   Bootloader   |             API                  |   Remarks        |
-|----------------------------| ---------------|----------------------------------|------------------|
-| ota_file_open              | MCUBootloader  |  cy_ota_storage_open()           | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
-| ota_file_read              | MCUBootloader  |  cy_ota_storage_read()           | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
-| ota_file_write             | MCUBootloader  |  cy_ota_storage_write()          | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
-| ota_file_close             | MCUBootloader  |  cy_ota_storage_close()          | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
-| ota_file_verify            | MCUBootloader  |  cy_ota_storage_verify()         | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
-| ota_file_validate          | MCUBootloader  |  cy_ota_storage_image_validate() | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
-| ota_file_get_app_info      | MCUBootloader  |  cy_ota_storage_get_app_info()   | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
+| Storage operation callback |   Bootloader   |             API                    |   Remarks        |
+|----------------------------| ---------------|------------------------------------|------------------|
+| ota_file_open              | MCUBootloader  |  cy_ota_storage_open()             | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
+| ota_file_read              | MCUBootloader  |  cy_ota_storage_read()             | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
+| ota_file_write             | MCUBootloader  |  cy_ota_storage_write()            | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
+| ota_file_close             | MCUBootloader  |  cy_ota_storage_close()            | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
+| ota_file_verify            | MCUBootloader  |  cy_ota_storage_verify()           | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
+| ota_file_set_boot_pending  | MCUBootloader  |  cy_ota_storage_set_boot_pending() | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
+| ota_file_validate          | MCUBootloader  |  cy_ota_storage_image_validate()   | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
+| ota_file_get_app_info      | MCUBootloader  |  cy_ota_storage_get_app_info()     | Available in source/COMPONENT_MCUBOOT/cy_ota_storage_api.c |
 
 | Storage operation callback |   Bootloader                 |             API                  |   Remarks        |
 |----------------------------| -----------------------------|----------------------------------|------------------|
@@ -104,8 +107,10 @@ User OTA application will include the *ota-update* library along with *ota-bootl
    c. MCUBootloader starts the new (updated) application.<br>
    d. The updated application must call cy_ota_storage_image_validate() to validate the update.<br>
    e. For SWAP, if the new application does not call cy_ota_storage_image_validate(), MCUBootloader will REVERT on the next reset.<br>
+5. The MCUBootloader also supports direct execute-in-place (XIP) functionality. In this process, the upgrade file is downloaded to an inactive slot. After verification, during the next reboot, instead of performing a swap or overwrite, the MCUBootloader loads the upgrade image directly from the inactive slot. Consequently, the inactive slot becomes active, while the previously active slot is designated as inactive.
 
-<b> NOTE:</b> On secure MCUs such as PSoC™ 64, MCUBootloader is flashed as part of the provisioning step performed by the provisioning tools, and does not need to be built separately. For more information see [MCUBootloader App Information](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md#5-cysecuretools-for-psoc-64-and-cyw20829-devices).<br><br>
+<b> NOTE:</b> On secure MCUs such as PSoC™ 64, MCUBootloader is flashed as part of the provisioning step performed by the provisioning tools, and does not need to be built separately. For more information see [MCUBootloader App Information](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md#5-cysecuretools-for-psoc-64-and-cyw20829-devices).<br>
+<b> NOTE:</b> The MCUBootloader direct execute-in-place (XIP) functionality is currently supported only on the CYW920829 and CYW989829 platforms, and it is compatible exclusively with the GCC-ARM toolchain.<br><br>
 
 <b> 2.1 Flash layout requirements</b><br>
 
@@ -135,7 +140,7 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 | CY8CPROTO-063-BLE<br>CYBLE-416045-EVAL | 1M | PSOC_063_1M | Default - psoc63_1m_cm0_int_swap_single.json |
 | CY8CPROTO-062S3-4343W  | 512K | PSOC_062_512K | Default - psoc62_512k_xip_swap_single.json<br> psoc62_512k_ext_overwrite_single.json<br>psoc62_512k_ext_swap_single.json |
 | CY8CKIT-064B0S2-4343W | 2M | PSOC_064_2M | Default - policy_single_CM0_CM4_smif_swap.json |
-| CYW920829M2EVK-02 | 0K | CYW20829 | Default - cyw20829_xip_swap_single.json<br> cyw20829_xip_overwrite_single.json |
+| CYW920829M2EVK-02 | 0K | CYW20829 | Default - cyw20829_xip_swap_single.json<br> cyw20829_xip_overwrite_single.json<br> cyw20829_xip_direct.json |
 | CYW989829M2EVB-01 | 0K | CYW89829 | Default - cyw89829_xip_swap_single.json<br> cyw89829_xip_overwrite_single.json |
 | KIT_XMC71_EVK_LITE_V1 | 4MB | XMC7100 | Default - xmc7100_int_swap_single.json<br> xmc7100_int_overwrite_single.json |
 | KIT_XMC72_EVK<br>KIT_XMC72_EVK_MUR_43439M2 | 8MB | XMC7200 | Default - xmc7200_int_swap_single.json<br> xmc7200_int_overwrite_single.json |
@@ -164,6 +169,7 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 |--------------------------------|--------------|
 | cyw20829_xip_overwrite_single.json       | External only (primary and secondary) |
 | cyw20829_xip_swap_single.json            | External only (primary and secondary) |
+| cyw20829_xip_direct.json                 | External only (primary and secondary) |
 | cyw89829_xip_overwrite_single.json       | External only (primary and secondary) |
 | cyw89829_xip_swap_single.json            | External only (primary and secondary) |
 
@@ -187,6 +193,43 @@ MCUBootloader Application i.e MCUBootApp is a standalone application. It is an o
 MCUBoot itself is not OTA upgradable.
 
 For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md).
+
+<b> 2.4 OTA Boot and Upgrade Image Encryption Support for CYW20829</b><br>
+
+- The *ota-bootloader-abstraction* library supports the handling of encrypted UPGRADE images through on-the-fly encryption logic.
+
+- The downloaded signed image is encrypted using the provisioned encryption key, applicable to both the SECURE and NONSECURE lifecycles of the CYW20829.
+
+- For information on provisioning the CYW20829 in either SECURE or NONSECURE lifecycle modes, please refer to the following links:
+  ```
+  https://github.com/Infineon/cysecuretools/blob/master/docs/README_CYW20829.md
+  ```
+  ```
+  https://github.com/Infineon/edgeprotecttools/blob/master/docs/README_CYW20829.md
+  ```
+
+- The MCUBootloader utilizes the same provisioned encryption key to decrypt the OTA image during the boot process.
+
+- *ota-bootloader-abstraction* library provides a sample flash operation implementation that supports encryption using SMIF APIs.
+
+- To enable support for handling OTA image encryption, add the following macro definitions to the application makefile:
+   ```
+   DEFINE+=ENABLE_ON_THE_FLY_ENCRYPTION=1
+   DEFINE+=CY_XIP_SMIF_MODE_CHANGE=1
+   ```
+
+- The current version of the *ota-bootloader-abstraction* library does not include a post-build script for generating an encrypted BOOT image of the OTA application. Therefore, use the following command to encrypt the OTA application BOOT image:
+  ```
+  cysecuretools -t cyw20829 encrypt --input $OTA_APP_SIGNED_BIN --output $OTA_APP_ENCRYPTED_BIN --iv 0x08020000 --enckey ./keys/encrypt_key.bin --nonce $NONCE_FILE
+  ```
+  *** NOTE : *** When encrypting the OTA application BOOT image, ensure that you use the same encryption key that has been provisioned to the device, as well as the same nonce that was used for encrypting the MCUBootApp.
+
+- For the 'on-the-fly' encryption use case, first build the MCUBootApp with encryption support enabled. Next, create the OTA application boot image with 'on-the-fly' encryption support and subsequently encrypt the OTA application boot image using the designated encryption key.
+
+- Program the MCUBootApp with encryption support and the encrypted OTA application boot image. Only the signed OTA image should be sent as the upgrade image. The *ota-bootloader-abstraction* library receives the segments of the signed upgrade image, encrypts these segments with the provisioned encryption key using the SMIF APIs, and writes them to external flash.
+
+- MCUBootloader manages the encrypted OTA upgrade images utilizing the provisioned encryption key.
+
 
 ## 3. CYW955913EVK-01 in-built Bootloader Support
 
@@ -218,6 +261,11 @@ User OTA application will include the *ota-update* library along with *ota-bootl
 - Create an *ota-bootloader-abstraction.mtb* file to pull *ota-bootloader-abstraction* library which has storage APIs to handle the MCUBootloader based OTA upgrade files. Place *ota-bootloader-abstraction.mtb* in the application *deps* folder. The contents of *ota-bootloader-abstraction.mtb* should be as follows:
     ```
     https://github.com/Infineon/ota-bootloader-abstraction#latest-v1.X#$$ASSET_REPO$$/ota-bootloader-abstraction/latest-v1.X
+    ```
+
+- To verify the downloaded OTA image before rebooting and enable the Direct-XIP feature, create an mcuboot.mtb file to include the mcuboot library, which contains the APIs necessary for verifying the OTA upgrade files for the MCUBootloader. Place the mcuboot.mtb file in the application's deps folder. The contents of mcuboot.mtb should be structured as follows:
+    ```
+    https://github.com/mcu-tools/mcuboot#v1.9.6-cypress#$$ASSET_REPO$$/mcuboot/v1.9.6-cypress
     ```
 
 - After adding *ota-bootloader-abstraction.mtb* file to the *deps* folder of your application, Run the command 'make getlibs' to fetch *ota-bootloader-abstraction* library and its dependencies.
@@ -254,6 +302,7 @@ User OTA application will include the *ota-update* library along with *ota-bootl
        .ota_file_write           = cy_ota_storage_write,
        .ota_file_close           = cy_ota_storage_close,
        .ota_file_verify          = cy_ota_storage_verify,
+	   .ota_file_set_boot_pending = cy_ota_storage_set_boot_pending,
        .ota_file_validate        = cy_ota_storage_image_validate,
        .ota_file_get_app_info    = cy_ota_storage_get_app_info
     };

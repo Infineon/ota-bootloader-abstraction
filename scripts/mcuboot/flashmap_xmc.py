@@ -357,7 +357,7 @@ class FlashMap:
 
         with open(path, "w", encoding='UTF-8') as f_out:
             f_out.write(f'#include "{include}"\n')
-            f_out.write(f'#include "flash_map_backend.h"\n\n')
+            f_out.write(f'#include "cy_flash_map_backend.h"\n\n')
             f_out.write('struct flash_device flash_devices[] =\n')
             f_out.write('{\n')
             for region in self.regions:
@@ -406,7 +406,7 @@ class FlashMap:
             header_guard_generate(f_out)
 
             f_out.write(f'#include <stdint.h>\n')
-            f_out.write(f'#include "flash_map_backend.h"\n\n')
+            f_out.write(f'#include "cy_flash_map_backend.h"\n\n')
             f_out.write(f'#define FLASHMAP_GENERATED_AREAS 1\n\n')
             f_out.write('extern struct flash_device flash_devices[];\n')
             f_out.write('extern struct flash_area *boot_area_descs[];\n\n')
@@ -536,13 +536,13 @@ class FlashMap:
         boot = self.boot_layout
 
         print(settings_dict['application_count'], f'= {len(self.apps)}')
-        print(settings_dict['bootloader_id'], ':=', 'FLASH_DEVICE_INTERNAL_FLASH')
+        print(settings_dict['bootloader_id'], ':=', 'CY_FLASH_DEVICE_INTERNAL_FLASH')
         print(settings_dict['bootloader_app_address'], ':=', str.format("{:#08x}",(boot.bootloader_area.addr - cy_xmc_flash_base)))
         print(settings_dict['bootloader_app_size'], ':=', str.format("{:#08x}",(boot.bootloader_area.sz)))
-        print(settings_dict['primary_image_id'], ':=', 'FLASH_DEVICE_INTERNAL_FLASH')
+        print(settings_dict['primary_image_id'], ':=', 'CY_FLASH_DEVICE_INTERNAL_FLASH')
         print(settings_dict['primary_image_start'], ':=', str.format("{:#08x}",(app.boot_area.addr - cy_xmc_flash_base)))
         print(settings_dict['primary_image_size'], ':=', str.format("{:#08x}",(app.boot_area.sz)))
-        print(settings_dict['secondary_image_id'], ':=', 'FLASH_DEVICE_INTERNAL_FLASH')
+        print(settings_dict['secondary_image_id'], ':=', 'CY_FLASH_DEVICE_INTERNAL_FLASH')
         print(settings_dict['secondary_image_start'], ':=', str.format("{:#08x}",(app.upgrade_area.addr - cy_xmc_flash_base)))
         print(settings_dict['secondary_image_size'], ':=', str.format("{:#08x}",(app.boot_area.sz))) #hex(app.upgrade_area.sz))
 
@@ -550,10 +550,10 @@ class FlashMap:
         if boot.scratch_area is None and boot.status_area is None:
             print(settings_dict['overwrite'], ':= 1')
         else:
-            print(settings_dict['swap_status_image_id'], ':=', 'FLASH_DEVICE_INTERNAL_FLASH' )
+            print(settings_dict['swap_status_image_id'], ':=', 'CY_FLASH_DEVICE_INTERNAL_FLASH' )
             print(settings_dict['swap_status_image_start'], ':=', str.format("{:#08x}",(boot.status_area.addr - cy_xmc_flash_base)))
             print(settings_dict['swap_status_image_size'], ':=', str.format("{:#08x}",(boot.status_area.sz)))
-            print(settings_dict['scratch_image_id'], ':=', 'FLASH_DEVICE_INTERNAL_FLASH' )
+            print(settings_dict['scratch_image_id'], ':=', 'CY_FLASH_DEVICE_INTERNAL_FLASH' )
             print(settings_dict['scratch_image_start'], ':=', str.format("{:#08x}",(boot.scratch_area.addr - cy_xmc_flash_base)))
             print(settings_dict['scratch_image_size'], ':=', str.format("{:#08x}",(boot.scratch_area.sz))) #hex(boot.scratch_area.sz))
 

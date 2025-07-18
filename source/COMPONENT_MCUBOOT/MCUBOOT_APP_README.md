@@ -23,7 +23,7 @@ cd mcuboot
 
 - Change the branch to get the appropriate version:
 ```
-git checkout v1.9.4-cypress
+git checkout v1.9.6-cypress
 ```
 
 - Pull in sub-modules to build mcuboot:
@@ -31,11 +31,13 @@ git checkout v1.9.4-cypress
 git submodule update --init --recursive
 ```
 
-- Install the required Python packages mentioned in *mcuboot/scripts/requirements.txt*. Be sure to use the python instance in ModusToolbox/tools_XX/python:
+- Install the required Python packages mentioned in *scripts/mcuboot/requirements.txt*. Be sure to use the python instance in ModusToolbox/tools_XX/python:
 ```
-cd mcuboot/scripts
+cd scripts/mcuboot
 pip install -r requirements.txt
 ```
+<b>Note:</b>
+- Make sure edgeprotecttools version 1.3 or greater is installed on build system.
 
 <b>Note:</b>
 - The **CY8CKIT-064B0S2-4343W** is a special kit that uses cysecureboot. See [cysecuretools for PSoC™ 64, CYW20829 and CYW89829 devices](#5-cysecuretools-for-psoc-64-and-cyw20829-devices) information section below.
@@ -95,19 +97,22 @@ For CY8CKIT-062B0S2-4343W kit, CYW20829 and CYW89829 devices (SECURE), we use a 
 <b>Note:</b>
 - For 20829 and 89829 NORMAL_NO_SECURE/SECURE mode, MCUBootApp should be built and programmed separately.
 
-- The Windows version of ModusToolbox 3.2 does not include a Python package. Therefore, users are required to install python version 3.10 and the python module CySecureTools 6.1.0. For the mcuboot v1.9.4-cypress, CySecureTools v5.0.0 or later is necessary for the CYW920829 Non-Secure and XMC7200 platforms. Additionally, the CYW989829 platform specifically requires CySecureTools v5.1.0. Secure LCS and OTA image encryption on CYW920829 platform requires CySecureTools v6.1.0 or higher.
+- The Windows version of ModusToolbox 3.5 does not include a Python package. Therefore, users are required to install python version 3.10 and the python module CySecureTools 6.1.0. For the mcuboot v1.9.6-cypress, CySecureTools v6.1.0 or later and edgeprotecttools version 1.3 or greater is necessary for the CYW920829 Non-Secure and XMC7200 platforms. Additionally, the CYW989829 platform specifically requires CySecureTools v5.1.0. Secure LCS and OTA image encryption on CYW920829 platform requires CySecureTools v6.1.0 or higher.
 
-- The following command can be used in the modus-shell terminal to find the current version of CySecureTools.
+- The following command can be used in the modus-shell terminal to find the current version of CySecureTools and edgeprotecttools.
 ````
 cysecuretools version
+edgeprotecttools version
 ````
 
-- If the current CySecureTools is not the required version, the following command can be used in modus-shell terminal to update it.
+- If the current CySecureTools and edgeprotecttools is not the required version, the following command can be used in modus-shell terminal to update it.
 ````
 pip install --upgrade --force-reinstall cysecuretools
+pip install --upgrade --force-reinstall edgeprotecttools
 ````
 
 - Additionally, the following command can be used to view the supported targets and families of devices.
 ````
 cysecuretools device-list
+edgeprotecttools device-list
 ````

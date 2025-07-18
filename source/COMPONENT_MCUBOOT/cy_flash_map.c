@@ -74,7 +74,7 @@
 #include <string.h>
 #include "cy_pdl.h"
 
-#include "flash_map_backend.h"
+#include "cy_flash_map_backend.h"
 #include "cy_ota_api.h"
 #include "cy_ota_bootloader_abstraction_log.h"
 #include "cy_ota_flash.h"
@@ -113,6 +113,15 @@
 /* alignment within the MCUBoot Trailer */
 #define BOOT_TRAILER_ALIGN          8u
 
+/* Inactive slot */
+#define CY_INACTIVE_SLOT           (APP_ACTIVE_SLOT ^ 1)
+
+/* IMAKE OK byte offset from the end of the image.*/
+#define CY_USER_SWAP_IMAGE_OK_OFFS (24)
+
+#ifdef CY_OTA_DIRECT_XIP
+static uint8_t row_buff[PLATFORM_MAX_TRAILER_PAGE_SIZE];
+#endif
 
 /* This is not actually used by mcuboot's code but can be used by apps
  * when attempting to read/write a trailer.
@@ -143,10 +152,19 @@ static const uint32_t boot_img_magic[] = {
     0x8079b62cu,
 };
 
-/* size of the boot_image_magic in mcuboot slot */
-#define BOOT_MAGIC_SZ   (sizeof(boot_img_magic))
+struct cy_mcuboot_swap_state
+{
+    uint8_t magic;      /* One of the CY_MCUBOOT_MAGIC_[...] values. */
+    uint8_t swap_type;  /* One of the CY_MCUBOOT_SWAP_TYPE_[...] values. */
+    uint8_t copy_done;  /* One of the CY_MCUBOOT_FLAG_[...] values. */
+    uint8_t image_ok;   /* One of the CY_MCUBOOT_FLAG_[...] values. */
+    uint8_t image_num;  /* Boot status belongs to this image */
+};
 
-uint8_t flash_area_erased_val(const struct flash_area *fap);
+/* size of the boot_image_magic in mcuboot slot */
+#define CY_MCUBOOT_MAGIC_SZ   (sizeof(boot_img_magic))
+
+uint8_t cy_flash_area_erased_val(const struct flash_area *fap);
 
 /* Define DEBUG_PRINT_OPEN_AREA to print flash area info when area is opened */
 
@@ -160,7 +178,7 @@ void print_flash_area_desc(const struct flash_area *fa)
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "  device_id:  %d\r\n", fa->fa_device_id);
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "     fa_off:  0x%08lx\r\n", fa->fa_off);
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "    fa_size:  0x%08lx\r\n", fa->fa_size);
-    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "  erase_val:  0x%02x\r\n", flash_area_erased_val(fa));
+    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "  erase_val:  0x%02x\r\n", cy_flash_area_erased_val(fa));
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "\r\n");
 }
 
@@ -179,16 +197,16 @@ void print_all_flash_area_descs(void)
 #define DEBUG_PRINT_FLASH_AREAS()   print_all_flash_area_descs
 #endif
 
-uint8_t flash_area_erased_val(const struct flash_area *fap)
+uint8_t cy_flash_area_erased_val(const struct flash_area *fap)
 {
     uint8_t ret = 0;
 
-    if(fap->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
+    if(fap->fa_device_id == CY_FLASH_DEVICE_INTERNAL_FLASH)
     {
         ret = CY_BOOT_INTERNAL_FLASH_ERASE_VALUE ;
     }
  #ifdef OTA_USE_EXTERNAL_FLASH
-    else if((fap->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
+    else if((fap->fa_device_id & CY_FLASH_DEVICE_EXTERNAL_FLAG) == CY_FLASH_DEVICE_EXTERNAL_FLAG)
     {
         ret = CY_BOOT_EXTERNAL_FLASH_ERASE_VALUE;
     }
@@ -205,7 +223,7 @@ uint8_t flash_area_erased_val(const struct flash_area *fap)
  /*
 * Opens the area for use. id is one of the `fa_id`s
 */
-int8_t flash_area_open(uint8_t id, const struct flash_area **fa)
+int8_t cy_flash_area_open(uint8_t id, const struct flash_area **fa)
 {
     int8_t ret = -1;
     uint32_t i = 0;
@@ -231,7 +249,7 @@ int8_t flash_area_open(uint8_t id, const struct flash_area **fa)
 /*
 * Clear pointer to flash area fa
 */
-void flash_area_close(const struct flash_area *fa)
+void cy_flash_area_close(const struct flash_area *fa)
 {
     (void)fa; /* Nothing to do there */
 }
@@ -239,7 +257,7 @@ void flash_area_close(const struct flash_area *fa)
 /*
 * Reads `len` bytes of flash memory at `off` to the buffer at `dst`
 */
-int8_t flash_area_read(const struct flash_area *fa, uint32_t off, void *dst, uint32_t len)
+int8_t cy_flash_area_read(const struct flash_area *fa, uint32_t off, void *dst, uint32_t len)
 {
     cy_rslt_t result = CY_RSLT_SUCCESS;
     size_t addr = 0;
@@ -247,24 +265,24 @@ int8_t flash_area_read(const struct flash_area *fa, uint32_t off, void *dst, uin
     /* check if requested offset not less then flash area (fa) start */
     if((NULL == fa) || (NULL == dst) || ((off > fa->fa_size) || (len > fa->fa_size) || ((off + len) > fa->fa_size)))
     {
-        return BOOT_EBADARGS;
+        return CY_MCUBOOT_ERR_BADARGS;
     }
 
     /* Add base of flash area and offset within the flash area */
     addr = fa->fa_off + off;
 
-    if(fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
+    if(fa->fa_device_id == CY_FLASH_DEVICE_INTERNAL_FLASH)
     {
 #if defined(CYW20829) || defined(CYW89829)
         /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
-        return BOOT_EBADARGS;
+        return CY_MCUBOOT_ERR_BADARGS;
 #endif
 #if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined (XMC7100) || defined(XMC7200)
         result = cy_ota_mem_read(CY_OTA_MEM_TYPE_INTERNAL_FLASH, addr, dst, len);
 #endif
     }
 #ifdef OTA_USE_EXTERNAL_FLASH
-    else if((fa->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
+    else if((fa->fa_device_id & CY_FLASH_DEVICE_EXTERNAL_FLAG) == CY_FLASH_DEVICE_EXTERNAL_FLAG)
     {
         result = cy_ota_mem_read(CY_OTA_MEM_TYPE_EXTERNAL_FLASH, addr, dst, len);
     }
@@ -285,7 +303,7 @@ int8_t flash_area_read(const struct flash_area *fa, uint32_t off, void *dst, uin
 }
 
 /*< Writes `len` bytes of flash memory at `off` from the buffer at `src` */
-int8_t flash_area_write(const struct flash_area *fa, uint32_t off, const void *src, uint32_t len)
+int8_t cy_flash_area_write(const struct flash_area *fa, uint32_t off, const void *src, uint32_t len)
 {
     cy_rslt_t result = CY_RSLT_SUCCESS;
     size_t addr = 0;
@@ -293,24 +311,24 @@ int8_t flash_area_write(const struct flash_area *fa, uint32_t off, const void *s
     /* check if requested offset not less then flash area (fa) start */
     if((NULL == fa) || (NULL == src) || ((off > fa->fa_size) || (len > fa->fa_size) || ((off + len) > fa->fa_size)))
     {
-        return BOOT_EBADARGS;
+        return CY_MCUBOOT_ERR_BADARGS;
     }
 
     /* Add base of flash area and offset within the flash area */
     addr = fa->fa_off + off;
 
-    if(fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
+    if(fa->fa_device_id == CY_FLASH_DEVICE_INTERNAL_FLASH)
     {
 #if defined(CYW20829) || defined(CYW89829)
         /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
-        return BOOT_EBADARGS;
+        return CY_MCUBOOT_ERR_BADARGS;
 #endif
 #if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined (XMC7100) || defined(XMC7200)
         result = cy_ota_mem_write(CY_OTA_MEM_TYPE_INTERNAL_FLASH, addr, (void *)src, len);
 #endif
     }
 #ifdef OTA_USE_EXTERNAL_FLASH
-    else if((fa->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
+    else if((fa->fa_device_id & CY_FLASH_DEVICE_EXTERNAL_FLAG) == CY_FLASH_DEVICE_EXTERNAL_FLAG)
     {
         result = cy_ota_mem_write(CY_OTA_MEM_TYPE_EXTERNAL_FLASH, addr, (void *)src, len);
     }
@@ -331,7 +349,7 @@ int8_t flash_area_write(const struct flash_area *fa, uint32_t off, const void *s
 }
 
 /*< Erases `len` bytes of flash memory at `off` */
-int8_t flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
+int8_t cy_flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
 {
     cy_rslt_t result = CY_RSLT_SUCCESS;
     size_t addr = 0;
@@ -339,27 +357,29 @@ int8_t flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
     /* check if requested offset not less then flash area (fa) start */
     if(NULL == fa)
     {
-        return BOOT_EBADARGS;
+        return CY_MCUBOOT_ERR_BADARGS;
     }
 
-    assert(off < fa->fa_off);
-    assert(off + len < fa->fa_off + fa->fa_size);
+    if (off + len > fa->fa_size)
+    {
+        return (CY_MCUBOOT_ERR_BADARGS);
+    }
 
     /* Add base of flash area and offset within the flash area */
     addr = fa->fa_off + off;
 
-    if(fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
+    if(fa->fa_device_id == CY_FLASH_DEVICE_INTERNAL_FLASH)
     {
 #if defined(CYW20829) || defined(CYW89829)
         /* CYW20829 and CYW89829 do not have internal flash - check your flash layout JSON file!*/
-        return BOOT_EBADARGS;
+        return CY_MCUBOOT_ERR_BADARGS;
 #endif
 #if defined(PSOC_062_2M) || defined(PSOC_062_1M) || defined(PSOC_062_512K) || defined(PSOC_063_1M) || defined(PSOC_064_2M) || defined (XMC7100) || defined(XMC7200)
         result = cy_ota_mem_erase(CY_OTA_MEM_TYPE_INTERNAL_FLASH, addr, len);
 #endif
     }
 #ifdef OTA_USE_EXTERNAL_FLASH
-    else if((fa->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
+    else if((fa->fa_device_id & CY_FLASH_DEVICE_EXTERNAL_FLAG) == CY_FLASH_DEVICE_EXTERNAL_FLAG)
     {
         result = cy_ota_mem_erase(CY_OTA_MEM_TYPE_EXTERNAL_FLASH, addr, len);
     }
@@ -381,7 +401,7 @@ int8_t flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
 
 static inline uint32_t boot_magic_off(const struct flash_area *fap)
 {
-    return fap->fa_size - BOOT_MAGIC_SZ;
+    return fap->fa_size - CY_MCUBOOT_MAGIC_SZ;
 }
 
 static inline uint32_t boot_image_ok_off(const struct flash_area *fap)
@@ -400,13 +420,13 @@ static inline uint32_t boot_swap_info_off(const struct flash_area *fap)
 }
 
 /*< Returns this `flash_area`s alignment */
-size_t flash_area_align(const struct flash_area *fa)
+size_t cy_flash_area_align(const struct flash_area *fa)
 {
     size_t rc = 0u; /* error code (alignment cannot be zero) */
 
     if(NULL != fa)
     {
-        if(fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
+        if(fa->fa_device_id == CY_FLASH_DEVICE_INTERNAL_FLASH)
         {
 #if defined (XMC7100) || defined (XMC7200)
             rc = BOOT_MAX_ALIGN;
@@ -415,7 +435,7 @@ size_t flash_area_align(const struct flash_area *fa)
 #endif
         }
 #ifdef OTA_USE_EXTERNAL_FLASH
-        else if((fa->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
+        else if((fa->fa_device_id & CY_FLASH_DEVICE_EXTERNAL_FLAG) == CY_FLASH_DEVICE_EXTERNAL_FLAG)
         {
             rc = cy_ota_mem_get_prog_size(CY_OTA_MEM_TYPE_EXTERNAL_FLASH, 0);
         }
@@ -434,17 +454,17 @@ size_t flash_area_align(const struct flash_area *fa)
  *
  * @returns 0 on success, != 0 on error.
  */
-int8_t boot_write_trailer(const struct flash_area *fap, uint32_t off, const uint8_t *inbuf, uint8_t inlen)
+int8_t cy_boot_write_trailer(const struct flash_area *fap, uint32_t off, const uint8_t *inbuf, uint8_t inlen)
 {
     uint8_t buf[BOOT_MAX_ALIGN];
     size_t align;
     uint8_t erased_val;
     int8_t rc;
 
-    align = flash_area_align(fap);
+    align = cy_flash_area_align(fap);
     if(align == 0u)
     {
-        return BOOT_EFLASH;
+        return CY_MCUBOOT_ERR_FLASH;
     }
 
     align = ((inlen + align - 1) & (~(align - 1)));
@@ -453,7 +473,7 @@ int8_t boot_write_trailer(const struct flash_area *fap, uint32_t off, const uint
         cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%d:%s() align 0x%x > 0x%x BOOT_MAX_ALIGN , ret -1\n", __LINE__, __func__, align, BOOT_MAX_ALIGN);
         return -1;
     }
-    erased_val = flash_area_erased_val(fap);
+    erased_val = cy_flash_area_erased_val(fap);
 
     memcpy(buf, inbuf, inlen);
     memset(&buf[inlen], erased_val, (align - inlen));
@@ -463,19 +483,19 @@ int8_t boot_write_trailer(const struct flash_area *fap, uint32_t off, const uint
         align = fap->fa_size - off;
     }
 
-    rc = flash_area_write(fap, off, buf, align);
-    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%d:%s() flash_area_write(fap, 0x%lx, %p, 0x%lx) , ret %d\n", __LINE__, __func__, off, buf, align, rc);
+    rc = cy_flash_area_write(fap, off, buf, align);
+    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%d:%s() cy_flash_area_write(fap, 0x%lx, %p, 0x%lx) , ret %d\n", __LINE__, __func__, off, buf, align, rc);
     if(rc != 0)
     {
-        return BOOT_EFLASH;
+        return CY_MCUBOOT_ERR_FLASH;
     }
 
     return 0;
 }
 
-int8_t boot_write_magic(const struct flash_area *fap)
+int8_t cy_boot_write_magic(const struct flash_area *fap)
 {
-    uint8_t magic[BOOT_MAGIC_SZ];
+    uint8_t magic[CY_MCUBOOT_MAGIC_SZ];
     uint32_t off;
     int8_t rc;
 
@@ -485,32 +505,116 @@ int8_t boot_write_magic(const struct flash_area *fap)
      * an external flash buffer while using ram SMIF write routines..
      */
 
-    memcpy(&(magic[0]), &(boot_img_magic[0]), BOOT_MAGIC_SZ);
+    memcpy(&(magic[0]), &(boot_img_magic[0]), CY_MCUBOOT_MAGIC_SZ);
 
     off = boot_magic_off(fap);
-    rc = flash_area_write(fap, off, magic, BOOT_MAGIC_SZ);
+    rc = cy_flash_area_write(fap, off, magic, CY_MCUBOOT_MAGIC_SZ);
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() fap->off 0x%lx off 0x%lx rc %d\n", __func__, fap->fa_off, off, rc);
     if(rc != 0)
     {
-        return BOOT_EFLASH;
+        return CY_MCUBOOT_ERR_FLASH;
     }
 
     return 0;
 }
 
-int8_t boot_write_image_ok(const struct flash_area *fap)
+bool cy_bootutil_buffer_is_filled(const void *buffer, uint8_t fill, size_t len)
+{
+    uint8_t *p;
+
+    if(buffer == NULL || len == 0)
+    {
+        return false;
+    }
+
+    for(p = (uint8_t *)buffer; len-- > 0; p++)
+    {
+        if(*p != fill)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool cy_bootutil_buffer_is_erased(const struct flash_area *area,
+                               const void *buffer, size_t len)
+{
+    uint8_t erased_val;
+
+    if(area == NULL)
+    {
+        return false;
+    }
+
+    erased_val = cy_flash_area_erased_val(area);
+
+    return cy_bootutil_buffer_is_filled(buffer, erased_val, len);
+}
+
+static int boot_flag_decode(uint8_t flag)
+{
+    if(flag != CY_MCUBOOT_FLAG_SET)
+    {
+        return CY_MCUBOOT_FLAG_BAD;
+    }
+    return CY_MCUBOOT_FLAG_SET;
+}
+
+static int boot_magic_decode(const uint8_t *magic)
+{
+    if (memcmp(magic, boot_img_magic, CY_MCUBOOT_MAGIC_SZ) == 0)
+    {
+        return CY_MCUBOOT_MAGIC_GOOD;
+    }
+    return CY_MCUBOOT_MAGIC_BAD;
+}
+
+static int8_t boot_read_flag(const struct flash_area *fap, uint8_t *flag, uint32_t off)
+{
+    int8_t rc;
+
+    rc = cy_flash_area_read(fap, off, flag, sizeof *flag);
+    if(rc != 0)
+    {
+        return CY_MCUBOOT_ERR_FLASH;
+    }
+    if(*flag == cy_flash_area_erased_val(fap))
+    {
+        *flag = CY_MCUBOOT_FLAG_UNSET;
+    }
+    else
+    {
+        *flag = boot_flag_decode(*flag);
+    }
+
+    return 0;
+}
+
+int cy_boot_read_image_ok(const struct flash_area *fap, uint8_t *image_ok)
+{
+    return boot_read_flag(fap, image_ok, boot_image_ok_off(fap));
+}
+
+static inline int boot_read_copy_done(const struct flash_area *fap, uint8_t *copy_done)
+{
+    return boot_read_flag(fap, copy_done, boot_copy_done_off(fap));
+}
+
+int8_t cy_boot_write_image_ok(const struct flash_area *fap)
 {
     uint32_t off;
     uint8_t  buff[2];
     int8_t rc;
 
     off = boot_image_ok_off(fap);
-    buff[0] = BOOT_FLAG_SET;
-    rc = flash_area_write(fap, off, buff, 1);
+    buff[0] = CY_MCUBOOT_FLAG_SET;
+    rc = cy_flash_area_write(fap, off, buff, 1);
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() fap->off 0x%lx off 0x%lx rc %d\n", __func__, fap->fa_off, off, rc);
     if(rc != 0)
     {
-        return BOOT_EFLASH;
+        return CY_MCUBOOT_ERR_FLASH;
     }
 
     return 0;
@@ -521,7 +625,7 @@ int8_t boot_write_image_ok(const struct flash_area *fap)
  * This value is persisted so that the boot loader knows what swap operation to
  * resume in case of an unexpected reset.
  */
-int8_t boot_write_swap_info(const struct flash_area *fap, uint8_t swap_type, uint8_t image_num)
+int8_t cy_boot_write_swap_info(const struct flash_area *fap, uint8_t swap_type, uint8_t image_num)
 {
     uint32_t off;
     uint8_t swap_info;
@@ -529,11 +633,11 @@ int8_t boot_write_swap_info(const struct flash_area *fap, uint8_t swap_type, uin
 
     BOOT_SET_SWAP_INFO(swap_info, image_num, swap_type);
     off = boot_swap_info_off(fap);
-    rc = boot_write_trailer(fap, off, (const uint8_t *) &swap_info, 1);
+    rc = cy_boot_write_trailer(fap, off, (const uint8_t *) &swap_info, 1);
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() fap->off 0x%lx off 0x%lx rc %d\n", __func__, fap->fa_off, off, rc);
     if(rc != 0)
     {
-        return BOOT_EFLASH;
+        return CY_MCUBOOT_ERR_FLASH;
     }
 
     return 0;
@@ -550,27 +654,27 @@ int8_t boot_write_swap_info(const struct flash_area *fap, uint8_t swap_type, uin
  *
  * @return                  0 on success; nonzero on failure.
  */
-int8_t flash_area_boot_set_pending(uint8_t image, uint8_t permanent)
+int8_t cy_flash_area_boot_set_pending(uint8_t image, uint8_t permanent)
 {
     const struct flash_area *fap;
     int8_t rc = 0;
 
-    rc = flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image), &fap);
+    rc = cy_flash_area_open(CY_FLASH_UPGRADE_AREA(CY_INACTIVE_SLOT, 0), &fap);
     if(rc == 0)
     {
-        rc = boot_write_magic(fap);
-        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() boot_write_magic(fap) returned %d\n", __func__, rc);
+        rc = cy_boot_write_magic(fap);
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() cy_boot_write_magic(fap) returned %d\n", __func__, rc);
 
         /*
          * Writing trailer flags doesn't work properly for internal flash. That's OK
          * because writing the magic does work and that's enough to trigger the update.
          */
-        if( (fap->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
+        if( (fap->fa_device_id & CY_FLASH_DEVICE_EXTERNAL_FLAG) == CY_FLASH_DEVICE_EXTERNAL_FLAG)
         {
             if((rc == 0) && permanent)
             {
-                rc = boot_write_image_ok(fap);
-                cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() boot_write_image_ok(fap) returned %d\n", __func__, rc);
+                rc = cy_boot_write_image_ok(fap);
+                cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() cy_boot_write_image_ok(fap) returned %d\n", __func__, rc);
             }
 #if(CY_ENC_IMG != 1)
             uint8_t swap_type = 0;
@@ -578,19 +682,19 @@ int8_t flash_area_boot_set_pending(uint8_t image, uint8_t permanent)
             {
                 if(permanent)
                 {
-                    swap_type = BOOT_SWAP_TYPE_PERM;
+                    swap_type = CY_MCUBOOT_SWAP_TYPE_PERM;
                 }
                 else
                 {
-                    swap_type = BOOT_SWAP_TYPE_TEST;
+                    swap_type = CY_MCUBOOT_SWAP_TYPE_TEST;
                 }
-                rc = boot_write_swap_info(fap, swap_type, 0);
-                cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() boot_write_swap_info(fap) returned %d\n", __func__, rc);
+                rc = cy_boot_write_swap_info(fap, swap_type, 0);
+                cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() cy_boot_write_swap_info(fap) returned %d\n", __func__, rc);
             }
 #endif
         }
 
-        flash_area_close(fap);
+        cy_flash_area_close(fap);
     }
 
     return rc;
@@ -603,32 +707,195 @@ int8_t flash_area_boot_set_pending(uint8_t image, uint8_t permanent)
  *
  * @return                  0 on success; nonzero on failure.
  */
-int8_t flash_area_boot_unset_pending(uint8_t image)
+int8_t cy_flash_area_boot_unset_pending(uint8_t image)
 {
     const struct flash_area *fap;
     int8_t rc = 0;
 
-    rc = flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image), &fap);
+    rc = cy_flash_area_open(CY_FLASH_UPGRADE_AREA(CY_INACTIVE_SLOT, image), &fap);
     if(rc == 0)
     {
-        uint8_t magic[BOOT_MAGIC_SZ];
+        uint8_t magic[CY_MCUBOOT_MAGIC_SZ];
         uint32_t off;
 
-        memset(&(magic[0]), 0x00, BOOT_MAGIC_SZ);
+        memset(&(magic[0]), 0x00, CY_MCUBOOT_MAGIC_SZ);
 
         off = boot_magic_off(fap);
-        rc = flash_area_write(fap, off, magic, BOOT_MAGIC_SZ);
+        rc = cy_flash_area_write(fap, off, magic, CY_MCUBOOT_MAGIC_SZ);
         cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() fap->off 0x%lx off 0x%lx rc %d\n", __func__, fap->fa_off, off, rc);
         if(rc != 0)
         {
-            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() flash_area_write() failed, returned rc = %d\n", __func__, rc);
-            return BOOT_EFLASH;
+            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() cy_flash_area_write() failed, returned rc = %d\n", __func__, rc);
+            return CY_MCUBOOT_ERR_FLASH;
         }
-        flash_area_close(fap);
+        cy_flash_area_close(fap);
     }
 
     return rc;
 }
+
+int cy_boot_read_swap_state(const struct flash_area *fap, struct cy_mcuboot_swap_state *state)
+{
+    uint8_t magic[CY_MCUBOOT_MAGIC_SZ];
+    uint32_t off;
+    uint8_t swap_info;
+    int rc;
+
+    memset(&magic, 0x00, CY_MCUBOOT_MAGIC_SZ);
+
+    off = boot_magic_off(fap);
+    rc = cy_flash_area_read(fap, off, magic, CY_MCUBOOT_MAGIC_SZ);
+    if(rc != 0)
+    {
+        return CY_MCUBOOT_ERR_FLASH;
+    }
+
+    if(cy_bootutil_buffer_is_erased(fap, magic, CY_MCUBOOT_MAGIC_SZ))
+    {
+        state->magic = CY_MCUBOOT_MAGIC_UNSET;
+    }
+    else
+    {
+        state->magic = boot_magic_decode(magic);
+    }
+
+    off = boot_swap_info_off(fap);
+    rc = cy_flash_area_read(fap, off, &swap_info, sizeof swap_info);
+    if(rc != 0)
+    {
+        return CY_MCUBOOT_ERR_FLASH;
+    }
+
+    /* Extract the swap type and image number */
+    state->swap_type = BOOT_GET_SWAP_TYPE(swap_info);
+    state->image_num = BOOT_GET_IMAGE_NUM(swap_info);
+
+    if(swap_info == cy_flash_area_erased_val(fap) ||
+       state->swap_type > CY_MCUBOOT_SWAP_TYPE_REVERT)
+    {
+        state->swap_type = CY_MCUBOOT_SWAP_TYPE_NONE;
+        state->image_num = 0;
+    }
+
+    rc = boot_read_copy_done(fap, &state->copy_done);
+    if (rc != 0)
+    {
+        return CY_MCUBOOT_ERR_FLASH;
+    }
+
+    return cy_boot_read_image_ok(fap, &state->image_ok);
+}
+
+/**
+ * Get value of swap type flag of the image in the secondary slot.
+ * If called from chin-loaded image the swap type flag flag value can be used to check whether image in upgrade slot is set for booting.
+ *
+ * @param boot_pending_status[out]        -   image-ok flag value
+ *
+ * @return                  0 on success; nonzero on failure.
+ */
+int8_t cy_flash_area_boot_get_pending_status(uint8_t *boot_pending_status)
+{
+    const struct flash_area *fap;
+    struct cy_mcuboot_swap_state state_secondary_slot = {0};
+
+    int8_t rc = 0;
+
+    rc = cy_flash_area_open(CY_FLASH_UPGRADE_AREA(CY_INACTIVE_SLOT, 0), &fap);
+    if(rc == 0)
+    {
+        rc = cy_boot_read_swap_state(fap, &state_secondary_slot);
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() cy_boot_read_swap_state() returned %d\n", __func__, rc);
+        if(rc == 0)
+        {
+            *boot_pending_status = state_secondary_slot.swap_type;
+            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "boot_pending_status is %d\n", *boot_pending_status);
+        }
+        cy_flash_area_close(fap);
+    }
+
+    return rc;
+}
+
+#ifdef CY_OTA_DIRECT_XIP
+/**
+ * @brief Function sets img_ok flag value to primary image trailer.
+ *
+ * @param address - address of img_ok flag in primary img trailer
+ * @param value - value corresponding to img_ok set
+ *
+ * @return - operation status. 0 - set succesfully, -1 - failed to set.
+ */
+static int cy_write_img_ok_value(cy_ota_mem_type_t mem_type, uint32_t address, uint8_t src)
+{
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+
+    /* Accepting an arbitrary address */
+    uint32_t row_mask = cy_ota_mem_get_erase_size(mem_type, address) - 1U;
+    uint32_t erase_val = CY_BOOT_EXTERNAL_FLASH_ERASE_VALUE;
+    uint32_t index = address & row_mask;
+
+    result = cy_ota_mem_read(mem_type, (address & ~row_mask), row_buff, PLATFORM_MAX_TRAILER_PAGE_SIZE);
+    if(result != CY_RSLT_SUCCESS)
+    {
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "\n cy_ota_mem_read failed with error 0x%lx \n", result);
+        return CY_MCUBOOT_ERR_FLASH;
+    }
+
+    /* Modifying the target byte */
+    memset(&row_buff[index], erase_val, sizeof(uint64_t));
+    row_buff[index] = src;
+
+    result = cy_ota_mem_erase(mem_type, (address & ~row_mask), PLATFORM_MAX_TRAILER_PAGE_SIZE);
+    if(result != 0)
+    {
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "\n cy_ota_mem_erase failed with error 0x%lx \n", result);
+        return CY_MCUBOOT_ERR_FLASH;
+    }
+
+    result = cy_ota_mem_write(mem_type, (address & ~row_mask), (void *)row_buff, PLATFORM_MAX_TRAILER_PAGE_SIZE);
+    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "cy_ota_mem_write() offset 0x%lx result %d\n", (address & ~row_mask), result);
+    if(result != CY_RSLT_SUCCESS)
+    {
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "\n cy_ota_mem_write failed with error 0x%lx \n", result);
+        return CY_MCUBOOT_ERR_FLASH;
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Function reads value of img_ok flag from address.
+ */
+
+static int cy_boot_read_img_ok_value(cy_ota_mem_type_t mem_type, uint32_t address, uint8_t *val)
+{
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+
+    uint32_t temp = 0;
+
+    if(mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH)
+    {
+#ifdef OTA_USE_EXTERNAL_FLASH
+        result = cy_ota_mem_read(CY_OTA_MEM_TYPE_EXTERNAL_FLASH, address, &temp, sizeof(uint32_t));
+#endif
+    }
+    else
+    {
+        /* incorrect/non-existing flash device id */
+        result = CY_RSLT_SERIAL_FLASH_ERR_UNSUPPORTED;
+    }
+
+    if(result != CY_RSLT_SUCCESS)
+    {
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "\n cy_boot_read_img_ok_value Flash area read error, result = [0x%X]", (uint32_t)result);
+        return -1;
+    }
+
+    *val = (uint8_t)(temp & 0xFF);
+    return 0;
+}
+#endif
 
 /**
  * Marks the image in the primary slot as confirmed.  The system will continue
@@ -637,22 +904,77 @@ int8_t flash_area_boot_unset_pending(uint8_t image)
  *
  * @return                  0 on success; nonzero on failure.
  */
-int8_t flash_area_boot_set_confirmed(void)
+int8_t cy_flash_area_boot_set_confirmed(uint8_t image)
 {
     const struct flash_area *fap;
     int8_t rc = 0;
 
-    rc = flash_area_open(FLASH_AREA_IMAGE_PRIMARY(0), &fap);
+    rc = cy_flash_area_open(CY_FLASH_UPGRADE_AREA(APP_ACTIVE_SLOT, 0), &fap);
     if(rc == 0)
     {
-        rc = boot_write_magic(fap);
-        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() boot_write_magic() returned %d\n", __func__, rc);
+#ifndef CY_OTA_DIRECT_XIP
+        rc = cy_boot_write_magic(fap);
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s() cy_boot_write_magic() returned %d\n", __func__, rc);
         if(rc == 0)
         {
-            rc = boot_write_image_ok(fap);
-            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "boot_write_image_ok() returned %d\n", rc);
+            rc = cy_boot_write_image_ok(fap);
+            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "cy_boot_write_image_ok() returned %d\n", rc);
         }
-        flash_area_close(fap);
+#else
+        uint8_t img_ok_val = 0U;
+        uint32_t img_ok_addr = ((fap->fa_off + fap->fa_size) - CY_USER_SWAP_IMAGE_OK_OFFS);
+
+        rc = cy_boot_read_img_ok_value(CY_OTA_MEM_TYPE_EXTERNAL_FLASH, img_ok_addr, &img_ok_val);
+        if(rc != 0)
+        {
+            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() cy_boot_read_img_ok_value() returned %d\n", __func__, rc);
+        }
+        else
+        {
+            if(img_ok_val != CY_MCUBOOT_FLAG_SET)
+            {
+                rc = cy_write_img_ok_value(CY_OTA_MEM_TYPE_EXTERNAL_FLASH, img_ok_addr, CY_MCUBOOT_FLAG_SET);
+                if(rc != 0)
+                {
+                    cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() cy_write_img_ok_value() returned with error %d\n", __func__, rc);
+                }
+            }
+            else
+            {
+                cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_INFO, "%s() set_img_ok flag already set!!!\n", __func__, rc);
+                rc = 0;
+            }
+        }
+#endif
+        cy_flash_area_close(fap);
+    }
+
+    return rc;
+}
+
+/**
+ * Get value of image-ok flag of the image in the primary slot.
+ * If called from chin-loaded image the image-ok flag value can be used to check whether application itself is already confirmed.
+ *
+ * @param image_ok_status[out]        -   image-ok flag value
+ *
+ * @return                  0 on success; nonzero on failure.
+ */
+int8_t cy_flash_area_boot_get_image_confirm_status(uint8_t *image_ok_status)
+{
+    const struct flash_area *fap;
+    int8_t rc = 0;
+
+    rc = cy_flash_area_open(CY_FLASH_UPGRADE_AREA(APP_ACTIVE_SLOT, 0), &fap);
+    if(rc == 0)
+    {
+        rc = cy_boot_read_image_ok(fap, image_ok_status);
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() boot_read_flag() returned %d\n", __func__, rc);
+        if(rc == 0)
+        {
+            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "image_ok_status is %d\n", *image_ok_status);
+        }
+        cy_flash_area_close(fap);
     }
 
     return rc;

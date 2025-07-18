@@ -268,9 +268,9 @@ API Overview</h1>
  The application is expected to call this API to execute an image as the boot image until the next upgrade image becomes available.<br />
  <code>cy_rslt_t cy_ota_storage_validated(void);</code></p>
 <h2>8. Get Application Image information </h2>
-<p><code><a class="el" href="group__group__ota__bootsupport__functions.html#gac4a3664a8d4f9e33e3bcc877e78f84f8" title="Get Application image information. ">cy_ota_storage_get_app_info()</a></code> - Get Application version, Application ID information.<br />
+<p><code><a class="el" href="group__group__ota__bootsupport__functions.html#gadf685fddbc5707ff912e1b91682dc952" title="Get Application image information. ">cy_ota_storage_get_app_info()</a></code> - Get Application version, Application ID information.<br />
  The header of an application image (BOOT/UPGRADE) typically includes the following information.<br />
- <code>cy_rslt_t <a class="el" href="group__group__ota__bootsupport__functions.html#gac4a3664a8d4f9e33e3bcc877e78f84f8" title="Get Application image information. ">cy_ota_storage_get_app_info(void* file_des, cy_ota_app_info_t *app_info)</a>;</code></p>
+ <code>cy_rslt_t <a class="el" href="group__group__ota__bootsupport__functions.html#gadf685fddbc5707ff912e1b91682dc952" title="Get Application image information. ">cy_ota_storage_get_app_info(uint16_t slot_id, uint16_t image_num, cy_ota_app_info_t *app_info)</a>;</code></p>
 <h1><a class="anchor" id="section_snippets"></a>
 Code Snippets</h1>
 <p><b>1. Override Default Flash operations API implementation:</b><br />
@@ -430,7 +430,7 @@ Code Snippets</h1>
 <div class="line">   .ota_file_close           = <a class="code" href="group__group__ota__bootsupport__functions.html#ga7148e14b70eec5343c693dc92147e257">cy_ota_storage_close</a>,</div>
 <div class="line">   .ota_file_verify          = <a class="code" href="group__group__ota__bootsupport__functions.html#gafec15fe9e456d05c41e5e8803d18193d">cy_ota_storage_verify</a>,</div>
 <div class="line">   .ota_file_validate        = cy_ota_storage_validated,</div>
-<div class="line">   .ota_file_get_app_info    = <a class="code" href="group__group__ota__bootsupport__functions.html#gac4a3664a8d4f9e33e3bcc877e78f84f8">cy_ota_storage_get_app_info</a></div>
+<div class="line">   .ota_file_get_app_info    = <a class="code" href="group__group__ota__bootsupport__functions.html#gadf685fddbc5707ff912e1b91682dc952">cy_ota_storage_get_app_info</a></div>
 <div class="line">};</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">void</span>)</div>

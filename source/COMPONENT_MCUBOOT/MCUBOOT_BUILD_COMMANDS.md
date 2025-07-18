@@ -113,7 +113,33 @@ To build MCUBoot for external flash execute (XIP) OVERWRITE configuration:
 make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw20829_xip_overwrite_single.json ENC_IMG=1
 ```
 
+<b>Building MCUBoot with Direct XIP support</b>
+- <b>Notes:</b> To build the MCUBootApp with Direct XIP support, utilize the flash map file named *cyw20829_xip_direct_mcuboot.json* located in the [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap) directory.
+
+To build the MCUBootApp with Direct XIP support, utilize the flash map file named cyw20829_xip_direct_mcuboot.json located in the flashmap directory
+
+To build MCUBoot with direct-xip feature:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 FLASH_MAP=./cyw20829_xip_direct_mcuboot.json
+```
+
+To build MCUBoot with direct-xip feature(Skipping MCUBoot validation during boot):
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 MCUBOOT_SKIP_VALIDATE_PRIMARY_SLOT=1 FLASH_MAP=./cyw20829_xip_direct_mcuboot.json
+```
+
+To build MCUBoot with direct-xip feature and encryption support:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 SMIF_ENC=1 FLASH_MAP=./cyw20829_xip_direct_mcuboot.json
+```
+
+To build MCUBoot with direct-xip feature and encryption support(Skipping MCUBoot validation during boot):
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 MCUBOOT_SKIP_VALIDATE_PRIMARY_SLOT=1 SMIF_ENC=1 FLASH_MAP=./cyw20829_xip_direct_mcuboot.json
+```
+
 ### SECURE Mode
+
 <b>Building MCUBoot with Encryption support</b>
 
 To build MCUBoot for external flash execute (XIP) SWAP configuration with encryption:
@@ -124,6 +150,19 @@ make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE
 To build MCUBoot for external flash execute (XIP) OVERWRITE configuration with encryption:
 ```
 make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw20829_xip_overwrite_single.json LCS=SECURE ENC_IMG=1
+```
+
+<b>Building MCUBoot with Direct XIP support</b>
+- <b>Notes:</b> To build the MCUBootApp with Direct XIP support, utilize the flash map file named *cyw20829_xip_direct_mcuboot.json* located in the [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap) directory.
+
+To build MCUBoot with direct-xip feature and encryption support:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 LCS=SECURE USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 SMIF_ENC=1 FLASH_MAP=./cyw20829_xip_direct_mcuboot.json
+```
+
+To build MCUBoot with direct-xip feature and encryption support(Skipping MCUBoot validation during boot):
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 LCS=SECURE USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 SMIF_ENC=1 FLASH_MAP=./cyw20829_xip_direct_mcuboot.json MCUBOOT_SKIP_VALIDATE_PRIMARY_SLOT=1
 ```
 
 ## 7. XMC7000 Platform

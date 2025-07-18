@@ -89,6 +89,16 @@ CY_SMIF_ENC=$1
 shift
 CY_NONCE=$1
 shift
+CY_OTA_DIRECT_XIP=$1
+shift
+CY_COMPANY_ID=$1
+shift
+CY_TLV_INDEX_COMPANY_ID=$1
+shift
+CY_PRODUCT_ID=$1
+shift
+CY_TLV_INDEX_PRODUCT_ID=$1
+shift
 CY_ADD_ARGS=$1
 
 # Export these values for python3 click module
@@ -175,6 +185,11 @@ echo "CY_ENC_KEY                              = $CY_ENC_KEY"
 echo "CY_OEM_PRIVATE_KEY                      = $CY_OEM_PRIVATE_KEY"
 echo "CY_SMIF_ENC                             = $CY_SMIF_ENC"
 echo "CY_NONCE                                = $CY_NONCE"
+echo "CY_OTA_DIRECT_XIP                       = $CY_OTA_DIRECT_XIP"
+echo "CY_COMPANY_ID                           = $CY_COMPANY_ID"
+echo "CY_TLV_INDEX_COMPANY_ID                 = $CY_TLV_INDEX_COMPANY_ID"
+echo "CY_PRODUCT_ID                           = $CY_PRODUCT_ID"
+echo "CY_TLV_INDEX_PRODUCT_ID                 = $CY_TLV_INDEX_PRODUCT_ID"
 echo "CY_ADD_ARGS                             = $CY_ADD_ARGS"
 
 echo "Working directory"
@@ -242,17 +257,28 @@ then
 fi
 
 echo "------------------------------- Signing and Encrypting BOOT Image -------------------------------"
-echo "[SIGNING BOOT using cysecuretools]"
+if [ "$CY_OTA_DIRECT_XIP" == "0" ]
+then
+    echo "[SIGNING BOOT using cysecuretools]"
+else
+    echo "[SIGNING BOOT using edgeprotecttools]"
+fi
 
 if [ "$CY_SMIF_ENC" == "1" ]
 then
     if [ "$OTA_BUILD_POST_VERBOSE" == "1" ]
     then
        echo ""
-       echo -e "$CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image \n --image-format $CY_SIGN_TYPE \n --align 1 \n --version $APP_BUILD_VERSION \n --slot-size $CY_SLOT_SIZE \n --image-id $CY_SIGN_IMG_ID \n --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin \n --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin \n --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \n --update-key-path $CY_OEM_PRIVATE_KEY \n $CY_ADD_ARGS \n"
+       if [ "$CY_OTA_DIRECT_XIP" == "0" ]
+       then
+           echo -e "$CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image \n --image-format $CY_SIGN_TYPE \n --align 1 \n --version $APP_BUILD_VERSION \n --slot-size $CY_SLOT_SIZE \n --image-id $CY_SIGN_IMG_ID \n --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin \n --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin \n --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE $CY_ADD_ARGS \n"
+       else
+           echo -e "edgeprotecttools sign-image \n --align 1 \n --image-version $APP_BUILD_VERSION \n --slot-size $CY_SLOT_SIZE \n --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin \n --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin \n --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \n --protected-tlv $CY_TLV_INDEX_COMPANY_ID $CY_COMPANY_ID \n --protected-tlv $CY_TLV_INDEX_PRODUCT_ID $CY_PRODUCT_ID \n $CY_ADD_ARGS\n"
+       fi
     fi
-
-    $CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image \
+    if [ "$CY_OTA_DIRECT_XIP" == "0" ]
+    then
+        $CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image \
                              --image-format $CY_SIGN_TYPE \
                              --align 1 \
                              --version $APP_BUILD_VERSION \
@@ -263,7 +289,17 @@ then
                              --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \
                              --update-key-path $CY_OEM_PRIVATE_KEY \
                               $CY_ADD_ARGS
-
+    else
+        edgeprotecttools sign-image --align 1 \
+	                     --image-version $APP_BUILD_VERSION \
+	                     --slot-size $CY_SLOT_SIZE \
+	                     --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin \
+	                     --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.signed.bin \
+	                     --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \
+	                     --protected-tlv $CY_TLV_INDEX_COMPANY_ID $CY_COMPANY_ID \
+	                     --protected-tlv $CY_TLV_INDEX_PRODUCT_ID $CY_PRODUCT_ID \
+	                     $CY_ADD_ARGS
+    fi
     echo "[Encrypting BOOT using cysecuretools]"
 
     if [ "$OTA_BUILD_POST_VERBOSE" == "1" ]
@@ -313,16 +349,28 @@ cp $CY_OUTPUT_FINAL_HEX $CY_OUTPUT_FINAL_FINAL_HEX
 echo ""
 
 echo "------------------------------- Signing and Encrypting UPGRADE Image -------------------------------"
-echo "[SIGNING UPGRADE using cysecuretools]"
+if [ "$CY_OTA_DIRECT_XIP" == "0" ]
+then
+    echo "[SIGNING UPGRADE using cysecuretools]"
+else
+    echo "[SIGNING UPGRADE using edgeprotecttools]"
+fi
 
 if [ "$CY_SMIF_ENC" == "1" ]
 then
     if [ "$OTA_BUILD_POST_VERBOSE" == "1" ]
     then
        echo ""
-       echo -e "$CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image \n --image-format $CY_SIGN_TYPE \n --align 1 \n --version $APP_BUILD_VERSION \n --slot-size $CY_SLOT_SIZE \n --image-id $CY_SIGN_IMG_ID \n --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin \n --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.upgrade_signed.bin \n --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \n --update-key-path $CY_OEM_PRIVATE_KEY \n $CY_ADD_ARGS \n"
+       if [ "$CY_OTA_DIRECT_XIP" == "0" ]
+       then
+           echo -e "$CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image \n --image-format $CY_SIGN_TYPE \n --align 1 \n --version $APP_BUILD_VERSION \n --slot-size $CY_SLOT_SIZE \n --image-id $CY_SIGN_IMG_ID \n --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin \n --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.upgrade_signed.bin \n --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \n --update-key-path $CY_OEM_PRIVATE_KEY \n $CY_ADD_ARGS \n"
+       else
+           echo -e "edgeprotecttools sign-image \n --align 1 \n --image-version $APP_BUILD_VERSION \n --slot-size $CY_SLOT_SIZE \n --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin \n --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.upgrade_signed.bin \n --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \n --protected-tlv $CY_TLV_INDEX_COMPANY_ID $CY_COMPANY_ID \n --protected-tlv $CY_TLV_INDEX_PRODUCT_ID $CY_PRODUCT_ID \n $CY_ADD_ARGS\n"
+       fi
     fi
-    $CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image \
+    if [ "$CY_OTA_DIRECT_XIP" == "0" ]
+    then
+        $CY_PYTHON_PATH -m cysecuretools -q -t $APP_PLATFORM -p $OTA_APP_POLICY_PATH sign-image \
                              --image-format $CY_SIGN_TYPE \
                              --align 1 \
                              --version $APP_BUILD_VERSION \
@@ -333,6 +381,17 @@ then
                              --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \
                              --update-key-path $CY_OEM_PRIVATE_KEY \
                              $CY_ADD_ARGS
+    else
+        edgeprotecttools sign-image --align 1 \
+	                     --image-version $APP_BUILD_VERSION \
+	                     --slot-size $CY_SLOT_SIZE \
+	                     --image $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.final.bin \
+	                     --output $CY_OUTPUT_PATH/$CY_OUTPUT_NAME.upgrade_signed.bin \
+	                     --key-path $MCUBOOT_KEY_DIR/$MCUBOOT_KEY_FILE \
+	                     --protected-tlv $CY_TLV_INDEX_COMPANY_ID $CY_COMPANY_ID \
+	                     --protected-tlv $CY_TLV_INDEX_PRODUCT_ID $CY_PRODUCT_ID \
+	                     $CY_ADD_ARGS
+    fi
 
     echo "[Encrypting UPGRADE using cysecuretools]"
 

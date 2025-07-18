@@ -6,6 +6,12 @@ See the [README.md](./README.md) for a complete description of the OTA bootloade
 
 ## Changelog
 
+### v1.6.0
+
+- Implemented 'direct-XIP OTA' support for MCUBootloader based OTA on CYW20829(CYW920829M2EVK-02) kits.
+- Introduced 'on-the-fly encryption' support for the CYW20829 platform operating in Non-Secure LCS mode life cycle.
+- Minor Documentation updates.
+
 ### v1.5.3
 
 - Minor postbuild script update for PSOC62.
@@ -66,11 +72,11 @@ This version of the library was validated for compatibility with the following s
 
 | Software and Tools                                        | Version |
 | :---                                                      | :----:  |
-| ModusToolbox&trade; Software Environment                  | 3.4     |
-| - ModusToolbox&trade; Device Configurator                 | 5.20    |
-| - ModusToolbox&trade; Bluetooth Configurator              | 3.10    |
+| ModusToolbox&trade; Software Environment                  | 3.5     |
+| - ModusToolbox&trade; Device Configurator                 | 5.30    |
+| - ModusToolbox&trade; Bluetooth Configurator              | 3.30    |
 | - ModusToolbox&trade; CapSense Configurator / Tuner tools | 6.40.0  |
 | Peripheral Driver Library (PDL CAT1)                      | 3.16    |
-| GCC Compiler                                              | 11.3.1  |
+| GCC Compiler                                              | 14.2.1  |
 | IAR Compiler                                              | 9.50.2  |
 | Arm Compiler 6                                            | 6.22    |

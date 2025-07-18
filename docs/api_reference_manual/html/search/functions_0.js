@@ -7,11 +7,16 @@ var searchData=
   ['cy_5fota_5fmem_5fread',['cy_ota_mem_read',['../group__group__ota__bootsupport__functions.html#gaee479d591db0b2861504f1753fac752d',1,'cy_ota_flash.h']]],
   ['cy_5fota_5fmem_5fwrite',['cy_ota_mem_write',['../group__group__ota__bootsupport__functions.html#ga9faaf895a1256d1406c9727e8f3cf991',1,'cy_ota_flash.h']]],
   ['cy_5fota_5fstorage_5fclose',['cy_ota_storage_close',['../group__group__ota__bootsupport__functions.html#ga7148e14b70eec5343c693dc92147e257',1,'cy_ota_storage_api.h']]],
-  ['cy_5fota_5fstorage_5fget_5fapp_5finfo',['cy_ota_storage_get_app_info',['../group__group__ota__bootsupport__functions.html#gac4a3664a8d4f9e33e3bcc877e78f84f8',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fstorage_5fget_5fapp_5finfo',['cy_ota_storage_get_app_info',['../group__group__ota__bootsupport__functions.html#gadf685fddbc5707ff912e1b91682dc952',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fstorage_5fget_5fboot_5fpending_5fstatus',['cy_ota_storage_get_boot_pending_status',['../group__group__ota__bootsupport__functions.html#gaab1cb38d45bb7a4e6ed4e6cd8497a3de',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fstorage_5fget_5fimage_5fvalidate_5fstatus',['cy_ota_storage_get_image_validate_status',['../group__group__ota__bootsupport__functions.html#gaebbc5011b9ec65fb9e3963d9acad0c16',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fstorage_5fget_5fslot_5fstate',['cy_ota_storage_get_slot_state',['../group__group__ota__bootsupport__functions.html#gaccdf56d5efd1e5d3d782942a4f50457d',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fimage_5fvalidate',['cy_ota_storage_image_validate',['../group__group__ota__bootsupport__functions.html#ga5afcd58a2720b61217def6d2fd86cf7f',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5finit',['cy_ota_storage_init',['../group__group__ota__bootsupport__functions.html#gad1e6294598ad971d3cb35eb789ea4b7b',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fopen',['cy_ota_storage_open',['../group__group__ota__bootsupport__functions.html#gade56090dfaf908e2aa14a35d1ace6b06',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fread',['cy_ota_storage_read',['../group__group__ota__bootsupport__functions.html#gae935166cb14ce63a64e6f58bafe1c2af',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fstorage_5fset_5fboot_5fpending',['cy_ota_storage_set_boot_pending',['../group__group__ota__bootsupport__functions.html#ga3c9c62b6c769e88515a05d1d5aba3242',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fstorage_5fset_5fslot_5fstate',['cy_ota_storage_set_slot_state',['../group__group__ota__bootsupport__functions.html#gaf5a14d9eff1fdd34ae77d174a18a9c04',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fverify',['cy_ota_storage_verify',['../group__group__ota__bootsupport__functions.html#gafec15fe9e456d05c41e5e8803d18193d',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fwrite',['cy_ota_storage_write',['../group__group__ota__bootsupport__functions.html#ga2636ed026fa43484ae0f24e74c6bc472',1,'cy_ota_storage_api.h']]]
 ];

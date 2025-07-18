@@ -422,7 +422,6 @@ cy_untar_result_t cy_is_tar_header( uint8_t *buffer, uint32_t size )
      */
     if (memcmp((void const *)hdr->magic, (void const *)TMAGIC, (TMAGLEN - 1)) != 0)
     {
-        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "is_tar_header() invalid ustar magic:%s\n", hdr->magic);
         return CY_UNTAR_INVALID;
     }
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "is_tar_header(), hdr->magic: %s, TMAGIC: %s, TMAGLEN: %d\n", hdr->magic, TMAGIC, TMAGLEN);

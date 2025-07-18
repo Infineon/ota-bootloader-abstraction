@@ -12,6 +12,11 @@ var group__group__ota__bootsupport__functions =
     [ "cy_ota_storage_write", "group__group__ota__bootsupport__functions.html#ga2636ed026fa43484ae0f24e74c6bc472", null ],
     [ "cy_ota_storage_close", "group__group__ota__bootsupport__functions.html#ga7148e14b70eec5343c693dc92147e257", null ],
     [ "cy_ota_storage_verify", "group__group__ota__bootsupport__functions.html#gafec15fe9e456d05c41e5e8803d18193d", null ],
+    [ "cy_ota_storage_set_boot_pending", "group__group__ota__bootsupport__functions.html#ga3c9c62b6c769e88515a05d1d5aba3242", null ],
+    [ "cy_ota_storage_get_boot_pending_status", "group__group__ota__bootsupport__functions.html#gaab1cb38d45bb7a4e6ed4e6cd8497a3de", null ],
     [ "cy_ota_storage_image_validate", "group__group__ota__bootsupport__functions.html#ga5afcd58a2720b61217def6d2fd86cf7f", null ],
-    [ "cy_ota_storage_get_app_info", "group__group__ota__bootsupport__functions.html#gac4a3664a8d4f9e33e3bcc877e78f84f8", null ]
+    [ "cy_ota_storage_get_image_validate_status", "group__group__ota__bootsupport__functions.html#gaebbc5011b9ec65fb9e3963d9acad0c16", null ],
+    [ "cy_ota_storage_get_app_info", "group__group__ota__bootsupport__functions.html#gadf685fddbc5707ff912e1b91682dc952", null ],
+    [ "cy_ota_storage_get_slot_state", "group__group__ota__bootsupport__functions.html#gaccdf56d5efd1e5d3d782942a4f50457d", null ],
+    [ "cy_ota_storage_set_slot_state", "group__group__ota__bootsupport__functions.html#gaf5a14d9eff1fdd34ae77d174a18a9c04", null ]
 ];

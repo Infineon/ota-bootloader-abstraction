@@ -1,0 +1,5 @@
+cryptography>=3.2
+intelhex
+click
+cbor2
+edgeprotecttools>=1.3
