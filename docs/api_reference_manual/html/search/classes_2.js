@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ustar_5fheader_5ft',['ustar_header_t',['../structustar__header__t.html',1,'']]]
+  ['image_5fboot_5fconfig_5ft',['image_boot_config_t',['../structimage__boot__config__t.html',1,'']]]
 ];

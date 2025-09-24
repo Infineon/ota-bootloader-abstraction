@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['tar_5fstate',['tar_state',['../structcy__untar__context__t.html#ac065c394e3e966b08d5afe0287961ccd',1,'cy_untar_context_t']]],
-  ['type',['type',['../structcy__ota__file__info__t.html#aa3f1124969b36367c1441456fd435e9c',1,'cy_ota_file_info_t']]],
-  ['typeflag',['typeflag',['../structustar__header__t.html#afec77696bbb04d88e95dbc52e531482d',1,'ustar_header_t']]]
+  ['size',['size',['../structustar__header__t.html#a89045ae21ff86e82fee25444b454ef61',1,'ustar_header_t::size()'],['../structcy__ota__file__info__t.html#a412e487cd5f86ed45293fce86071e07e',1,'cy_ota_file_info_t::size()'],['../structflash__device.html#a830592b2bfc75c64758d402d41b1afde',1,'flash_device::size()']]],
+  ['start_5faddr',['start_addr',['../structcy__ota__file__info__t.html#a88c8e699df7d2aa38a14da52a8330856',1,'cy_ota_file_info_t']]]
 ];

@@ -98,7 +98,7 @@ typedef enum
  * \addtogroup group_ota_bootsupport_functions
  * \{
  * Bootloader based storage interface APIs for handling downloaded UPGRADE image of OTA application.
- * These callbacks are defind in ota-update library and expected to register these callbacks during OTA agent start.
+ * These callbacks are defined in ota-update library and expected to register these callbacks during OTA agent start.
  * ota-bootloader-abstraction library has implementation of these bootloader specific storage interface APIs.
  *
  */

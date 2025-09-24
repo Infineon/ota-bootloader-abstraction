@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['header_5foffset',['header_offset',['../structcy__ota__file__info__t.html#ac66d23e077df5a73e8e00ae3c5297a78',1,'cy_ota_file_info_t']]]
+  ['gid',['gid',['../structustar__header__t.html#ae737e310a73a8ed33101b47792828608',1,'ustar_header_t']]],
+  ['gname',['gname',['../structustar__header__t.html#a762ea7484ce484aaeaeb92f167920877',1,'ustar_header_t']]]
 ];

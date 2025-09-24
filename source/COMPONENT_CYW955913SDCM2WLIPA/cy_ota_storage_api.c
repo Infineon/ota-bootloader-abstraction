@@ -70,13 +70,15 @@
  * Macros
  *
  **********************************************************************/
-#define CY_DS1_ADDRESS          0x680000
+#define CY_DS1_ADDRESS          0x680000  /**<  Data Section Start address.  */
 
 #ifndef CY_DS_SIZE
-#define CY_DS_SIZE              0x3C0000
+#define CY_DS_SIZE              0x3C0000  /**<  Default Data Section Size.  */
 #endif
 
-#define CY_DS_MDH_SIZE          48
+#define CY_DS_MDH_SIZE            48      /**<  Unencrypted OTA image MDH Size.  */
+#define CY_ENC_DS_MDH_SIZE        64      /**<  Encrypted OTA image MDH Size.  */
+#define CY_ENC_ENABLE_BYTE_OFFSET 32      /**<  Offset to check if image is encrypted.  */
 
 /**
  * @brief Tarball support file types recognized in components.json file
@@ -133,6 +135,16 @@ uint8_t *write_buffer = NULL;
  */
 bool header_init = false;
 
+/**
+ * @brief Variable to check header size.
+ */
+uint32_t mdh_size = CY_ENC_DS_MDH_SIZE;
+
+/**
+ * @brief MDH flags for encrypted image.
+ */
+static const uint8_t cy_ds_enc_flags[] = {0x01u, 0x00u, 0x01u, 0x00u};
+
 /***********************************************************************
  *
  * functions
@@ -180,11 +192,13 @@ static void ota_free_write_buffer(void)
  * return   CY_UNTAR_SUCCESS
  *          CY_UNTAR_ERROR
  */
-static cy_untar_result_t ota_untar_write_callback(cy_untar_context_ptr ctxt, uint16_t file_index,
-                                                  uint8_t *buffer, uint32_t file_offset,
-                                                  uint32_t chunk_size, void *cb_arg)
+static cy_untar_result_t ota_untar_write_callback(cy_untar_context_ptr ctxt,
+                                                  uint16_t file_index,
+                                                  uint8_t *buffer,
+                                                  uint32_t file_offset,
+                                                  uint32_t chunk_size,
+                                                  void *cb_arg)
 {
-    BTSS_SYSTEM_NVRAM_OTA_ERR_t res = BTSS_SYSTEM_NVRAM_OTA_ERR_NONE;
     cy_ota_storage_context_t *storage_ptr = (cy_ota_storage_context_t *)cb_arg;
 
     if((ctxt == NULL) || (buffer == NULL) || (storage_ptr == NULL))
@@ -228,14 +242,7 @@ static cy_untar_result_t ota_untar_write_callback(cy_untar_context_ptr ctxt, uin
 
     ota_free_write_buffer();
 
-    if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
-    {
-        return CY_UNTAR_ERROR;
-    }
-    else
-    {
-        return CY_UNTAR_SUCCESS;
-    }
+    return CY_UNTAR_SUCCESS;
 }
 
 /**
@@ -351,8 +358,8 @@ cy_rslt_t cy_ota_storage_read(cy_ota_storage_context_t *storage_ptr, cy_ota_stor
  * @param[in]   storage_ptr     Pointer to the OTA Agent storage context 'cy_ota_storage_context_t'
  * @param[in]   chunk_info      Pointer to write data chunk information
  *
- * @return      CY_UNTAR_SUCCESS
- *              CY_UNTAR_ERROR
+ * @return      CY_RSLT_SUCCESS
+ *              CY_RSLT_OTA_ERROR_WRITE_STORAGE
  */
 cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_storage_write_info_t *chunk_info)
 {
@@ -477,7 +484,7 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
             consumed = 0;
         }
 
-        while (consumed < chunk_info->size)
+        while(consumed < chunk_info->size)
         {
             cy_untar_result_t result;
             result = cy_untar_parse(&ota_untar_context, (chunk_info->offset + consumed), &chunk_info->buffer[consumed + copy_offset],
@@ -520,10 +527,8 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
                             (minor == APP_VERSION_MINOR) &&
                             (build <= APP_VERSION_BUILD)))
                     {
-                         cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() OTA image version %d.%d.%d <= current %d.%d.%d-- bail!\r\n", __func__,
-                                 major, minor, build,
-                                 APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_BUILD);
-
+                         cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "%s() OTA image version %d.%d.%d <= current %d.%d.%d -- bail!\r\n",
+                                                               __func__, major, minor, build, APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_BUILD);
                          return CY_RSLT_OTA_ERROR_WRITE_STORAGE;
                     }
                 }
@@ -537,19 +542,22 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
         cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "NON-TAR file ...\n");
         if(file_header.buffer_size)
         {
-            /* First 48 Bytes is MDH, Pass MDH to Init.*/
-
-            if(ota_allocate_write_buffer(CY_DS_MDH_SIZE) != true)
+            mdh_size = CY_ENC_DS_MDH_SIZE;
+            /* First 48/64 Bytes is MDH, Pass MDH to Init.*/
+            if(ota_allocate_write_buffer(mdh_size) != true)
             {
                 return CY_RSLT_OTA_ERROR_WRITE_STORAGE;
             }
 
-            memset(write_buffer, 0x00, CY_DS_MDH_SIZE);
-            memcpy(write_buffer, file_header.buffer, CY_DS_MDH_SIZE);
+            memset(write_buffer, 0x00, mdh_size);
+            memcpy(write_buffer, file_header.buffer, mdh_size);
+            if(memcmp((write_buffer + CY_ENC_ENABLE_BYTE_OFFSET), &cy_ds_enc_flags[0], sizeof(cy_ds_enc_flags)) != 0)
+            {
+                mdh_size = CY_DS_MDH_SIZE;
+            }
 
-            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE start for address : size : 0x%08x...!!!\n", CY_DS_MDH_SIZE);
-
-            res = thread_ap_OTA_Initialize((BTSS_SYSTEM_NVRAM_OTA_HEADER_t *)write_buffer, CY_DS_MDH_SIZE);
+            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE start for address : size : 0x%08x...!!!\n", mdh_size);
+            res = thread_ap_OTA_Initialize((BTSS_SYSTEM_NVRAM_OTA_HEADER_t *)write_buffer, mdh_size);
             ota_free_write_buffer();
             if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
             {
@@ -561,11 +569,11 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
                 cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE completed \n");
             }
             cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "DS WRITE start for address : 0x%08x size : 0x%08x...!!!\n",
-                                                                                 (CY_DS1_ADDRESS), (file_header.buffer_size - CY_DS_MDH_SIZE));
+                                                  (CY_DS1_ADDRESS), (file_header.buffer_size - CY_DS_MDH_SIZE));
 
             res = thread_ap_OTA_WriteAltImageMemory(CY_DS1_ADDRESS,
-                                                    (file_header.buffer + CY_DS_MDH_SIZE),
-                                                    (file_header.buffer_size - CY_DS_MDH_SIZE));
+                                                    (file_header.buffer + mdh_size),
+                                                    (file_header.buffer_size - mdh_size));
             free(file_header.buffer);
             file_header.buffer = NULL;
             file_header.buffer_size = 0;
@@ -586,13 +594,18 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
         }
         memset(write_buffer, 0x00, chunk_info->size);
 
-        /* First 48 Bytes is MDH, Pass MDH to Init.*/
+        /* First 48/64 Bytes is MDH, Pass MDH to Init.*/
         if(chunk_info->offset == 0UL)
         {
-            memcpy(write_buffer, chunk_info->buffer, CY_DS_MDH_SIZE);
-            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE start for address : size : 0x%08x...!!!\n", CY_DS_MDH_SIZE);
+            mdh_size = CY_ENC_DS_MDH_SIZE;
+            memcpy(write_buffer, chunk_info->buffer, mdh_size);
+            if(memcmp((write_buffer + CY_ENC_ENABLE_BYTE_OFFSET), &cy_ds_enc_flags[0], sizeof(cy_ds_enc_flags)) != 0)
+            {
+                mdh_size = CY_DS_MDH_SIZE;
+            }
 
-            res = thread_ap_OTA_Initialize((BTSS_SYSTEM_NVRAM_OTA_HEADER_t *)write_buffer, CY_DS_MDH_SIZE);
+            cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "Header WRITE start for address : size : 0x%08x...!!!\n", mdh_size);
+            res = thread_ap_OTA_Initialize((BTSS_SYSTEM_NVRAM_OTA_HEADER_t *)write_buffer, mdh_size);
             if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
             {
                 ota_free_write_buffer();
@@ -607,11 +620,11 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
 
             /* Write remaing bytes of chunks to DS section */
             memset(write_buffer, 0x00, chunk_info->size);
-            memcpy(write_buffer, (chunk_info->buffer + CY_DS_MDH_SIZE), ((chunk_info->size) - CY_DS_MDH_SIZE));
+            memcpy(write_buffer, (chunk_info->buffer + mdh_size), ((chunk_info->size) - mdh_size));
 
             cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "DS WRITE start for address : 0x%08x size : 0x%08x...!!!\n",
-                                                                                 (CY_DS1_ADDRESS), ((chunk_info->size) - CY_DS_MDH_SIZE));
-            res = thread_ap_OTA_WriteAltImageMemory(CY_DS1_ADDRESS, write_buffer, ((chunk_info->size) - CY_DS_MDH_SIZE));
+                                                  (CY_DS1_ADDRESS), ((chunk_info->size) - mdh_size));
+            res = thread_ap_OTA_WriteAltImageMemory(CY_DS1_ADDRESS, write_buffer, ((chunk_info->size) - mdh_size));
             if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
             {
                 ota_free_write_buffer();
@@ -628,8 +641,8 @@ cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_sto
         {
             memcpy(write_buffer, (chunk_info->buffer + copy_offset), chunk_info->size);
             cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "DS WRITE start for address : 0x%08x size : 0x%08x...!!!\n",
-                                                    (CY_DS1_ADDRESS + chunk_info->offset - CY_DS_MDH_SIZE), (chunk_info->size));
-            res = thread_ap_OTA_WriteAltImageMemory((CY_DS1_ADDRESS + chunk_info->offset - CY_DS_MDH_SIZE), write_buffer, chunk_info->size);
+                                                  (CY_DS1_ADDRESS + chunk_info->offset - CY_DS_MDH_SIZE), (chunk_info->size));
+            res = thread_ap_OTA_WriteAltImageMemory((CY_DS1_ADDRESS + chunk_info->offset - mdh_size), write_buffer, chunk_info->size);
             if(res != BTSS_SYSTEM_NVRAM_OTA_ERR_NONE)
             {
                 ota_free_write_buffer();

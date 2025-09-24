@@ -253,6 +253,7 @@ cy_rslt_t cy_ota_storage_verify(cy_ota_storage_context_t *storage_ptr)
     else
     {
         cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_NOTICE, "boot_validate_slot_for_image_id() completed \n");
+        return CY_RSLT_SUCCESS;
     }
 #else
     if(cy_flash_area_boot_set_pending(0, (storage_ptr->validate_after_reboot == 0)) != CY_RSLT_SUCCESS)
@@ -266,8 +267,6 @@ cy_rslt_t cy_ota_storage_verify(cy_ota_storage_context_t *storage_ptr)
         return CY_RSLT_SUCCESS;
     }
 #endif
-
-    return CY_RSLT_SUCCESS;
 }
 
 /**

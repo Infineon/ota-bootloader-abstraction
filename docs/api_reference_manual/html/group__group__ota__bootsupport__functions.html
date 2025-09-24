@@ -106,7 +106,7 @@ $(document).ready(function(){initNavTree('group__group__ota__bootsupport__functi
 <p>Bootloader based storage interface APIs for handling downloaded UPGRADE image of OTA application.</p>
 <p>OTA Bootloader support library flash operation APIs.</p>
 <p>Storage Interface APIs call these flash operation APIs to store downloaded UPGRADE image on Internal or External Flash based on target platforms.</p>
-<p>These callbacks are defind in ota-update library and expected to register these callbacks during OTA agent start. ota-bootloader-abstraction library has implementation of these bootloader specific storage interface APIs. </p>
+<p>These callbacks are defined in ota-update library and expected to register these callbacks during OTA agent start. ota-bootloader-abstraction library has implementation of these bootloader specific storage interface APIs. </p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -146,9 +146,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gafec15fe9e456d05c41e5e8803d18193d"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gafec15fe9e456d05c41e5e8803d18193d">cy_ota_storage_verify</a> (cy_ota_storage_context_t *storage_ptr)</td></tr>
 <tr class="memdesc:gafec15fe9e456d05c41e5e8803d18193d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify downloaded UPGRADE OTA image.  <a href="#gafec15fe9e456d05c41e5e8803d18193d">More...</a><br /></td></tr>
 <tr class="separator:gafec15fe9e456d05c41e5e8803d18193d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#ga3c9c62b6c769e88515a05d1d5aba3242">cy_ota_storage_set_boot_pending</a> (cy_ota_storage_context_t *storage_ptr)</td></tr>
-<tr class="memdesc:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set boot pending.  <a href="#ga3c9c62b6c769e88515a05d1d5aba3242">More...</a><br /></td></tr>
-<tr class="separator:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf0877e6241e912f840c4f15495ed4210"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gaf0877e6241e912f840c4f15495ed4210">cy_ota_storage_set_boot_pending</a> (uint16_t app_id, cy_ota_storage_context_t *storage_ptr)</td></tr>
+<tr class="memdesc:gaf0877e6241e912f840c4f15495ed4210"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set boot pending.  <a href="#gaf0877e6241e912f840c4f15495ed4210">More...</a><br /></td></tr>
+<tr class="separator:gaf0877e6241e912f840c4f15495ed4210"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaab1cb38d45bb7a4e6ed4e6cd8497a3de"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gaab1cb38d45bb7a4e6ed4e6cd8497a3de">cy_ota_storage_get_boot_pending_status</a> (uint16_t app_id, uint8_t *status)</td></tr>
 <tr class="memdesc:gaab1cb38d45bb7a4e6ed4e6cd8497a3de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get boot pending status of the image in inactive slot.  <a href="#gaab1cb38d45bb7a4e6ed4e6cd8497a3de">More...</a><br /></td></tr>
 <tr class="separator:gaab1cb38d45bb7a4e6ed4e6cd8497a3de"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -167,6 +167,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaf5a14d9eff1fdd34ae77d174a18a9c04"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#gaf5a14d9eff1fdd34ae77d174a18a9c04">cy_ota_storage_set_slot_state</a> (uint16_t slot_id, uint16_t image_num, <a class="el" href="group__group__ota__bootsupport__typedefs.html#ga7c9d2f801f8307ef5691de969247ea8a">cy_ota_slot_state_t</a> state)</td></tr>
 <tr class="memdesc:gaf5a14d9eff1fdd34ae77d174a18a9c04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set Application slot state information.  <a href="#gaf5a14d9eff1fdd34ae77d174a18a9c04">More...</a><br /></td></tr>
 <tr class="separator:gaf5a14d9eff1fdd34ae77d174a18a9c04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="memItemLeft" align="right" valign="top">cy_rslt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__ota__bootsupport__functions.html#ga3c9c62b6c769e88515a05d1d5aba3242">cy_ota_storage_set_boot_pending</a> (cy_ota_storage_context_t *storage_ptr)</td></tr>
+<tr class="memdesc:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set boot pending.  <a href="#ga3c9c62b6c769e88515a05d1d5aba3242">More...</a><br /></td></tr>
+<tr class="separator:ga3c9c62b6c769e88515a05d1d5aba3242"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="ga8992438c302b7b07295524c1ff9a1103"></a>
@@ -577,16 +580,26 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ga3c9c62b6c769e88515a05d1d5aba3242"></a>
+<a class="anchor" id="gaf0877e6241e912f840c4f15495ed4210"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">cy_rslt_t cy_ota_storage_set_boot_pending </td>
           <td>(</td>
-          <td class="paramtype">cy_ota_storage_context_t *&#160;</td>
-          <td class="paramname"><em>storage_ptr</em></td><td>)</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>app_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">cy_ota_storage_context_t *&#160;</td>
+          <td class="paramname"><em>storage_ptr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -595,6 +608,7 @@ Functions</h2></td></tr>
 <p>Marks the image in the inactive slot as pending. On the next reboot, the system will perform a one-time boot of the the inactive slot image.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">app_id</td><td>Application ID. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">storage_ptr</td><td>Pointer to the OTA Agent storage context cy_ota_storage_context_t</td></tr>
   </table>
   </dd>
@@ -825,6 +839,32 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">slot_id</td><td>Slot ID. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">image_num</td><td>Image number. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">state</td><td>OTA Application state variable.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>CY_RSLT_SUCCESS CY_RSLT_OTA_ERROR_GENERAL </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ga3c9c62b6c769e88515a05d1d5aba3242"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">cy_rslt_t cy_ota_storage_set_boot_pending </td>
+          <td>(</td>
+          <td class="paramtype">cy_ota_storage_context_t *&#160;</td>
+          <td class="paramname"><em>storage_ptr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set boot pending. </p>
+<p>Marks the image in the inactive slot as pending. On the next reboot, the system will perform a one-time boot of the the inactive slot image.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">storage_ptr</td><td>Pointer to the OTA Agent storage context cy_ota_storage_context_t</td></tr>
   </table>
   </dd>
 </dl>

@@ -32,6 +32,19 @@
  */
 
 /*
+ * @ Unix Standard Tar header format
+ *
+ * Note:  a description if the ustar Interchange Format can be found here:
+ *
+ * The Open Group Base Specifications Issue 7, 2018 edition
+ * IEEE Std 1003.1-2017 (Revision of IEEE Std 1003.1-2008)
+ * Copyright 2001-2018 IEEE and The Open Group
+ *
+ * See https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06
+ *
+ */
+
+/*
  * Parse incoming TAR archive
  *
  * NOTE: Since the data we expect is coming over WiFi we possiblky

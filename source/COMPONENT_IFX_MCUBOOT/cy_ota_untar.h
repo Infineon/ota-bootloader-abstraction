@@ -31,6 +31,19 @@
  * so agrees to indemnify Cypress against all liability.
  */
 
+/*
+ * @ Unix Standard Tar header format
+ *
+ * Note:  a description if the ustar Interchange Format can be found here:
+ *
+ * The Open Group Base Specifications Issue 7, 2018 edition
+ * IEEE Std 1003.1-2017 (Revision of IEEE Std 1003.1-2008)
+ * Copyright 2001-2018 IEEE and The Open Group
+ *
+ * See https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06
+ *
+ */
+
 #ifndef CY_OTA_UNTAR_H__
 #define CY_OTA_UNTAR_H__   1
 
@@ -40,31 +53,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-/**
- * @ Unix Standard Tar header format
- *
- * The Open Group Base Specifications Issue 7, 2018 edition
- * IEEE Std 1003.1-2017 (Revision of IEEE Std 1003.1-2008)
- * Copyright™ 2001-2018 IEEE and The Open Group
- *
- * ustar Interchange Format
- * A ustar archive tape or file shall contain a series of logical records.
- * Each logical record shall be a fixed-size logical record of 512 octets (see below).
- * Although this format may be thought of as being stored on 9-track industry-standard
- * 12.7 mm (0.5 in) magnetic tape, other types of transportable media are not excluded.
- * Each file archived shall be represented by a header logical record that describes
- * the file, followed by zero or more logical records that give the contents of the file.
- * At the end of the archive file there shall be two 512-octet logical records filled with
- * binary zeros, interpreted as an end-of-archive indicator.
- * The logical records may be grouped for physical I/O operations, as described under the
- * -b blocksize and -x ustar options. Each group of logical records may be written with a
- * single operation equivalent to the write() function. On magnetic tape, the result of
- * this write shall be a single tape physical block. The last physical block shall always
- * be the full size, so logical records after the two zero logical records may contain undefined data.
- *
- */
 
 #define TAR_BLOCK_SIZE  512
 
@@ -159,14 +147,17 @@ typedef struct ustar_header_s {
 /**
  * @brief Structure used for keeping track of files in the tar archive while extracting.
  */
-typedef struct cy_ota_file_info_s
-{
-    char                name[TNAMELEN];         /**< Copied from the components.json file              */
-    char                type[CY_FILE_TYPE_LEN]; /**< From components.json.                             */
-    uint16_t            found_in_tar;           /**< Encountered the header in the tar file.           */
-    uint32_t            header_offset;          /**< Offset of the header in the tar file.             */
-    uint32_t            size;                   /**< From components.json, verified from the header.   */
-    uint32_t            processed;              /**< Bytes processed from the tar file.                */
+typedef struct cy_ota_file_info_s {
+    uint8_t   img_id;                          /**< From components.json.                             */
+    char      name[TNAMELEN];                  /**< Copied from the components.json file              */
+    char      type[CY_FILE_TYPE_LEN];          /**< From components.json.                             */
+    uint16_t  found_in_tar;                    /**< Encountered the header in the tar file.           */
+    uint32_t  header_offset;                   /**< Offset of the header in the tar file.             */
+    uint32_t  start_addr;                      /**< Offset of the header in the tar file.             */
+    uint32_t  size;                            /**< From components.json, verified from the header.   */
+    uint32_t  processed;                       /**< Bytes processed from the tar file.                */
+    uint8_t   is_valid_img;                    /**< Based on the current and previous versions        */
+    char      version[CY_VERSION_STRING_MAX];  /**< From components.json.                             */
 } cy_ota_file_info_t;
 
 /**

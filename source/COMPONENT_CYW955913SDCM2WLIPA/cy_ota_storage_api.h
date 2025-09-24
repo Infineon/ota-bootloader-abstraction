@@ -87,8 +87,8 @@ cy_rslt_t cy_ota_storage_read(cy_ota_storage_context_t *storage_ptr, cy_ota_stor
  * @param[in]   storage_ptr     Pointer to the OTA Agent storage context 'cy_ota_storage_context_t'
  * @param[in]   chunk_info      Pointer to write data chunk information
  *
- * @return      CY_UNTAR_SUCCESS
- *              CY_UNTAR_ERROR
+ * @return      CY_RSLT_SUCCESS
+ *              CY_RSLT_OTA_ERROR_WRITE_STORAGE
  */
 cy_rslt_t cy_ota_storage_write(cy_ota_storage_context_t *storage_ptr, cy_ota_storage_write_info_t *chunk_info);
 

@@ -9,12 +9,13 @@ See the [ota-update](https://github.com/Infineon/ota-update/) library documentat
 
 | Library Version                 | Supported MTB version    | Remarks                                   |
 |---------------------------------| -------------------------|-------------------------------------------|
+| ota-bootloader-abstraction v1.7  | ModusToolbox 3.6      | Encrypted OTA image handling is added for CYW955913EVK-01 kit.<br>Added support for PSOC™ Edge E84 (PSE84) platform and MTb_HAL apis. |
 | ota-bootloader-abstraction v1.6  | ModusToolbox 3.5      | MCUBootloader based direct xip OTA support added for CYW20829. |
 | ota-bootloader-abstraction v1.5  | ModusToolbox 3.3      | XMC7100(KIT_XMC71_EVK_LITE_V1) platform support added.<br>Image encryption support added for 20829 platform. |
-| ota-bootloader-abstraction v1.4  | ModusToolbox 3.2      | CY8CEVAL-062S2-CYW955513SDM2WLIPA kit support added.<br>Support for secure LCS and OTA image encryption has been added to the CYW920829 platform.<br>cysecuretools v6.1 or greater is required. |
-| ota-bootloader-abstraction v1.2  | ModusToolbox 3.2      | CYW955913EVK-01 platform support added |
-| ota-bootloader-abstraction v1.1  | ModusToolbox 3.2      | CYW89829 platform support added |
-| ota-bootloader-abstraction v1.0  | ModusToolbox 3.1      | cysecuretools v5.0 or greater is required |
+| ota-bootloader-abstraction v1.4  | ModusToolbox 3.2      | CY8CEVAL-062S2-CYW955513SDM2WLIPA platform support added.<br>Support for secure LCS and OTA image encryption has been added to the CYW920829 platform.<br>cysecuretools v6.1 or greater is required. |
+| ota-bootloader-abstraction v1.2  | ModusToolbox 3.2      | CYW955913EVK-01 platform support added. |
+| ota-bootloader-abstraction v1.1  | ModusToolbox 3.2      | CYW89829 platform support added. |
+| ota-bootloader-abstraction v1.0  | ModusToolbox 3.1      | cysecuretools v5.0 or greater is required. |
 
 ## 1. Bootloader Support
 To add different bootloader support on Infineon connectivity-enabled MCU platforms, [ota-update](https://github.com/Infineon/ota-update/) library offloads bootloader specific storage interface APIs using callback mechanism.
@@ -69,9 +70,17 @@ typedef struct cy_ota_storage_interface_s
 
 *ota-bootloader-abstraction* library has below support for MCUBootloader based OTA on PSoC6, 20829, 89829, XMC7100 and XMC7200 platforms.
 
-- Template flashmaps for PSoC6, 20829, 89829, XMC7100 and XMC7200 platforms.
+- Template flashmaps for PSoC6, 20829, 89829, XMC7100, XMC7200 and PSE84 platforms.
 
-- Template linker files for GCC_ARM, ARM, and IAR toolchains.
+- Template linker files for GCC_ARM, ARM, and IAR toolchains. LLVM_ARM toolchain support is available on PSE84 platform.
+
+- For PSE84 platform,**design.modus** files are provided for each use-case. User needs to navigate to `bsps/TARGET_APP_<Target>/config` directory and remove `design.modus`, then copy and paste `./template_linkers/PSE84/<USE-CASE>/<EPC2/EPC4>/design.modus` file to  `bsps/TARGET_APP_<Target>/config`
+
+
+<b> NOTE:</b><br>
+    1. If user modifies the default load addresses of CM33 Non-Secure and CM55 projects, they updated values need to override the start addresses using `CY_CM33_NS_APP_BOOT_ADDR` and `CY_CM55_APP_BOOT_ADDR` macros.<br>
+    2. For more information on how to modify the PSE84 memory configurations for different use-cases, please refer to PSoC™ Edge Protect Bootloader Code Example's README.md file.<br>
+    3. For more information on how to configure for Encryption support on PSE84 platform, refer to [MCUBootloader App Information](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md#6-Edgeprotecttools for PSE84 devices).<br>
 
 - Storage operation callback APIs to handle MCUBootloader based upgrade image.
 
@@ -90,6 +99,8 @@ typedef struct cy_ota_storage_interface_s
 - KIT_XMC71_EVK_LITE_V1
 - CYW989829M2EVB-01
 - CY8CEVAL-062S2-CYW955513SDM2WLIPA
+- KIT_PSE84_EVAL_EPC2
+- KIT_PSE84_EVAL_EPC4
 
 The *ota-update* along with *ota-bootloader-abstraction* library works in concert with MCUBootloader to provide a no-fail solution to updating device software in the field.
 
@@ -313,7 +324,12 @@ User OTA application will include the *ota-update* library along with *ota-bootl
     ```
 
 - OTA storage interface calls Flash operations(Read, Write, erase) to store upgrade images in UPGRADE slot.
- *ota-bootloader-abstraction* implements flash operation using *mtb-pdl-cat1* library APIs and implementation is available in [configs folder](./configs/COMPONENT_MCUBOOT/flash/).
+ *ota-bootloader-abstraction* implements flash operation using *serial-memory* library for PSE84 platform. User needs to pull this library by creating a *serial-memory.mtb* file and place it the application's deps folder.
+ The contents of *serial-memory.mtb* should be as follows:
+    ```
+    mtb:serial-memory#release-v3.0.0#$$ASSET_REPO$$/serial-memory/release-v3.0.0
+    ```
+ For all other platforms, *ota-bootloader-abstraction* implements flash operation using *PDL* APIs and implementation is available in [configs folder](./configs/COMPONENT_MCUBOOT/flash/).
  User can use same implementation by copying contents of [configs folder](./configs/COMPONENT_MCUBOOT/flash/) to application space or Can implement flash operation APIs defined in [cy_ota_flash.h](./source/COMPONENT_MCUBOOT/cy_ota_flash.h).
 
 - For Secure platforms like PSoC64, MCUBootloader will get programmed during kit provisioning process. Follow steps in 3.1 before building OTA application.
@@ -439,6 +455,8 @@ For the toolchain version information, please refer to [ota-bootloader-abstracti
 - [XMC7100 Evaluation Kit](https://www.infineon.com/KIT_XMC71_EVK_LITE_V1) (KIT_XMC71_EVK_LITE_V1)
 - [AIROC™ CYW989820M2EVB-01 Evaluation kit](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/)(CYW989820M2EVB-01)
 - [CYW955913EVK-01 Wi-Fi Bluetooth&reg; Prototyping Kit (CYW955913EVK-01)](https://www.infineon.com/CYW955913EVK-01)
+- [KIT_PSE84_EVAL_EPC2 kit](https://www.infineon.com/cms/en/product/evaluation-boards/placeholder/)(KIT_PSE84_EVAL_EPC2)
+- PSOC&trade; Edge E84 Evaluation Kit
 
 ## 9. Hardware Setup
 

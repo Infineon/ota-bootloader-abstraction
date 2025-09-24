@@ -24,3 +24,4 @@ This guide shows Makefile variables and build DEFINES used when building an appl
 | APP_VERSION_MAJOR=\<application_version\> | Yes | Error | Application Major version number  X.y.z|
 | APP_VERSION_MINOR=\<application_version\> | Yes | Error | Application Minor version number  x.Y.z|
 | APP_VERSION_BUILD=\<application_version\> | Yes | Error | Application Build version number x.y.Z |
+| POST_BUILD_SECURE_IMAGE=\<0,1\> | No | 0 | When using the default POSTBUILD scripts of recipe-cat-make5 library, setting it to 1 will generate encrypted OTA BOOT and OTA UPGRADE image. |

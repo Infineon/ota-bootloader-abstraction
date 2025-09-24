@@ -15,7 +15,7 @@ var searchData=
   ['cy_5fota_5fstorage_5finit',['cy_ota_storage_init',['../group__group__ota__bootsupport__functions.html#gad1e6294598ad971d3cb35eb789ea4b7b',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fopen',['cy_ota_storage_open',['../group__group__ota__bootsupport__functions.html#gade56090dfaf908e2aa14a35d1ace6b06',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fread',['cy_ota_storage_read',['../group__group__ota__bootsupport__functions.html#gae935166cb14ce63a64e6f58bafe1c2af',1,'cy_ota_storage_api.h']]],
-  ['cy_5fota_5fstorage_5fset_5fboot_5fpending',['cy_ota_storage_set_boot_pending',['../group__group__ota__bootsupport__functions.html#ga3c9c62b6c769e88515a05d1d5aba3242',1,'cy_ota_storage_api.h']]],
+  ['cy_5fota_5fstorage_5fset_5fboot_5fpending',['cy_ota_storage_set_boot_pending',['../group__group__ota__bootsupport__functions.html#gaf0877e6241e912f840c4f15495ed4210',1,'cy_ota_storage_set_boot_pending(uint16_t app_id, cy_ota_storage_context_t *storage_ptr):&#160;cy_ota_storage_api.h'],['../group__group__ota__bootsupport__functions.html#ga3c9c62b6c769e88515a05d1d5aba3242',1,'cy_ota_storage_set_boot_pending(cy_ota_storage_context_t *storage_ptr):&#160;cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fset_5fslot_5fstate',['cy_ota_storage_set_slot_state',['../group__group__ota__bootsupport__functions.html#gaf5a14d9eff1fdd34ae77d174a18a9c04',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fverify',['cy_ota_storage_verify',['../group__group__ota__bootsupport__functions.html#gafec15fe9e456d05c41e5e8803d18193d',1,'cy_ota_storage_api.h']]],
   ['cy_5fota_5fstorage_5fwrite',['cy_ota_storage_write',['../group__group__ota__bootsupport__functions.html#ga2636ed026fa43484ae0f24e74c6bc472',1,'cy_ota_storage_api.h']]]
