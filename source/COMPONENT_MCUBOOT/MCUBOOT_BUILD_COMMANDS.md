@@ -83,7 +83,6 @@ make clean app APP_NAME=MCUBootApp PLATFORM=PSOC_063_1M USE_CUSTOM_DEBUG_UART=1 
 
 There are no flash maps for this device, the parameters are in the Makefile. We use cysecuretools to provision CY8CPROTO-064B0S2-4343W targets. Please see MCUBOOT_APP_README.md for more details.
 
-
 ## 6. CYW20829 Platform
 
 The CYW920829M2EVK-02 platform only supports an external flash execution(XIP) configuration.
@@ -115,8 +114,6 @@ make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 USE_CUSTOM_DEBUG_UART=1 USE
 
 <b>Building MCUBoot with Direct XIP support</b>
 - <b>Notes:</b> To build the MCUBootApp with Direct XIP support, utilize the flash map file named *cyw20829_xip_direct_mcuboot.json* located in the [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap) directory.
-
-To build the MCUBootApp with Direct XIP support, utilize the flash map file named cyw20829_xip_direct_mcuboot.json located in the flashmap directory
 
 To build MCUBoot with direct-xip feature:
 ```
@@ -165,7 +162,74 @@ To build MCUBoot with direct-xip feature and encryption support(Skipping MCUBoot
 make clean app APP_NAME=MCUBootApp PLATFORM=CYW20829 LCS=SECURE USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 SMIF_ENC=1 FLASH_MAP=./cyw20829_xip_direct_mcuboot.json MCUBOOT_SKIP_VALIDATE_PRIMARY_SLOT=1
 ```
 
-## 7. XMC7000 Platform
+## 7. CYW89829 Platform
+
+The CYW989829M2EVB-01 platform only supports an external flash execution(XIP) configuration.
+
+### NORMAL_NO_SECURE Mode
+<b>Building MCUBoot</b>
+
+To build MCUBoot for external flash execute (XIP) SWAP configuration:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw89829_xip_swap_single.json
+```
+
+To build MCUBoot for external flash execute (XIP) OVERWRITE configuration:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw89829_xip_overwrite_single.json
+```
+
+<b>Building MCUBoot with Direct XIP support</b>
+- <b>Notes:</b> To build the MCUBootApp with Direct XIP support, utilize the flash map file named *cyw89829_xip_direct_mcuboot.json* located in the [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap) directory.
+
+To build MCUBoot with direct-xip feature:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 FLASH_MAP=./cyw89829_xip_direct_mcuboot.json
+```
+
+To build MCUBoot with direct-xip feature(Skipping MCUBoot validation during boot):
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 MCUBOOT_SKIP_VALIDATE_PRIMARY_SLOT=1 FLASH_MAP=./cyw89829_xip_direct_mcuboot.json
+```
+
+To build MCUBoot with direct-xip feature and encryption support:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 SMIF_ENC=1 FLASH_MAP=./cyw89829_xip_direct_mcuboot.json
+```
+
+To build MCUBoot with direct-xip feature and encryption support(Skipping MCUBoot validation during boot):
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 MCUBOOT_SKIP_VALIDATE_PRIMARY_SLOT=1 SMIF_ENC=1 FLASH_MAP=./cyw89829_xip_direct_mcuboot.json
+```
+
+### SECURE Mode
+
+<b>Building MCUBoot with Encryption support</b>
+
+To build MCUBoot for external flash execute (XIP) SWAP configuration with encryption:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw89829_xip_swap_single.json LCS=SECURE ENC_IMG=1
+```
+
+To build MCUBoot for external flash execute (XIP) OVERWRITE configuration with encryption:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw89829_xip_overwrite_single.json LCS=SECURE ENC_IMG=1
+```
+
+<b>Building MCUBoot with Direct XIP support</b>
+- <b>Notes:</b> To build the MCUBootApp with Direct XIP support, utilize the flash map file named *cyw89829_xip_direct_mcuboot.json* located in the [flashmap](./../../configs/COMPONENT_MCUBOOT/flashmap) directory.
+
+To build MCUBoot with direct-xip feature and encryption support:
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 LCS=SECURE USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 SMIF_ENC=1 FLASH_MAP=./cyw89829_xip_direct_mcuboot.json
+```
+
+To build MCUBoot with direct-xip feature and encryption support(Skipping MCUBoot validation during boot):
+```
+make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 LCS=SECURE USE_DIRECT_XIP=1 MCUBOOT_DIRECT_XIP=1 SMIF_ENC=1 FLASH_MAP=./cyw89829_xip_direct_mcuboot.json MCUBOOT_SKIP_VALIDATE_PRIMARY_SLOT=1
+```
+
+## 8. XMC7000 Platform
 - KIT_XMC72_EVK
 - KIT_XMC72_EVK_MUR_43439M2
 - KIT_XMC71_EVK_LITE_V1
@@ -192,22 +256,6 @@ make clean app APP_NAME=MCUBootApp PLATFORM=XMC7200 BUILDCFG=Debug FLASH_MAP=./x
 ```
 # For KIT_XMC71_EVK_LITE_V1
 make clean app APP_NAME=MCUBootApp PLATFORM=XMC7100 BUILDCFG=Debug FLASH_MAP=./xmc7100_int_overwrite_single.json PLATFORM_CONFIG=platforms/memory/XMC7000/flashmap/xmc7100_platform.json CORE=CM0P APP_CORE=CM7 APP_CORE_ID=0
-```
-
-## 8. CYW89829 Platform
-
-The CYW989829M2EVB-01 platform only supports an external flash execution(XIP) configuration.
-
-<b>Building MCUBoot</b>
-
-To build MCUBoot for external flash execute (XIP) SWAP configuration:
-```
-make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw89829_xip_swap_single.json
-```
-
-To build MCUBoot for external flash execute (XIP) OVERWRITE configuration:
-```
-make clean app APP_NAME=MCUBootApp PLATFORM=CYW89829 USE_CUSTOM_DEBUG_UART=1 USE_EXTERNAL_FLASH=1 USE_XIP=1 FLASH_MAP=./cyw89829_xip_overwrite_single.json
 ```
 
 # UART differences

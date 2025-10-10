@@ -171,7 +171,7 @@ static cy_rslt_t ota_untar_json_callback( cy_JSON_object_t *obj, void*cb_arg )
         memcpy(ctxt->files[ctxt->curr_file_in_json].name, obj->value, obj->value_length);
 
         /* Setting the default Value of is_valid_img for each file as 'true' */
-        ctxt->files[ctxt->curr_file_in_json].is_valid_img=1;
+        ctxt->files[ctxt->curr_file_in_json].is_valid_img = true;
     }
     else if(strncmp(CY_KEY_FILE_ID, obj->object_string, obj->object_string_length) == 0)
     {

@@ -9,6 +9,7 @@ See the [ota-update](https://github.com/Infineon/ota-update/) library documentat
 
 | Library Version                 | Supported MTB version    | Remarks                                   |
 |---------------------------------| -------------------------|-------------------------------------------|
+| ota-bootloader-abstraction v1.8  | ModusToolbox 3.6      | MCUBootloader based direct xip OTA support added for CYW89829.<br> Added encryption support for the PSOC&trade; Edge E84 (PSE84) platform. <br> edgeprotecttools >= 1.5 required. |
 | ota-bootloader-abstraction v1.7  | ModusToolbox 3.6      | Encrypted OTA image handling is added for CYW955913EVK-01 kit.<br>Added support for PSOC™ Edge E84 (PSE84) platform and MTb_HAL apis. |
 | ota-bootloader-abstraction v1.6  | ModusToolbox 3.5      | MCUBootloader based direct xip OTA support added for CYW20829. |
 | ota-bootloader-abstraction v1.5  | ModusToolbox 3.3      | XMC7100(KIT_XMC71_EVK_LITE_V1) platform support added.<br>Image encryption support added for 20829 platform. |
@@ -142,7 +143,7 @@ For more information, please see [OTA Flash Layout Information](./source/COMPONE
 
 <b> 2.2 Target and Flashmap Use</b><br>
 
-Template flashmaps for the supported targets as of v1.0.0 release. These flashmaps are available in [MCUBootloader based OTA Flashmap folder](./configs/COMPONENT_MCUBOOT/flashmap/).
+Template flashmaps for the supported targets as of v1.X release. These flashmaps are available in [MCUBootloader based OTA Flashmap folder](./configs/COMPONENT_MCUBOOT/flashmap/).
 
 | Target | Internal<br>Flash size | OTA_PLATFORM | Flashmaps |
 |-------------------|---------------------|----|------|
@@ -152,7 +153,7 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 | CY8CPROTO-062S3-4343W  | 512K | PSOC_062_512K | Default - psoc62_512k_xip_swap_single.json<br> psoc62_512k_ext_overwrite_single.json<br>psoc62_512k_ext_swap_single.json |
 | CY8CKIT-064B0S2-4343W | 2M | PSOC_064_2M | Default - policy_single_CM0_CM4_smif_swap.json |
 | CYW920829M2EVK-02 | 0K | CYW20829 | Default - cyw20829_xip_swap_single.json<br> cyw20829_xip_overwrite_single.json<br> cyw20829_xip_direct.json |
-| CYW989829M2EVB-01 | 0K | CYW89829 | Default - cyw89829_xip_swap_single.json<br> cyw89829_xip_overwrite_single.json |
+| CYW989829M2EVB-01 | 0K | CYW89829 | Default - cyw89829_xip_swap_single.json<br> cyw89829_xip_overwrite_single.json<br> cyw89829_xip_direct.json |
 | KIT_XMC71_EVK_LITE_V1 | 4MB | XMC7100 | Default - xmc7100_int_swap_single.json<br> xmc7100_int_overwrite_single.json |
 | KIT_XMC72_EVK<br>KIT_XMC72_EVK_MUR_43439M2 | 8MB | XMC7200 | Default - xmc7200_int_swap_single.json<br> xmc7200_int_overwrite_single.json |
 
@@ -183,6 +184,7 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 | cyw20829_xip_direct.json                 | External only (primary and secondary) |
 | cyw89829_xip_overwrite_single.json       | External only (primary and secondary) |
 | cyw89829_xip_swap_single.json            | External only (primary and secondary) |
+| cyw89829_xip_direct.json                 | External only (primary and secondary) |
 
 | 4M Internal Flash Maps | Memory Usage |
 |--------------------------------|--------------|
@@ -199,19 +201,19 @@ Template flashmaps for the supported targets as of v1.0.0 release. These flashma
 MCUBootloader Application i.e MCUBootApp is a standalone application. It is an open source software taken and customized in terms of Flash map and is built outside of ModusToolbox. MCUBootApp is programmed/flashed on the device one time, at manufacture (or for development).
 
 - MCUBootApp runs on the CM0+ CPU and starts any OTA enabled application on CM4 core in case of multicore Psoc6 devices and on CM7 core in case of XMC7100 and XMC7200 devices.
-- In case of 20829 and 89829 devices, MCUBootApp runs on CM33 CPU along with the OTA enabled applications.
+- In case of CYW20829 and CYW89829 devices, MCUBootApp runs on CM33 CPU along with the OTA enabled applications.
 
 MCUBoot itself is not OTA upgradable.
 
 For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPONENT_MCUBOOT/MCUBOOT_APP_README.md).
 
-<b> 2.4 OTA Boot and Upgrade Image Encryption Support for CYW20829</b><br>
+<b> 2.4 OTA Boot and Upgrade Image Encryption Support for CYW20829/CYW89829</b><br>
 
 - The *ota-bootloader-abstraction* library supports the handling of encrypted UPGRADE images through on-the-fly encryption logic.
 
-- The downloaded signed image is encrypted using the provisioned encryption key, applicable to both the SECURE and NONSECURE lifecycles of the CYW20829.
+- The downloaded signed image is encrypted using the provisioned encryption key, applicable to both the SECURE and NONSECURE lifecycles of the CYW20829/CYW89829.
 
-- For information on provisioning the CYW20829 in either SECURE or NONSECURE lifecycle modes, please refer to the following links:
+- For information on provisioning the CYW20829/CYW89829 in either SECURE or NONSECURE lifecycle modes, please refer to the following links:
   ```
   https://github.com/Infineon/cysecuretools/blob/master/docs/README_CYW20829.md
   ```
@@ -232,6 +234,9 @@ For cloning and building MCUBootApp refer to [MCUBootApp README](./source/COMPON
 - The current version of the *ota-bootloader-abstraction* library does not include a post-build script for generating an encrypted BOOT image of the OTA application. Therefore, use the following command to encrypt the OTA application BOOT image:
   ```
   cysecuretools -t cyw20829 encrypt --input $OTA_APP_SIGNED_BIN --output $OTA_APP_ENCRYPTED_BIN --iv 0x08020000 --enckey ./keys/encrypt_key.bin --nonce $NONCE_FILE
+  ```
+  ```
+  cysecuretools -t cyw89829 encrypt --input $OTA_APP_SIGNED_BIN --output $OTA_APP_ENCRYPTED_BIN --iv 0x08020000 --enckey ./keys/encrypt_key.bin --nonce $NONCE_FILE
   ```
   *** NOTE : *** When encrypting the OTA application BOOT image, ensure that you use the same encryption key that has been provisioned to the device, as well as the same nonce that was used for encrypting the MCUBootApp.
 
@@ -449,14 +454,13 @@ For the toolchain version information, please refer to [ota-bootloader-abstracti
 - [PSoC™ 6-BLE Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062-ble/) (CY8CKIT-062-BLE)
 - [PSoC™ 6 BLE Prototyping Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8cproto-063-ble/) (CY8CPROTO-063-BLE)
 - [EZ-BLE Arduino Evaluation Board](https://www.infineon.com/cms/en/product/evaluation-boards/cyble-416045-eval/) (CYBLE-416045-EVAL)
-- [AIROC™ CYW20829 Bluetooth® LE SoC](https://www.infineon.com/cms/en/product/promopages/airoc20829/) (CYW920829M2EVK-02)
+- [AIROC™ CYW20829 Bluetooth® LE SoC](https://www.infineon.com/part/CYW20829) (CYW920829M2EVK-02)
+- [AIROC™ CYW989829M2EVB-01 Evaluation kit](https://www.infineon.com/part/CYW89829) (CYW989829M2EVB-01)
 - [XMC7200 Evaluation Kit](https://www.infineon.com/KIT_XMC72_EVK) (KIT_XMC72_EVK)
 - [XMC7200 Evaluation Kit](https://www.infineon.com/KIT_XMC72_EVK) (KIT_XMC72_EVK_MUR_43439M2)
 - [XMC7100 Evaluation Kit](https://www.infineon.com/KIT_XMC71_EVK_LITE_V1) (KIT_XMC71_EVK_LITE_V1)
-- [AIROC™ CYW989820M2EVB-01 Evaluation kit](https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/)(CYW989820M2EVB-01)
 - [CYW955913EVK-01 Wi-Fi Bluetooth&reg; Prototyping Kit (CYW955913EVK-01)](https://www.infineon.com/CYW955913EVK-01)
-- [KIT_PSE84_EVAL_EPC2 kit](https://www.infineon.com/cms/en/product/evaluation-boards/placeholder/)(KIT_PSE84_EVAL_EPC2)
-- PSOC&trade; Edge E84 Evaluation Kit
+- PSOC&trade; Edge E84 Evaluation Kits (KIT_PSE84_EVAL_EPC2, KIT_PSE84_EVAL_EPC4)
 
 ## 9. Hardware Setup
 

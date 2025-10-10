@@ -39,17 +39,29 @@ This guide shows Makefile variables and build DEFINES used when building an appl
 | OTA_APP_POLICY_PATH=\<Application's Policy File Path\> | No | Depends on Target Support | User needs to define this Makefile entry to provide the policy file path for 20829 and 89829 devices which use cysecuretools for signing update images.<br>Refer to [MCUBoot App Readme](./MCUBOOT_APP_README.md).<br>This is not required for PSoC6 non-secure devices.  |
 | OTA_APP_POSTBUILD=\<Application's POSTBUILD commands\> | No | Post-build commands for generating Signed BOOT and UPGRADE images. | Users can use this Makefile entry to provide their own post-build commands.<br>If this makefile entry is empty, the ota-bootloader-abstraction library uses the default POSTBUILD commands which create signed BOOT and UPGRADE images.|
 
-## 4. BOOT and UPGRADE Images for 20829
-When the 20829 based OTA Application utilizes the default postbuild scripts from the ota-bootloader-abstraction library, the BOOT and UPGRADE images are generated at the specified build location(CY_BUILD_LOCATION).
+## 4. BOOT and UPGRADE Images for 20829/89829
+When the 20829/89829 based OTA Application utilizes the default postbuild scripts from the ota-bootloader-abstraction library, the BOOT and UPGRADE images are generated at the specified build location(CY_BUILD_LOCATION).
+
+### Swap and Overwrite
 
 | Platform | Device Mode | Encryption | BOOT | UPGRADE | Remarks |
 | ---------| ----------- | -----------| ---- | ------- | ------- |
-| CYW20829 | NORMAL_NO_SECURE | CY_ENC_IMG=0 | \<APPNAME\>.signed.bin | \<APPNAME\>.update.signed.bin |  |
-| CYW20829 | NORMAL_NO_SECURE | CY_ENC_IMG=1 | \<APPNAME\>.signed.bin | \<APPNAME\>.update.signed.bin |  |
-| CYW20829 | SECURE | CY_ENC_IMG=1 | \<APPNAME\>.signed.bin | \<APPNAME\>.upgrade_signed.bin |  |
-| CYW20829 | SECURE | CY_ENC_IMG=1 <br> CY_SMIF_ENC=1 | \<APPNAME\>.encrypted.bin | \<APPNAME\>.upgrade_signed.bin <br> \<APPNAME\>.upgrade_encrypted.bin | In case of *on-the-fly* encryption \<APPNAME\>.upgrade_signed.bin should be used as upgrade image  |
+| CYW20829 <br> CYW89829 | NORMAL_NO_SECURE | CY_ENC_IMG=0 | \<APPNAME\>.signed.bin | \<APPNAME\>.update.signed.bin |  |
+| CYW20829 <br> CYW89829 | NORMAL_NO_SECURE | CY_ENC_IMG=1 | \<APPNAME\>.signed.bin | \<APPNAME\>.update.signed.bin |  |
+| CYW20829 <br> CYW89829 | SECURE | CY_ENC_IMG=1 | \<APPNAME\>.signed.bin | \<APPNAME\>.upgrade_signed.bin |  |
+| CYW20829 <br> CYW89829 | SECURE | CY_ENC_IMG=1 <br> CY_SMIF_ENC=1 | \<APPNAME\>.encrypted.bin | \<APPNAME\>.upgrade_signed.bin <br> \<APPNAME\>.upgrade_encrypted.bin | In case of *on-the-fly* encryption \<APPNAME\>.upgrade_signed.bin should be used as upgrade image  |
 
+### Direct-XIP
 <b>Notes:</b>
+- Only 'on-the-encryption' supported in case of Direct-XIP based OTA.
+
+| Platform | Device Mode | Encryption | BOOT | UPGRADE | Remarks |
+| ---------| ----------- | -----------| ---- | ------- | ------- |
+| CYW20829 <br> CYW89829 | NORMAL_NO_SECURE | CY_SMIF_ENC=0 | \<APPNAME\>.signed.bin | \<APPNAME\>.update.signed.bin |  |
+| CYW20829 <br> CYW89829 | NORMAL_NO_SECURE | CY_SMIF_ENC=1 | \<APPNAME\>.signed.bin | \<APPNAME\>.update.signed.bin |  |
+| CYW20829 <br> CYW89829 | SECURE | CY_SMIF_ENC=1 | \<APPNAME\>.signed.bin | \<APPNAME\>.upgrade_signed.bin |  |
+
+## 5. Notes
 - ota-bootloader-abstraction repo provides makefiles/mcuboot/mcuboot_support.mk file for simplifying the ota-bootloader-abstraction library integration with the applications.
 - Application Makefile needs to include mcuboot_support.mk file from the ota-bootloader-abstraction library for the Target dependent Flashmap Configurations and pre/post build scripts.
     ```

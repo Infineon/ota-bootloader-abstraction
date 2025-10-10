@@ -6,6 +6,10 @@ See the [README.md](./README.md) for a complete description of the OTA bootloade
 
 ## Changelog
 
+### v1.8.0
+- Added 'direct-XIP OTA' support for MCUBootloader based OTA on CYW89829(CYW989829M2EVB-01) kits.
+- Added encryption support for the PSOC&trade; Edge E84 (PSE84) platform in the 'Running Bootloader from RRAM' use-case.
+
 ### v1.7.0
 
 - Added support for PSOC&trade; Edge E84 (PSE84) platform.

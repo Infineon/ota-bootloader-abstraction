@@ -525,7 +525,7 @@ cy_rslt_t cy_ota_storage_get_slot_state(uint16_t slot_id, uint16_t image_num, cy
     boot_slot_state_t slot_state;
 
     cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_DEBUG, "%s \n", __func__);
-    rc = boot_get_image_state(image_num, slot_id, &slot_state);
+    rc = boot_get_slot_state(image_num, slot_id, &slot_state);
     if(rc == 0)
     {
         switch(slot_state)
@@ -557,7 +557,7 @@ cy_rslt_t cy_ota_storage_get_slot_state(uint16_t slot_id, uint16_t image_num, cy
     }
     else
     {
-        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "boot_get_image_state() failed with error %d", rc);
+        cy_ota_bootloader_abstraction_log_msg(CYLF_MIDDLEWARE, CY_LOG_ERR, "boot_get_slot_state() failed with error %d", rc);
         result = CY_RSLT_OTA_ERROR_GENERAL;
     }
 #endif /* (CY_OTA_IMAGE_VERIFICATION) || (CY_OTA_DIRECT_XIP) */

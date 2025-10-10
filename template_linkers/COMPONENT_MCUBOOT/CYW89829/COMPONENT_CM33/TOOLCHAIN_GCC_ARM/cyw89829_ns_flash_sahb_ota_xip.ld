@@ -19,7 +19,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright (c) (2020-2022), Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright (c) (2020-2024), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -190,6 +190,7 @@ SECTIONS
         KEEP(*(.cy_ramfunc*))
         . = ALIGN(4);
 
+        *cy_ota_flash.o(.text*)
         *cy_smif.o(.text*)
         *cy_smif_memslot.o(.text*)
         *cy_smif_sfdp.o(.text*)
@@ -419,7 +420,7 @@ SECTIONS
         __text_begin = .;
 
         *(EXCLUDE_FILE(*cy_smif.o
-                        *cy_smif_memslot.o *cy_smif_sfdp.o) .text*)
+                        *cy_smif_memslot.o *cy_smif_sfdp.o *cy_ota_flash.o) .text*)
 
         KEEP(*(.init))
         KEEP(*(.fini))

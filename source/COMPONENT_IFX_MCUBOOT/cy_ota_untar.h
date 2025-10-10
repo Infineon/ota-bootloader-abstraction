@@ -47,6 +47,7 @@
 #ifndef CY_OTA_UNTAR_H__
 #define CY_OTA_UNTAR_H__   1
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "cy_result.h"
 
@@ -156,7 +157,7 @@ typedef struct cy_ota_file_info_s {
     uint32_t  start_addr;                      /**< Offset of the header in the tar file.             */
     uint32_t  size;                            /**< From components.json, verified from the header.   */
     uint32_t  processed;                       /**< Bytes processed from the tar file.                */
-    uint8_t   is_valid_img;                    /**< Based on the current and previous versions        */
+    bool      is_valid_img;                    /**< Based on the current and previous versions        */
     char      version[CY_VERSION_STRING_MAX];  /**< From components.json.                             */
 } cy_ota_file_info_t;
 

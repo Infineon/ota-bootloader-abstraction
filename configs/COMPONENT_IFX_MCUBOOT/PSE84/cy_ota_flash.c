@@ -123,11 +123,11 @@ cy_rslt_t cy_ota_mem_init( void )
     /* Initialize the QSPI block */
 #if ((DATA_WIDTH_PINS) == (SMIF_DATA_QUAD))
 
-	result = mtb_serial_memory_setup(&sm_obj, MTB_SERIAL_MEMORY_CHIP_SELECT_1, CYBSP_SMIF_CORE_0_XSPI_FLASH_hal_config.base, CYBSP_SMIF_CORE_0_XSPI_FLASH_hal_config.clock, &context, &smif_mem_info, &smif0BlockConfig);
-	if (result != CY_RSLT_SUCCESS)
-	{
-		printf("\nmtb_serial_memory_setup() failed in %s : line %d", __func__, __LINE__);
-	}
+    result = mtb_serial_memory_setup(&sm_obj, MTB_SERIAL_MEMORY_CHIP_SELECT_1, CYBSP_SMIF_CORE_0_XSPI_FLASH_hal_config.base, CYBSP_SMIF_CORE_0_XSPI_FLASH_hal_config.clock, &context, &smif_mem_info, &smif0BlockConfig);
+    if (result != CY_RSLT_SUCCESS)
+    {
+        printf("\nmtb_serial_memory_setup() failed in %s : line %d", __func__, __LINE__);
+    }
 
 #elif ((DATA_WIDTH_PINS) == (SMIF_DATA_OCTAL))
 #if !defined(MTB_HAL)
@@ -175,11 +175,11 @@ cy_rslt_t cy_ota_mem_read( cy_ota_mem_type_t mem_type, uint32_t addr, void *data
         }
         else if(addr >= CY_XIP_PORT0_NS_SBUS_BASE)
         {
-		addr -= CY_XIP_PORT0_NS_SBUS_BASE;
+            addr -= CY_XIP_PORT0_NS_SBUS_BASE;
         }
         else
         {
-		//Nothing to do
+            //Nothing to do
         }
         result = mtb_serial_memory_read(&sm_obj, addr, len, data);
 #endif /* PSE84 */
@@ -214,7 +214,7 @@ static cy_rslt_t cy_ota_mem_write_row_size( cy_ota_mem_type_t mem_type, uint32_t
         }
         else
         {
-		//Nothing to do
+            //Nothing to do
         }
 
 #if defined(COMPONENT_MTB_HAL)
@@ -222,11 +222,11 @@ static cy_rslt_t cy_ota_mem_write_row_size( cy_ota_mem_type_t mem_type, uint32_t
 #else
         result = cy_serial_flash_qspi_write(addr, len, data);
 #endif
-
         if(result == CY_RSLT_SUCCESS)
         {
             return 0;
-        } else
+        }
+        else
         {
             return result;
         }
@@ -379,31 +379,32 @@ cy_rslt_t cy_ota_mem_erase( cy_ota_mem_type_t mem_type, uint32_t addr, size_t le
 
     if( mem_type == CY_OTA_MEM_TYPE_EXTERNAL_FLASH )
     {
-    uint32_t offset=0;
+        uint32_t offset=0;
 
-    if(addr >= CY_XIP_PORT0_S_SBUS_BASE)
-    {
-        offset= addr - CY_XIP_PORT0_S_SBUS_BASE;
-    }
-    else if(addr >= CY_XIP_PORT0_NS_SBUS_BASE)
-    {
-	offset= addr - CY_XIP_PORT0_NS_SBUS_BASE;
-    }
-    else
-    {
-	//Nothing to do
-    }
-
+        if(addr >= CY_XIP_PORT0_S_SBUS_BASE)
+        {
+            offset= addr - CY_XIP_PORT0_S_SBUS_BASE;
+        }
+        else if(addr >= CY_XIP_PORT0_NS_SBUS_BASE)
+        {
+            offset= addr - CY_XIP_PORT0_NS_SBUS_BASE;
+        }
+        else
+        {
+            //Nothing to do
+        }
 
 #if defined(COMPONENT_MTB_HAL)
         result = mtb_serial_memory_erase(&sm_obj, offset, len);
 #else
         result = cy_serial_flash_qspi_erase(offset, len);
 #endif
-
-        if(result == CY_RSLT_SUCCESS) {
+        if(result == CY_RSLT_SUCCESS)
+        {
             return 0;
-        } else {
+        }
+        else
+        {
             return -1;
         }
     }

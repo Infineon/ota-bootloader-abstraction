@@ -23,7 +23,7 @@ cd mcuboot
 
 - Change the branch to get the appropriate version:
 ```
-git checkout v1.9.6-cypress
+git checkout v1.9.7-cypress
 ```
 
 - Pull in sub-modules to build mcuboot:

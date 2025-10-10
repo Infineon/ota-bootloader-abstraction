@@ -310,7 +310,7 @@ endif
 
 ifeq ($(OTA_PLATFORM),CYW89829)
     # Default to XIP Swap
-    OTA_FLASH_MAP?=$(RELATIVE_FILE1_FILE2)/../../configs/COMPONENT_MCUBOOT/flashmap/cyw89829_xip_overwrite_single.json
+    OTA_FLASH_MAP?=$(RELATIVE_FILE1_FILE2)/../../configs/COMPONENT_MCUBOOT/flashmap/cyw89829_xip_swap_single.json
 endif
 
 ifeq ($(OTA_PLATFORM),XMC7100)
@@ -367,6 +367,8 @@ endif
 #    Single image JSON files, always external flash
 #        flashmap/cyw20829_ext_overwrite_single.json
 #        flashmap/cyw20829_ext_swap_single.json
+#        flashmap/cyw89829_ext_overwrite_single.json
+#        flashmap/cyw89829_ext_swap_single.json
 # CY8CPROTO-062S3-4343W
 #    Single image JSON files, internal flash
 #        flashmap/psoc62s3_int_overwrite_single.json
